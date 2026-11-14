@@ -1,0 +1,11 @@
+package dev.underthebedrock.horror;
+import dev.underthebedrock.UnderTheBedrockPlugin;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.YamlConfiguration;
+import java.io.File; import java.io.IOException; import java.util.EnumMap; import java.util.Map; import java.util.UUID;
+public final class PlayerHorrorMemoryStore {
+ private final UnderTheBedrockPlugin plugin; private final File file; private final YamlConfiguration data;
+ public PlayerHorrorMemoryStore(UnderTheBedrockPlugin plugin){this.plugin=plugin;file=new File(plugin.getDataFolder(),"player-horror-memory.yml");data=YamlConfiguration.loadConfiguration(file);}
+ public PlayerHorrorMemory load(UUID id){String root=id.toString();ConfigurationSection s=data.getConfigurationSection(root);PlayerHorrorMemory m=new PlayerHorrorMemory();if(s==null)return m;Map<EntityArchetype,Integer> counts=new EnumMap<>(EntityArchetype.class);ConfigurationSection entities=s.getConfigurationSection("entities");if(entities!=null)for(EntityArchetype a:EntityArchetype.values()){int n=Math.max(0,entities.getInt(a.name()));if(n>0)counts.put(a,n);}m.restore(s.getDouble("tension"),s.getDouble("provocation"),s.getLong("last-occurrence-at"),s.getLong("last-severe-occurrence-at"),s.getLong("last-chat"),s.getLong("encounters"),s.getLong("distance-travelled"),s.getString("last-occurrence","none"),counts);return m;}
+ public void save(UUID id,PlayerHorrorMemory m){String root=id.toString();data.set(root+".tension",m.tension());data.set(root+".provocation",m.provocation());data.set(root+".last-occurrence",m.lastOccurrence());data.set(root+".last-occurrence-at",m.lastOccurrenceAt());data.set(root+".last-severe-occurrence-at",m.lastSevereOccurrenceAt());data.set(root+".last-chat",m.lastChatAt());data.set(root+".encounters",m.encounters());data.set(root+".distance-travelled",m.distanceTravelled());for(EntityArchetype a:EntityArchetype.values())data.set(root+".entities."+a.name(),m.entityEncounters().getOrDefault(a,0));try{if(!file.getParentFile().exists()&&!file.getParentFile().mkdirs()){plugin.getLogger().warning("Could not create horror memory directory.");return;}data.save(file);}catch(IOException e){plugin.getLogger().severe("Could not save horror memory: "+e.getMessage());}}
+}

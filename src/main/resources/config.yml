@@ -7,6 +7,15 @@ world:
   time: 18000
 player:
   return-location-file: player-locations.yml
+horror:
+  director:
+    enabled: true
+    check-interval-seconds: 12
+    minimum-occurrence-gap-seconds: 42
+    severe-occurrence-cooldown-minutes: 8
+    base-roll-chance: 0.22
+  memory:
+    file: player-horror-memory.yml
 integrations:
   nova:
     enabled: true
