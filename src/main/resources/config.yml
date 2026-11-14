@@ -1,8 +1,10 @@
 world:
   name: under_the_bedrock
-  enabled-on-startup: false
+  enabled-on-startup: true
+  auto-start: true
   auto-join-on-connect: true
   auto-respawn: true
+  lock-to-experience: true
   floor-y: 64
   spawn-x: 0
   spawn-z: 0
@@ -16,6 +18,10 @@ horror:
     minimum-occurrence-gap-seconds: 42
     severe-occurrence-cooldown-minutes: 8
     base-roll-chance: 0.22
+  events:
+    enabled: true
+    minimum-cooldown-seconds: 150
+    maximum-cooldown-seconds: 360
   clues:
     enabled: true
     scan-interval-ticks: 100

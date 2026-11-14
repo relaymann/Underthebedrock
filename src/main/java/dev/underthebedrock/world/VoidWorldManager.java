@@ -11,13 +11,14 @@ public final class VoidWorldManager {
 
     public VoidWorldManager(UnderTheBedrockPlugin plugin) {
         this.plugin = plugin;
-        this.active = plugin.getConfig().getBoolean("world.enabled-on-startup", false);
+        this.active = false;
     }
 
     public boolean start() {
         if (ensureWorld() == null) return false;
         active = true;
         plugin.getConfig().set("world.enabled-on-startup", true);
+        plugin.getConfig().set("world.auto-start", true);
         plugin.saveConfig();
         return true;
     }
@@ -28,6 +29,7 @@ public final class VoidWorldManager {
         if (current != null && !Bukkit.unloadWorld(current, true)) return false;
         active = false;
         plugin.getConfig().set("world.enabled-on-startup", false);
+        plugin.getConfig().set("world.auto-start", false);
         plugin.saveConfig();
         world = null;
         return true;
@@ -36,9 +38,9 @@ public final class VoidWorldManager {
     public World ensureWorld() {
         String name = plugin.getConfig().getString("world.name", "under_the_bedrock");
         int floorY = plugin.getConfig().getInt("world.floor-y", 64);
-        if (world != null) { setEntranceSpawn(world, floorY); return world; }
+        if (world != null) { applyWorldRules(world, floorY); return world; }
         World loaded = Bukkit.getWorld(name);
-        if (loaded != null) { world = loaded; setEntranceSpawn(world, floorY); return world; }
+        if (loaded != null) { world = loaded; applyWorldRules(world, floorY); return world; }
 
         WorldCreator creator = new WorldCreator(name);
         creator.environment(World.Environment.NORMAL);
@@ -51,17 +53,21 @@ public final class VoidWorldManager {
             return null;
         }
 
-        world.setDifficulty(Difficulty.PEACEFUL);
-        world.setGameRule(GameRule.DO_MOB_SPAWNING, false);
-        world.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, false);
-        world.setGameRule(GameRule.DO_WEATHER_CYCLE, false);
-        world.setGameRule(GameRule.KEEP_INVENTORY, true);
-        world.setTime(plugin.getConfig().getLong("world.time", 18000L));
-        world.setStorm(false);
-        world.setThundering(false);
-        setEntranceSpawn(world, floorY);
+        applyWorldRules(world, floorY);
         plugin.getLogger().info("Void world created: " + name + " (bedrock Y=" + floorY + ")");
         return world;
+    }
+
+    private void applyWorldRules(World target, int floorY) {
+        target.setDifficulty(Difficulty.NORMAL);
+        target.setGameRule(GameRule.DO_MOB_SPAWNING, false);
+        target.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, false);
+        target.setGameRule(GameRule.DO_WEATHER_CYCLE, false);
+        target.setGameRule(GameRule.KEEP_INVENTORY, true);
+        target.setTime(plugin.getConfig().getLong("world.time", 18000L));
+        target.setStorm(false);
+        target.setThundering(false);
+        setEntranceSpawn(target, floorY);
     }
 
     private void setEntranceSpawn(World target, int floorY) {
@@ -75,7 +81,9 @@ public final class VoidWorldManager {
     public Location getEntranceLocation() {
         World target = ensureWorld();
         if (target == null) return null;
-        return new Location(target, plugin.getConfig().getInt("world.spawn-x", 0) + 0.5, plugin.getConfig().getInt("world.floor-y", 64) + 1, plugin.getConfig().getInt("world.spawn-z", 0) + 0.5);
+        return new Location(target, plugin.getConfig().getInt("world.spawn-x", 0) + 0.5,
+                plugin.getConfig().getInt("world.floor-y", 64) + 1,
+                plugin.getConfig().getInt("world.spawn-z", 0) + 0.5);
     }
 
     public World getWorld() {

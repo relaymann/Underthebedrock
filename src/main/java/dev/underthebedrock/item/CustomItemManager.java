@@ -58,12 +58,12 @@ public final class CustomItemManager implements Listener {
   public static Optional<Type> byId(String id){return Arrays.stream(values()).filter(t->t.id.equals(id)).findFirst();}
  }
  private final UnderTheBedrockPlugin plugin;private final VoidWorldManager worlds;private final NamespacedKey itemKey,wardKey,evidenceKey;
- private final File cooldownFile,storageFile,deathFile,respawnFile;private final YamlConfiguration cooldowns,storage,deaths,respawns;private final NamespacedKey recipeKey;
+ private final File cooldownFile,storageFile,deathFile,respawnFile;private final YamlConfiguration cooldowns,storage,deaths,respawns;private final NamespacedKey recipeKey;private final List<NamespacedKey> researchRecipeKeys=new ArrayList<>();
  private final Map<UUID,Inventory> open=new HashMap<>();private final Map<UUID,Location> alarms=new HashMap<>();private BukkitTask alarmTask,charmEffectTask;
  public CustomItemManager(UnderTheBedrockPlugin p,VoidWorldManager w){plugin=p;worlds=w;itemKey=new NamespacedKey(p,"underbedrock-item");wardKey=new NamespacedKey(p,"null-ward");evidenceKey=new NamespacedKey(p,"evidence-clue");cooldownFile=file("item-cooldowns.yml");storageFile=file("portable-storage.yml");deathFile=file("death-echoes.yml");respawnFile=file("reconstructor-spawns.yml");recipeKey=new NamespacedKey(p,"reconstructor");cooldowns=YamlConfiguration.loadConfiguration(cooldownFile);storage=YamlConfiguration.loadConfiguration(storageFile);deaths=YamlConfiguration.loadConfiguration(deathFile);respawns=YamlConfiguration.loadConfiguration(respawnFile);}
  private File file(String n){return new File(plugin.getDataFolder(),n);}
- public void start(){plugin.getServer().getPluginManager().registerEvents(this,plugin);registerReconstructorRecipe();alarmTask=plugin.getServer().getScheduler().runTaskTimer(plugin,this::tickAlarms,20,20);charmEffectTask=plugin.getServer().getScheduler().runTaskTimer(plugin,this::applyForgottenCharmEffects,10,10);}
- public void stop(){if(alarmTask!=null)alarmTask.cancel();if(charmEffectTask!=null)charmEffectTask.cancel();for(var e:open.entrySet())saveStorage(e.getKey(),e.getValue());open.clear();save(cooldowns,cooldownFile);save(storage,storageFile);save(deaths,deathFile);save(respawns,respawnFile);Bukkit.removeRecipe(recipeKey);}
+ public void start(){plugin.getServer().getPluginManager().registerEvents(this,plugin);registerReconstructorRecipe();registerResearchRecipes();alarmTask=plugin.getServer().getScheduler().runTaskTimer(plugin,this::tickAlarms,20,20);charmEffectTask=plugin.getServer().getScheduler().runTaskTimer(plugin,this::applyForgottenCharmEffects,10,10);}
+ public void stop(){if(alarmTask!=null)alarmTask.cancel();if(charmEffectTask!=null)charmEffectTask.cancel();for(var e:open.entrySet())saveStorage(e.getKey(),e.getValue());open.clear();save(cooldowns,cooldownFile);save(storage,storageFile);save(deaths,deathFile);save(respawns,respawnFile);Bukkit.removeRecipe(recipeKey);for(NamespacedKey key:researchRecipeKeys)Bukkit.removeRecipe(key);researchRecipeKeys.clear();}
  public List<Type> allItems(){return List.of(Type.values());}
  public ItemStack createItem(Type type){ItemStack s=new ItemStack(type.material);ItemMeta m=s.getItemMeta();m.setDisplayName(ChatColor.GOLD+type.title);m.setLore(List.of(ChatColor.GRAY+type.lore,ChatColor.DARK_GRAY+"Under The Bedrock equipment",ChatColor.DARK_GRAY+"Right-click to use"));m.getPersistentDataContainer().set(itemKey,PersistentDataType.STRING,type.id);s.setItemMeta(m);return s;}
  public boolean isCustomItem(ItemStack s){return s!=null&&s.hasItemMeta()&&s.getItemMeta().getPersistentDataContainer().has(itemKey,PersistentDataType.STRING);}
@@ -106,6 +106,17 @@ public final class CustomItemManager implements Listener {
  
  @EventHandler public void storageClose(InventoryCloseEvent e){if(e.getInventory().getHolder() instanceof Holder h){saveStorage(h.owner,e.getInventory());open.remove(h.owner);}}
  private void registerReconstructorRecipe(){ShapedRecipe recipe=new ShapedRecipe(recipeKey,createItem(Type.RECONSTRUCTOR));recipe.shape(" D ","LSM"," B ");recipe.setIngredient('D',new RecipeChoice.ExactChoice(createItem(Type.DISTORTED_COMPASS)));recipe.setIngredient('L',new RecipeChoice.ExactChoice(createItem(Type.EMERGENCY_LANTERN)));recipe.setIngredient('S',new RecipeChoice.ExactChoice(createItem(Type.STABILIZER_INJECTION)));recipe.setIngredient('M',new RecipeChoice.ExactChoice(createItem(Type.FIELD_MEDKIT)));recipe.setIngredient('B',new RecipeChoice.ExactChoice(createItem(Type.SIGNAL_BEACON)));Bukkit.removeRecipe(recipeKey);Bukkit.addRecipe(recipe);}
+
+ private void registerResearchRecipes(){
+  addResearchRecipe("evidence_scanner",Type.EVIDENCE_SCANNER,new String[]{"AEA","RCR","AEA"},Map.of('A',Material.AMETHYST_SHARD,'E',Material.ECHO_SHARD,'R',Material.REDSTONE,'C',Material.COMPASS));
+  addResearchRecipe("motion_detector",Type.MOTION_DETECTOR,new String[]{"IRI","RTR","IRI"},Map.of('I',Material.IRON_INGOT,'R',Material.REDSTONE,'T',Material.TRIPWIRE_HOOK));
+  addResearchRecipe("echo_recorder",Type.ECHO_RECORDER,new String[]{"AEA","RCR","AEA"},Map.of('A',Material.AMETHYST_SHARD,'E',Material.ECHO_SHARD,'R',Material.REDSTONE,'C',Material.COMPARATOR));
+  addResearchRecipe("anomaly_map",Type.ANOMALY_MAP,new String[]{"PPP","PCP","PPP"},Map.of('P',Material.PAPER,'C',Material.COMPASS));
+ }
+ private void addResearchRecipe(String id,Type output,String[] shape,Map<Character,Material> ingredients){
+  NamespacedKey key=new NamespacedKey(plugin,"research_"+id);ShapedRecipe recipe=new ShapedRecipe(key,createItem(output));recipe.shape(shape);
+  ingredients.forEach(recipe::setIngredient);Bukkit.removeRecipe(key);Bukkit.addRecipe(recipe);researchRecipeKeys.add(key);
+ }
  private boolean bindRespawn(Player p){
   Location l=p.getLocation().clone();String k=p.getUniqueId().toString();
   respawns.set(k+".world",l.getWorld().getName());respawns.set(k+".x",l.getX());respawns.set(k+".y",l.getY());respawns.set(k+".z",l.getZ());respawns.set(k+".yaw",l.getYaw());respawns.set(k+".pitch",l.getPitch());
