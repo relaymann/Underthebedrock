@@ -71,7 +71,7 @@ public final class CustomItemManager implements Listener {
   if(e.getAction()!=Action.RIGHT_CLICK_AIR&&e.getAction()!=Action.RIGHT_CLICK_BLOCK)return;ItemStack stack=e.getItem();if(!isCustomItem(stack))return;
   String id=stack.getItemMeta().getPersistentDataContainer().get(itemKey,PersistentDataType.STRING);Type t=Type.byId(id).orElse(null);if(t==null)return;Player p=e.getPlayer();
   if(!worlds.isActive()||!p.getWorld().equals(worlds.getWorld())){p.sendMessage(ChatColor.DARK_GRAY+"This equipment only responds beneath the bedrock.");return;}
-  e.setCancelled(true);if(t==Type.RECONSTRUCTOR){if(e.getHand()!=EquipmentSlot.HAND)return;bindRespawn(p);consume(p,stack,e.getHand());return;}if(t==Type.PORTABLE_STORAGE){openStorage(p);return;}if(t==Type.NULL_WARD){ward(p);return;}if(t==Type.TRIPWIRE_ALARM){alarm(p);return;}if(!ready(p,t))return;
+  e.setCancelled(true);if(t==Type.RECONSTRUCTOR){if(e.getHand()!=EquipmentSlot.HAND)return;if(bindRespawn(p))consume(p,stack,e.getHand());return;}if(t==Type.PORTABLE_STORAGE){openStorage(p);return;}if(t==Type.NULL_WARD){ward(p);return;}if(t==Type.TRIPWIRE_ALARM){alarm(p);return;}if(!ready(p,t))return;
   boolean consume=false;
   switch(t){
    case DISTORTED_COMPASS->compass(p);
@@ -105,7 +105,19 @@ public final class CustomItemManager implements Listener {
  @EventHandler(priority=EventPriority.HIGHEST) public void respawn(PlayerRespawnEvent e){String key=e.getPlayer().getUniqueId().toString();World bedrock=worlds.getWorld();if(bedrock==null||!bedrock.getName().equals(deaths.getString(key+".world")))return;Location saved=loadRespawn(key);e.setRespawnLocation(saved==null?worlds.getEntranceLocation():saved);}
  @EventHandler public void storageClose(InventoryCloseEvent e){if(e.getInventory().getHolder() instanceof Holder h){saveStorage(h.owner,e.getInventory());open.remove(h.owner);}}
  private void registerReconstructorRecipe(){ShapedRecipe recipe=new ShapedRecipe(recipeKey,createItem(Type.RECONSTRUCTOR));recipe.shape(" D ","LSM"," B ");recipe.setIngredient('D',new RecipeChoice.ExactChoice(createItem(Type.DISTORTED_COMPASS)));recipe.setIngredient('L',new RecipeChoice.ExactChoice(createItem(Type.EMERGENCY_LANTERN)));recipe.setIngredient('S',new RecipeChoice.ExactChoice(createItem(Type.STABILIZER_INJECTION)));recipe.setIngredient('M',new RecipeChoice.ExactChoice(createItem(Type.FIELD_MEDKIT)));recipe.setIngredient('B',new RecipeChoice.ExactChoice(createItem(Type.SIGNAL_BEACON)));Bukkit.removeRecipe(recipeKey);Bukkit.addRecipe(recipe);}
- private void bindRespawn(Player p){Location l=p.getLocation().clone();String k=p.getUniqueId().toString();respawns.set(k+".world",l.getWorld().getName());respawns.set(k+".x",l.getX());respawns.set(k+".y",l.getY());respawns.set(k+".z",l.getZ());respawns.set(k+".yaw",l.getYaw());respawns.set(k+".pitch",l.getPitch());save(respawns,respawnFile);p.playSound(l,Sound.BLOCK_RESPAWN_ANCHOR_CHARGE,1,.8f);p.getWorld().spawnParticle(Particle.REVERSE_PORTAL,l.clone().add(0,1,0),35,.45,.7,.45,.04);p.sendMessage(ChatColor.LIGHT_PURPLE+"RECONSTRUCTOR: "+ChatColor.WHITE+"This location is now your respawn point. The device collapses into dust.");}
+ private boolean bindRespawn(Player p){
+  Location l=p.getLocation().clone();String k=p.getUniqueId().toString();
+  respawns.set(k+".world",l.getWorld().getName());respawns.set(k+".x",l.getX());respawns.set(k+".y",l.getY());respawns.set(k+".z",l.getZ());respawns.set(k+".yaw",l.getYaw());respawns.set(k+".pitch",l.getPitch());
+  PlayerHorrorMemory memory=plugin.getOccurrenceDirector().memory(p.getUniqueId());
+  boolean upgraded=memory.hasLore("architect_seal");
+  boolean upgradedCharge=upgraded&&!respawns.getBoolean(k+".seal-charge-used",false);
+  if(upgradedCharge)respawns.set(k+".seal-charge-used",true);else if(upgraded)respawns.set(k+".seal-charge-used",false);
+  save(respawns,respawnFile);p.playSound(l,Sound.BLOCK_RESPAWN_ANCHOR_CHARGE,1,.8f);p.getWorld().spawnParticle(Particle.REVERSE_PORTAL,l.clone().add(0,1,0),35,.45,.7,.45,.04);
+  if(upgradedCharge)p.sendMessage(ChatColor.GOLD+"ARCHITECT SEAL: "+ChatColor.WHITE+"The old boundary mark stabilizes the device. This Reconstructor has one additional activation.");
+  else p.sendMessage(ChatColor.LIGHT_PURPLE+"RECONSTRUCTOR: "+ChatColor.WHITE+"This location is now your respawn point. The device collapses into dust.");
+  if(memory.hasLore("recognition_event"))p.sendMessage(ChatColor.DARK_PURPLE+"A faint signal distortion follows the anchor. Null has noticed the new location, but the binding holds.");
+  return !upgradedCharge;
+}
  private Location loadRespawn(String key){String worldName=respawns.getString(key+".world");if(worldName==null)return null;World world=Bukkit.getWorld(worldName);if(world==null)return null;return new Location(world,respawns.getDouble(key+".x"),respawns.getDouble(key+".y"),respawns.getDouble(key+".z"),(float)respawns.getDouble(key+".yaw"),(float)respawns.getDouble(key+".pitch"));}
  private boolean ready(Player p,Type t){long until=cooldowns.getLong(p.getUniqueId()+"."+t.id);if(until>System.currentTimeMillis()){p.sendMessage(ChatColor.DARK_GRAY+"That device needs "+Math.max(1,(until-System.currentTimeMillis()+999)/1000)+"s to recharge.");return false;}return true;}
  private void applyForgottenCharmEffects(){

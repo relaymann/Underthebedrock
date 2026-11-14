@@ -65,6 +65,12 @@ horror:
       deep_entity: watcher
   memory:
     file: player-horror-memory.yml
+  civilization:
+    enabled: true
+    scan-interval-ticks: 100
+    cell-generation-chance: 0.20
+    ambient-effects-enabled: true
+    resident-echoes-enabled: true
 integrations:
   nova:
     enabled: true
