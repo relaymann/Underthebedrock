@@ -30,35 +30,29 @@ public final class PlayerLocationStore {
         flush();
     }
 
-    /** Reads the saved destination without consuming it; clear only after teleport succeeds. */
     public Location getReturnLocation(UUID id) {
         String key = id.toString();
         String name = data.getString(key + ".world");
         if (name == null) return null;
-
         World world = Bukkit.getWorld(name);
-        if (world == null) {
-            File worldFolder = new File(Bukkit.getWorldContainer(), name);
-            if (worldFolder.isDirectory()) {
-                world = Bukkit.createWorld(new WorldCreator(name));
-            }
+        if (world == null && new File(Bukkit.getWorldContainer(), name).isDirectory()) {
+            world = Bukkit.createWorld(new WorldCreator(name));
         }
         if (world == null) return null;
-
-        return new Location(world,
-            data.getDouble(key + ".x"),
-            data.getDouble(key + ".y"),
-            data.getDouble(key + ".z"),
-            (float) data.getDouble(key + ".yaw"),
-            (float) data.getDouble(key + ".pitch"));
+        return new Location(world, data.getDouble(key + ".x"), data.getDouble(key + ".y"),
+            data.getDouble(key + ".z"), (float) data.getDouble(key + ".yaw"), (float) data.getDouble(key + ".pitch"));
     }
 
-    /** YAML mutation is marshalled onto the server thread because teleportAsync may complete off-thread. */
     public void clearReturnLocation(UUID id) {
-        Bukkit.getScheduler().runTask(plugin, () -> {
+        runSync(() -> {
             data.set(id.toString(), null);
             flush();
         });
+    }
+
+    public void runSync(Runnable action) {
+        if (Bukkit.isPrimaryThread()) action.run();
+        else Bukkit.getScheduler().runTask(plugin, action);
     }
 
     public void flush() {
@@ -66,10 +60,7 @@ public final class PlayerLocationStore {
             plugin.getLogger().warning("Could not create player location storage directory.");
             return;
         }
-        try {
-            data.save(file);
-        } catch (IOException ex) {
-            plugin.getLogger().severe("Could not save return locations: " + ex.getMessage());
-        }
+        try { data.save(file); }
+        catch (IOException ex) { plugin.getLogger().severe("Could not save return locations: " + ex.getMessage()); }
     }
 }
