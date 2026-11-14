@@ -49,7 +49,8 @@ public final class CustomItemManager implements Listener {
   DEATH_ECHO("death_echo","Death Echo",Material.RECOVERY_COMPASS,"Recalls your last death coordinates in this world."),
   NULL_FRAGMENT("null_fragment","Null Fragment",Material.CRYING_OBSIDIAN,"Using it increases Null's attention."),
   LAST_RESORT_DEVICE("last_resort_device","Last Resort Device",Material.ENDER_PEARL,"One-use emergency return to the entrance."),
-  SPEED_BOOST("speed_boost","Adrenaline Injector",Material.SUGAR,"Grants Speed II for 18 seconds.");
+  SPEED_BOOST("speed_boost","Adrenaline Injector",Material.SUGAR,"Grants Speed II for 18 seconds."),
+  CHARM_OF_THE_FORGOTTEN("charm_of_the_forgotten","Charm of the Forgotten",Material.AMETHYST_SHARD,"Blessed by the Forgotten. While held: Speed I and Slowness I.");
   public final String id,title,lore; public final Material material;
   Type(String id,String title,Material material,String lore){this.id=id;this.title=title;this.material=material;this.lore=lore;}
   public static Optional<Type> byId(String id){return Arrays.stream(values()).filter(t->t.id.equals(id)).findFirst();}
@@ -59,7 +60,7 @@ public final class CustomItemManager implements Listener {
  private final Map<UUID,Inventory> open=new HashMap<>();private final Map<UUID,Location> alarms=new HashMap<>();private BukkitTask alarmTask;
  public CustomItemManager(UnderTheBedrockPlugin p,VoidWorldManager w){plugin=p;worlds=w;itemKey=new NamespacedKey(p,"underbedrock-item");wardKey=new NamespacedKey(p,"null-ward");evidenceKey=new NamespacedKey(p,"evidence-clue");cooldownFile=file("item-cooldowns.yml");storageFile=file("portable-storage.yml");deathFile=file("death-echoes.yml");cooldowns=YamlConfiguration.loadConfiguration(cooldownFile);storage=YamlConfiguration.loadConfiguration(storageFile);deaths=YamlConfiguration.loadConfiguration(deathFile);}
  private File file(String n){return new File(plugin.getDataFolder(),n);}
- public void start(){plugin.getServer().getPluginManager().registerEvents(this,plugin);alarmTask=plugin.getServer().getScheduler().runTaskTimer(plugin,this::tickAlarms,20,20);}
+ public void start(){plugin.getServer().getPluginManager().registerEvents(this,plugin);alarmTask=plugin.getServer().getScheduler().runTaskTimer(plugin,this::tickAlarms,20,20);plugin.getServer().getScheduler().runTaskTimer(plugin,this::applyForgottenCharmEffects,10,10);}
  public void stop(){if(alarmTask!=null)alarmTask.cancel();for(var e:open.entrySet())saveStorage(e.getKey(),e.getValue());open.clear();save(cooldowns,cooldownFile);save(storage,storageFile);save(deaths,deathFile);}
  public List<Type> allItems(){return List.of(Type.values());}
  public ItemStack createItem(Type type){ItemStack s=new ItemStack(type.material);ItemMeta m=s.getItemMeta();m.setDisplayName(ChatColor.GOLD+type.title);m.setLore(List.of(ChatColor.GRAY+type.lore,ChatColor.DARK_GRAY+"Under The Bedrock equipment",ChatColor.DARK_GRAY+"Right-click to use"));m.getPersistentDataContainer().set(itemKey,PersistentDataType.STRING,type.id);s.setItemMeta(m);return s;}
@@ -101,6 +102,23 @@ public final class CustomItemManager implements Listener {
  @EventHandler public void death(PlayerDeathEvent e){Player p=e.getEntity();if(!worlds.isActive()||!p.getWorld().equals(worlds.getWorld()))return;Location l=p.getLocation();String k=p.getUniqueId().toString();deaths.set(k+".x",l.getBlockX());deaths.set(k+".y",l.getBlockY());deaths.set(k+".z",l.getBlockZ());save(deaths,deathFile);}
  @EventHandler public void storageClose(InventoryCloseEvent e){if(e.getInventory().getHolder() instanceof Holder h){saveStorage(h.owner,e.getInventory());open.remove(h.owner);}}
  private boolean ready(Player p,Type t){long until=cooldowns.getLong(p.getUniqueId()+"."+t.id);if(until>System.currentTimeMillis()){p.sendMessage(ChatColor.DARK_GRAY+"That device needs "+Math.max(1,(until-System.currentTimeMillis()+999)/1000)+"s to recharge.");return false;}return true;}
+ private void applyForgottenCharmEffects(){
+  if(!worlds.isActive()||worlds.getWorld()==null)return;
+  for(Player p:worlds.getWorld().getPlayers())if(holdsCharm(p)){
+   p.addPotionEffect(new PotionEffect(PotionEffectType.SPEED,25,0,false,false,false));
+   p.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS,25,0,false,false,false));
+  }
+ }
+ private boolean holdsCharm(Player p){return isType(p.getInventory().getItemInMainHand(),Type.CHARM_OF_THE_FORGOTTEN)||isType(p.getInventory().getItemInOffHand(),Type.CHARM_OF_THE_FORGOTTEN);}
+ private boolean isType(ItemStack stack,Type type){
+  if(!isCustomItem(stack))return false;
+  return type.id.equals(stack.getItemMeta().getPersistentDataContainer().get(itemKey,PersistentDataType.STRING));
+ }
+ public ItemStack randomLootItem(Random random){
+  if(random.nextInt(100)==0)return createItem(Type.CHARM_OF_THE_FORGOTTEN);
+  Type[] common=Arrays.stream(Type.values()).filter(t->t!=Type.CHARM_OF_THE_FORGOTTEN).toArray(Type[]::new);
+  return createItem(common[random.nextInt(common.length)]);
+ }
  private long defaultCd(Type t){return switch(t){case FIELD_MEDKIT,STABILIZER_INJECTION,EMERGENCY_RATIONS,SEDATIVE->45;case SPEED_BOOST->35;case EMERGENCY_BARRIER,NULL_WARD,LAST_RESORT_DEVICE->90;case DISTORTED_COMPASS,ANOMALY_MAP,INVESTIGATION_JOURNAL,DEATH_ECHO->15;default->25;};}
  private void cooldown(Player p,Type t){long seconds=plugin.getConfig().getLong("horror.items.cooldowns."+t.id,defaultCd(t));cooldowns.set(p.getUniqueId()+"."+t.id,System.currentTimeMillis()+Math.max(1,seconds)*1000);save(cooldowns,cooldownFile);}
  private void ward(Player p){if(p.getPersistentDataContainer().has(wardKey,PersistentDataType.BYTE)){p.sendMessage(ChatColor.GRAY+"A Null Ward is already armed.");return;}if(!ready(p,Type.NULL_WARD))return;p.getPersistentDataContainer().set(wardKey,PersistentDataType.BYTE,(byte)1);cooldown(p,Type.NULL_WARD);p.sendMessage(ChatColor.LIGHT_PURPLE+"The ward hums once. It will absorb the next hit.");}

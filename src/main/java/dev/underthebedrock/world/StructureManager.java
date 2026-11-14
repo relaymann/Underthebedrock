@@ -183,7 +183,7 @@ public final class StructureManager implements Listener {
             if(block.getState() instanceof Container container){
                 container.getInventory().clear();Material[] loot={Material.BREAD,Material.TORCH,Material.IRON_INGOT,Material.STRING,Material.PAPER,Material.COMPASS,Material.CLOCK,Material.GOLD_NUGGET,Material.ARROW};
                 for(int i=0;i<rolls;i++)container.getInventory().addItem(new ItemStack(loot[random.nextInt(loot.length)],1+random.nextInt(4)));
-                if(plugin.getCustomItems()!=null){var choices=plugin.getCustomItems().allItems();for(int n=0;n<1+random.nextInt(2);n++)container.getInventory().addItem(plugin.getCustomItems().createItem(choices.get(random.nextInt(choices.size()))));}
+                if(plugin.getCustomItems()!=null){for(int n=0;n<1+random.nextInt(2);n++)container.getInventory().addItem(plugin.getCustomItems().randomLootItem(random));}
                 container.getPersistentDataContainer().set(marker,PersistentDataType.STRING,site);container.update(true,false);
             }
         }
