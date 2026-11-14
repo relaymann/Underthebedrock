@@ -9,9 +9,6 @@ commands:
   enter:
     description: Enter Under The Bedrock.
     usage: /enter
-  leave:
-    description: Return to your saved previous location.
-    usage: /leave
   evidence:
     description: Review evidence you have personally discovered.
     usage: /evidence

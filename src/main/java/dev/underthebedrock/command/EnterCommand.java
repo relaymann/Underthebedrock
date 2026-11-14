@@ -1,6 +1,5 @@
 package dev.underthebedrock.command;
 
-import dev.underthebedrock.storage.PlayerLocationStore;
 import dev.underthebedrock.world.VoidWorldManager;
 import org.bukkit.World;
 import org.bukkit.command.*;
@@ -8,10 +7,9 @@ import org.bukkit.entity.Player;
 
 public final class EnterCommand implements CommandExecutor {
     private final VoidWorldManager worlds;
-    private final PlayerLocationStore locations;
-    public EnterCommand(VoidWorldManager worlds, PlayerLocationStore locations) {
+
+    public EnterCommand(VoidWorldManager worlds) {
         this.worlds = worlds;
-        this.locations = locations;
     }
 
     @Override
@@ -34,11 +32,11 @@ public final class EnterCommand implements CommandExecutor {
             return true;
         }
 
-        locations.saveReturnLocation(player, player.getLocation());
-        player.teleportAsync(worlds.getEntranceLocation()).thenAccept(success -> locations.runSync(() -> {
-            if (success) player.sendMessage("§8You step into the empty world.");
-            else player.sendMessage("§cTeleport failed; your return location was preserved.");
-        }));
+        if (player.teleport(worlds.getEntranceLocation())) {
+            player.sendMessage("§8You step into the empty world.");
+        } else {
+            player.sendMessage("§cTeleport failed. Try again in a moment.");
+        }
         return true;
     }
 }

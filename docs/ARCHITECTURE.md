@@ -16,4 +16,4 @@ Fourteen deterministic structure archetypes are distance-gated and weighted. Str
 SupplyDropManager persists its next scheduled drop and total count. Every 30 minutes by default, it chooses a safe empty position near a player in the horror world, places a loot chest, and announces exact coordinates.
 
 ## Persistence and performance
-Clue scans, structure scans, supply-drop checks, and alarm checks run on scheduled timers. Player return locations, horror memory, structure state, supply-drop schedule, item cooldowns, portable storage, and death echoes persist through YAML and player data containers.
+Clue scans, structure scans, supply-drop checks, and alarm checks run on scheduled timers. Horror memory, structure state, supply-drop schedule, item cooldowns, portable storage, death echoes, and Reconstructor anchors persist through YAML and player data containers. Players are routed into the horror world on join while it is active, and there is no player-facing return-to-old-world command.

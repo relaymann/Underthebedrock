@@ -7,8 +7,6 @@ world:
   spawn-x: 0
   spawn-z: 0
   time: 18000
-player:
-  return-location-file: player-locations.yml
 horror:
   null:
     minimum-distance-blocks: 1000
