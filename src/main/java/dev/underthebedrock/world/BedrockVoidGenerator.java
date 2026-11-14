@@ -5,17 +5,29 @@ import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.generator.WorldInfo;
 import java.util.Random;
 
-/** Generates no terrain; each requested chunk receives one bedrock floor layer. */
+/**
+ * Generates a true void: vanilla noise, surface, caves, decorations, mobs, and structures
+ * are disabled. Each requested chunk receives exactly one bedrock floor layer.
+ */
 public final class BedrockVoidGenerator extends ChunkGenerator {
     private final int floorY;
-    public BedrockVoidGenerator(int floorY) { this.floorY = floorY; }
 
-    @Override
-    public void generateNoise(WorldInfo info, Random random, int chunkX, int chunkZ, ChunkData data) {
-        if (floorY < data.getMinHeight() || floorY >= data.getMaxHeight()) return;
-        data.setRegion(0, floorY, 0, 16, floorY + 1, 16, Material.BEDROCK);
+    public BedrockVoidGenerator(int floorY) {
+        this.floorY = floorY;
     }
 
     @Override
-    public boolean shouldGenerateStructures() { return false; }
+    public void generateNoise(WorldInfo info, Random random, int chunkX, int chunkZ, ChunkData data) {
+        if (floorY < data.getMinHeight() || floorY >= data.getMaxHeight()) {
+            return;
+        }
+        data.setRegion(0, floorY, 0, 16, floorY + 1, 16, Material.BEDROCK);
+    }
+
+    @Override public boolean shouldGenerateNoise() { return false; }
+    @Override public boolean shouldGenerateSurface() { return false; }
+    @Override public boolean shouldGenerateCaves() { return false; }
+    @Override public boolean shouldGenerateDecorations() { return false; }
+    @Override public boolean shouldGenerateMobs() { return false; }
+    @Override public boolean shouldGenerateStructures() { return false; }
 }

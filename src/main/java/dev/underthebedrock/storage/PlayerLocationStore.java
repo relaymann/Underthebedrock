@@ -22,22 +22,43 @@ public final class PlayerLocationStore {
     public void saveReturnLocation(Player player, Location location) {
         String key = player.getUniqueId().toString();
         data.set(key + ".world", location.getWorld() == null ? null : location.getWorld().getName());
-        data.set(key + ".x", location.getX()); data.set(key + ".y", location.getY()); data.set(key + ".z", location.getZ());
-        data.set(key + ".yaw", location.getYaw()); data.set(key + ".pitch", location.getPitch());
+        data.set(key + ".x", location.getX());
+        data.set(key + ".y", location.getY());
+        data.set(key + ".z", location.getZ());
+        data.set(key + ".yaw", location.getYaw());
+        data.set(key + ".pitch", location.getPitch());
         flush();
     }
 
-    public Location takeReturnLocation(UUID id) {
+    /** Reads the saved destination without consuming it; clear only after teleport succeeds. */
+    public Location getReturnLocation(UUID id) {
         String key = id.toString();
         String name = data.getString(key + ".world");
         if (name == null) return null;
+
         World world = Bukkit.getWorld(name);
+        if (world == null) {
+            File worldFolder = new File(Bukkit.getWorldContainer(), name);
+            if (worldFolder.isDirectory()) {
+                world = Bukkit.createWorld(new WorldCreator(name));
+            }
+        }
         if (world == null) return null;
-        Location result = new Location(world, data.getDouble(key + ".x"), data.getDouble(key + ".y"),
-            data.getDouble(key + ".z"), (float) data.getDouble(key + ".yaw"), (float) data.getDouble(key + ".pitch"));
-        data.set(key, null);
-        flush();
-        return result;
+
+        return new Location(world,
+            data.getDouble(key + ".x"),
+            data.getDouble(key + ".y"),
+            data.getDouble(key + ".z"),
+            (float) data.getDouble(key + ".yaw"),
+            (float) data.getDouble(key + ".pitch"));
+    }
+
+    /** YAML mutation is marshalled onto the server thread because teleportAsync may complete off-thread. */
+    public void clearReturnLocation(UUID id) {
+        Bukkit.getScheduler().runTask(plugin, () -> {
+            data.set(id.toString(), null);
+            flush();
+        });
     }
 
     public void flush() {
@@ -45,7 +66,10 @@ public final class PlayerLocationStore {
             plugin.getLogger().warning("Could not create player location storage directory.");
             return;
         }
-        try { data.save(file); }
-        catch (IOException ex) { plugin.getLogger().severe("Could not save return locations: " + ex.getMessage()); }
+        try {
+            data.save(file);
+        } catch (IOException ex) {
+            plugin.getLogger().severe("Could not save return locations: " + ex.getMessage());
+        }
     }
 }

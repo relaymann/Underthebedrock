@@ -7,21 +7,35 @@ import org.bukkit.entity.Player;
 
 public final class LeaveCommand implements CommandExecutor {
     private final PlayerLocationStore locations;
-    public LeaveCommand(PlayerLocationStore locations) { this.locations = locations; }
+
+    public LeaveCommand(PlayerLocationStore locations) {
+        this.locations = locations;
+    }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (!(sender instanceof Player player)) { sender.sendMessage("Only players can use this command."); return true; }
-        Location destination = locations.takeReturnLocation(player.getUniqueId());
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage("Only players can use this command.");
+            return true;
+        }
+
+        Location destination = locations.getReturnLocation(player.getUniqueId());
         if (destination == null) {
             World fallback = Bukkit.getWorlds().stream()
-                .filter(w -> !w.getName().equalsIgnoreCase("under_the_bedrock"))
-                .findFirst().orElse(Bukkit.getWorlds().getFirst());
+                .filter(world -> !world.getName().equalsIgnoreCase("under_the_bedrock"))
+                .findFirst()
+                .orElse(Bukkit.getWorlds().getFirst());
             destination = fallback.getSpawnLocation();
         }
-        player.teleportAsync(destination).thenAccept(ok -> {
-            if (ok) player.sendMessage("§7You return to where you came from.");
-            else player.sendMessage("§cCould not return you to your previous location.");
+
+        Location finalDestination = destination;
+        player.teleportAsync(finalDestination).thenAccept(success -> {
+            if (success) {
+                locations.clearReturnLocation(player.getUniqueId());
+                player.sendMessage("§7You return to where you came from.");
+            } else {
+                player.sendMessage("§cCould not return you to your previous location. Your saved destination was kept.");
+            }
         });
         return true;
     }
