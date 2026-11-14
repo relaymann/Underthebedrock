@@ -1,0 +1,37 @@
+package dev.underthebedrock.horror;
+
+import org.junit.jupiter.api.Test;
+import java.util.Random;
+import static org.junit.jupiter.api.Assertions.*;
+
+class EntityEncounterPolicyTest {
+    private final EntityEncounterPolicy policy = new EntityEncounterPolicy(512, 8192, 0.025);
+
+    @Test void startingAreaIsCompletelySafe() {
+        assertEquals(0, policy.chanceAt(0));
+        assertEquals(0, policy.chanceAt(512));
+        assertTrue(policy.eligibleAt(511).isEmpty());
+        assertTrue(policy.roll(512, new Random(1)).isEmpty());
+    }
+
+    @Test void chanceIncreasesWithDistanceAndHasACap() {
+        assertTrue(policy.chanceAt(1024) > 0);
+        assertTrue(policy.chanceAt(2048) > policy.chanceAt(1024));
+        assertTrue(policy.chanceAt(4096) > policy.chanceAt(2048));
+        assertEquals(0.025, policy.chanceAt(8192), 0.000001);
+        assertEquals(0.025, policy.chanceAt(100000), 0.000001);
+    }
+
+    @Test void dangerousArchetypesUnlockFartherOut() {
+        assertFalse(policy.eligibleAt(1024).contains(EntityArchetype.AGGRESSOR));
+        assertFalse(policy.eligibleAt(6143).contains(EntityArchetype.DEEP_ENTITY));
+        assertTrue(policy.eligibleAt(6144).contains(EntityArchetype.DEEP_ENTITY));
+        assertTrue(policy.eligibleAt(3072).contains(EntityArchetype.AGGRESSOR));
+    }
+
+    @Test void invalidDistancesAreSafe() {
+        assertEquals(0, policy.chanceAt(Double.NaN));
+        assertEquals(0, policy.chanceAt(Double.NEGATIVE_INFINITY));
+        assertEquals(0, policy.chanceAt(Double.POSITIVE_INFINITY));
+    }
+}

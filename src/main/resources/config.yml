@@ -14,6 +14,11 @@ horror:
     minimum-occurrence-gap-seconds: 42
     severe-occurrence-cooldown-minutes: 8
     base-roll-chance: 0.22
+  entities:
+    safe-radius-blocks: 512
+    full-threat-distance-blocks: 8192
+    maximum-chance-per-check: 0.025
+    successful-encounter-cooldown-minutes: 8
   memory:
     file: player-horror-memory.yml
 integrations:
