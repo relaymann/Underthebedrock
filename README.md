@@ -15,16 +15,16 @@ Standalone Paper 26.1.2 psychological / analog ARG horror plugin with a persiste
 - /underthebedrock status — inspect world and integration status.
 
 ## Custom equipment
-All 26 custom equipment items have persistent item identities, custom names/lore, cooldowns, and right-click abilities. They are distributed through procedural structure chests and supply drops.
+All 27 custom equipment items have persistent item identities, custom names/lore, cooldowns, and right-click abilities. They are distributed through procedural structure chests and supply drops.
 
 - Exploration: Distorted Compass, Signal Spyglass, Emergency Lantern, Broken Chronometer.
 - Detection/defense: Motion Detector, Resonance Horn, Emergency Barrier, Null Ward.
 - Survival: Field Medkit, Stabilizer Injection, Emergency Rations, Sedative, Adrenaline Injector (Speed Boost), Charm of the Forgotten.
 - Investigation: Investigation Journal, Evidence Scanner, Echo Recorder, Anomaly Map.
 - Utility: Portable Storage Device (persistent 27 slots), Signal Beacon, Tripwire Alarm, Emergency Flare.
-- Late-game: Resonance Core, Death Echo, Null Fragment, Last Resort Device.
+- Late-game: Resonance Core, Death Echo, Null Fragment, Last Resort Device, Reconstructor.
 
-Abilities include entity scans, temporary night vision and barriers, one-hit ward protection, healing/status recovery, evidence and structure detection, persistent portable storage, proximity alarms, death-location recall, a one-use return device, and an 18-second Speed II burst. The very rare Charm of the Forgotten grants Speed III while held, while Mining Fatigue II and Weakness II linger for 30 seconds after unequipping in either hand. Horn and Null Fragment increase Null's attention; the compass can mislead. Cooldowns persist in item-cooldowns.yml, portable storage and death echoes persist separately.
+Abilities include entity scans, temporary night vision and barriers, one-hit ward protection, healing/status recovery, evidence and structure detection, persistent portable storage, proximity alarms, death-location recall, a one-use return device, and an 18-second Speed II burst. The very rare Charm of the Forgotten grants Speed III while held, while Mining Fatigue II and Weakness II linger for 30 seconds after unequipping in either hand. Horn and Null Fragment increase Null's attention; the compass can mislead. The Reconstructor is crafted from five common custom supplies: Distorted Compass, Emergency Lantern, Stabilizer Injection, Field Medkit, and Signal Beacon. It binds the exact location where it is activated as your persistent personal respawn point, then destroys itself. On death in Under The Bedrock, you respawn at that saved point; until you craft one, the world entrance is the default. Reconstructors are craft-only and are never rolled directly in supply drops. Cooldowns persist in item-cooldowns.yml, portable storage, death echoes, and Reconstructor respawn points persist separately.
 
 ## ARG and world systems
 Ten ordered clues form the original personal evidence chain. The first six investigate the anomaly; the final four uncover the Forgotten, the erased creator who tried to remove Null and was erased first. The larger story is now **The Disappearance**: decades before the player returns, the ancient civilization was functioning normally. Null initiated a mass erasure that removed residents from records and from the world, leaving homes, labs, transport, medical spaces, and workstations abandoned mid-task. The player was one of those residents. Their personal resident file identifies them by their current Minecraft account name, but Null’s ledger says they were erased. The player returns decades later because the removal completed in the record but failed to remove their physical anchor. The cause remains uncertain until the Forgotten’s unfinished protection system is investigated.

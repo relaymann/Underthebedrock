@@ -36,11 +36,11 @@ public final class VoidWorldManager {
     }
 
     public World ensureWorld() {
-        if (world != null) return world;
         String name = plugin.getConfig().getString("world.name", "under_the_bedrock");
         int floorY = plugin.getConfig().getInt("world.floor-y", 64);
+        if (world != null) { setEntranceSpawn(world, floorY); return world; }
         World loaded = Bukkit.getWorld(name);
-        if (loaded != null) { world = loaded; return world; }
+        if (loaded != null) { world = loaded; setEntranceSpawn(world, floorY); return world; }
 
         WorldCreator creator = new WorldCreator(name);
         creator.environment(World.Environment.NORMAL);
@@ -61,12 +61,23 @@ public final class VoidWorldManager {
         world.setTime(plugin.getConfig().getLong("world.time", 18000L));
         world.setStorm(false);
         world.setThundering(false);
-        int x = plugin.getConfig().getInt("world.spawn-x", 0);
-        int z = plugin.getConfig().getInt("world.spawn-z", 0);
-        world.getChunkAt(Math.floorDiv(x, 16), Math.floorDiv(z, 16)).load();
-        world.setSpawnLocation(x, floorY + 1, z);
+        setEntranceSpawn(world, floorY);
         plugin.getLogger().info("Void world created: " + name + " (bedrock Y=" + floorY + ")");
         return world;
+    }
+
+    private void setEntranceSpawn(World target, int floorY) {
+        int x = plugin.getConfig().getInt("world.spawn-x", 0);
+        int z = plugin.getConfig().getInt("world.spawn-z", 0);
+        target.getChunkAt(Math.floorDiv(x, 16), Math.floorDiv(z, 16)).load();
+        if (target.getBlockAt(x, floorY, z).getType() != Material.BEDROCK) target.getBlockAt(x, floorY, z).setType(Material.BEDROCK, false);
+        target.setSpawnLocation(x, floorY + 1, z);
+    }
+
+    public Location getEntranceLocation() {
+        World target = ensureWorld();
+        if (target == null) return null;
+        return new Location(target, plugin.getConfig().getInt("world.spawn-x", 0) + 0.5, plugin.getConfig().getInt("world.floor-y", 64) + 1, plugin.getConfig().getInt("world.spawn-z", 0) + 0.5);
     }
 
     public World getWorld() {

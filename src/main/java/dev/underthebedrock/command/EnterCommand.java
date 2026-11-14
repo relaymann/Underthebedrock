@@ -35,7 +35,7 @@ public final class EnterCommand implements CommandExecutor {
         }
 
         locations.saveReturnLocation(player, player.getLocation());
-        player.teleportAsync(world.getSpawnLocation()).thenAccept(success -> locations.runSync(() -> {
+        player.teleportAsync(worlds.getEntranceLocation()).thenAccept(success -> locations.runSync(() -> {
             if (success) player.sendMessage("§8You step into the empty world.");
             else player.sendMessage("§cTeleport failed; your return location was preserved.");
         }));
