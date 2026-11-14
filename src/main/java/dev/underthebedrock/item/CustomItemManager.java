@@ -50,7 +50,7 @@ public final class CustomItemManager implements Listener {
   NULL_FRAGMENT("null_fragment","Null Fragment",Material.CRYING_OBSIDIAN,"Using it increases Null's attention."),
   LAST_RESORT_DEVICE("last_resort_device","Last Resort Device",Material.ENDER_PEARL,"One-use emergency return to the entrance."),
   SPEED_BOOST("speed_boost","Adrenaline Injector",Material.SUGAR,"Grants Speed II for 18 seconds."),
-  CHARM_OF_THE_FORGOTTEN("charm_of_the_forgotten","Charm of the Forgotten",Material.AMETHYST_SHARD,"Blessed by the Forgotten. While held: Speed I and Slowness I.");
+  CHARM_OF_THE_FORGOTTEN("charm_of_the_forgotten","Charm of the Forgotten",Material.AMETHYST_SHARD,"Blessed by the Forgotten. While held: Speed II and Slowness I.");
   public final String id,title,lore; public final Material material;
   Type(String id,String title,Material material,String lore){this.id=id;this.title=title;this.material=material;this.lore=lore;}
   public static Optional<Type> byId(String id){return Arrays.stream(values()).filter(t->t.id.equals(id)).findFirst();}
@@ -105,7 +105,7 @@ public final class CustomItemManager implements Listener {
  private void applyForgottenCharmEffects(){
   if(!worlds.isActive()||worlds.getWorld()==null)return;
   for(Player p:worlds.getWorld().getPlayers())if(holdsCharm(p)){
-   p.addPotionEffect(new PotionEffect(PotionEffectType.SPEED,25,0,false,false,false));
+   p.addPotionEffect(new PotionEffect(PotionEffectType.SPEED,25,1,false,false,false));
    p.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS,25,0,false,false,false));
   }
  }
