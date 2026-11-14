@@ -1,19 +1,13 @@
 # Architecture
 
-## Runtime
-Core plugin manages world lifecycle, player memory, occurrence pacing, clue discovery, entity control, custom item behavior, structure generation, and timed supply drops.
+## Runtime and world takeover
+The horror world is the default game space. It auto-starts unless explicitly disabled, routes online and joining players into the experience, routes deaths to its spawn or a personal Reconstructor anchor, and blocks portal/world-change escapes while active. Legacy inventories and ender chests are backed up once before being cleared so old-world gear cannot trivialize the experience. Player progression, equipment, clues, and respawn anchors persist independently.
 
-## Custom equipment
-CustomItemManager tags each equipment item with a namespaced persistent-data identity. The 25 item definitions include exploration, detection, defense, survival, investigation, utility, late-game equipment, and an Adrenaline Injector. Right-click abilities are scoped to the horror world. Cooldown timestamps, portable 27-slot inventories, and last-death coordinates persist in YAML. A one-hit Null Ward is stored on the player persistent data container. Tripwire alarms are checked once per second. Structure and supply-drop containers receive randomized custom equipment.
+## Horror direction
+OccurrenceDirector owns per-player tension, provocation, chapter pacing, and contextual Null chat. HorrorEntityController manages individualized apparition encounters. HorrorEventDirector adds a second, slower event layer with per-player cooldowns and story-stage escalation: remote movement, false local signals, archive anomalies, environmental sounds, and late-stage identity distortions.
 
-## Evidence and ARG progression
-Six ordered clues form a personal evidence chain. Evidence sites are deterministic from world seed and grid cells and are only built in loaded chunks.
-
-## Procedural structures and restoration
-Fourteen deterministic structure archetypes are distance-gated and weighted. StructureManager persists site coordinates/type/reset time in structures.yml, never force-loads terrain, and protects player placements. Missing blocks and loot are restored on the configured hourly cycle.
-
-## Timed supply drops
-SupplyDropManager persists its next scheduled drop and total count. Every 30 minutes by default, it chooses a safe empty position near a player in the horror world, places a loot chest, and announces exact coordinates.
+## Civilization and progression
+CivilizationManager generates deterministic abandoned districts in already-loaded chunks, maintains resident echoes and relationship discoveries, runs station service-cart events, and stages environmental changes from evidence progression. LoreManager owns faction records, identity case files, memory shards, and recognition gates. StructureManager and SupplyDropManager provide persistent exploration sites and timed resource drops. CustomItemManager owns persistent equipment, cooldowns, storage, and Reconstructor anchors.
 
 ## Persistence and performance
-Clue scans, structure scans, supply-drop checks, and alarm checks run on scheduled timers. Horror memory, structure state, supply-drop schedule, item cooldowns, portable storage, death echoes, and Reconstructor anchors persist through YAML and player data containers. Players are routed into the horror world on join while it is active, and there is no player-facing return-to-old-world command.
+Player horror memory, lore discoveries, structures, supply schedules, item cooldowns, portable storage, death echoes, Reconstructor anchors, and one-time legacy inventory isolation are persisted in YAML/PDC. Scheduled scans avoid force-loading chunks. Temporary world effects restore only expected states so player edits and other plugins are not overwritten.
