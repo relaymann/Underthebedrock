@@ -5,6 +5,8 @@ import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.Container;
 import org.bukkit.block.Sign;
+import org.bukkit.block.data.Lightable;
+import org.bukkit.block.data.Openable;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Minecart;
@@ -35,6 +37,7 @@ public final class CivilizationManager implements Listener {
     private final YamlConfiguration data;
     private final NamespacedKey residentKey;
     private final NamespacedKey echoKey;
+    private final NamespacedKey districtSignKey;
     private final Random random = new Random();
     private BukkitTask task;
 
@@ -71,6 +74,7 @@ public final class CivilizationManager implements Listener {
         data = YamlConfiguration.loadConfiguration(file);
         residentKey = new NamespacedKey(plugin, "civilization-resident");
         echoKey = new NamespacedKey(plugin, "civilization-echo");
+        districtSignKey = new NamespacedKey(plugin, "civilization-sign");
     }
 
     public void start() {
@@ -308,7 +312,8 @@ public final class CivilizationManager implements Listener {
                 Location behind = at.clone().subtract(at.getDirection().normalize().multiply(4));
                 if (behind.getWorld().isChunkLoaded(behind.getBlockX() >> 4, behind.getBlockZ() >> 4)) {
                     player.playSound(behind, Sound.BLOCK_WOODEN_DOOR_OPEN, .25f + phase * .035f, .55f);
-                    behind.getWorld().spawnParticle(Particle.SMOKE, behind.add(0, 1, 0), 3, .2, .3, .2, .005);
+                    behind.getWorld().spawnParticle(Particle.SMOKE, behind.clone().add(0, 1, 0), 3, .2, .3, .2, .005);
+                    openNearbyDoor(behind);
                 }
             }
             case 1 -> player.playSound(at, Sound.BLOCK_TRIPWIRE_CLICK_ON, .18f + phase * .025f, .45f);
@@ -316,15 +321,78 @@ public final class CivilizationManager implements Listener {
             case 3 -> {
                 player.playSound(at, Sound.BLOCK_NOTE_BLOCK_BASS, .14f, .35f);
                 at.getWorld().spawnParticle(Particle.ASH, at.clone().add(0, 2, 0), 5, .35, .3, .35, .005);
+                if (phase >= 3) flickerNearbyLight(at);
             }
             default -> {
                 if (phase >= 3) {
                     player.playSound(at, Sound.ENTITY_ENDERMAN_STARE, .13f, .5f);
                     at.getWorld().spawnParticle(Particle.PORTAL, at.clone().add(0, 1, 0), 8, .4, .5, .4, .02);
+                    glitchNearbySign(at);
                 }
             }
         }
         memory.addTension(.25 + phase * .12);
+    }
+
+    private void flickerNearbyLight(Location origin) {
+        World world = origin.getWorld();
+        if (world == null) return;
+        for (int dx = -12; dx <= 12; dx++) for (int dy = -3; dy <= 5; dy++) for (int dz = -12; dz <= 12; dz++) {
+            Block block = world.getBlockAt(origin.getBlockX() + dx, origin.getBlockY() + dy, origin.getBlockZ() + dz);
+            if (block.getType() != Material.REDSTONE_LAMP || !(block.getBlockData() instanceof Lightable light) || !light.isLit()) continue;
+            Lightable off = (Lightable) block.getBlockData();
+            off.setLit(false);
+            block.setBlockData(off, false);
+            plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+                if (block.getType() == Material.REDSTONE_LAMP && block.getBlockData() instanceof Lightable current) {
+                    current.setLit(true);
+                    block.setBlockData(current, false);
+                }
+            }, 4L);
+            return;
+        }
+    }
+
+    private void openNearbyDoor(Location origin) {
+        World world = origin.getWorld();
+        if (world == null) return;
+        for (int dx = -2; dx <= 2; dx++) for (int dz = -2; dz <= 2; dz++) {
+            Block block = world.getBlockAt(origin.getBlockX() + dx, origin.getBlockY(), origin.getBlockZ() + dz);
+            String type = block.getType().name();
+            if (!(type.endsWith("_DOOR") || type.endsWith("_TRAPDOOR") || type.endsWith("_FENCE_GATE"))) continue;
+            if (!(block.getBlockData() instanceof Openable openable) || openable.isOpen()) continue;
+            openable.setOpen(true);
+            block.setBlockData(openable, false);
+            plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+                if (block.getBlockData() instanceof Openable current && current.isOpen()) {
+                    current.setOpen(false);
+                    block.setBlockData(current, false);
+                }
+            }, 24L);
+            return;
+        }
+    }
+
+    private void glitchNearbySign(Location origin) {
+        World world = origin.getWorld();
+        if (world == null) return;
+        for (int dx = -10; dx <= 10; dx++) for (int dy = -2; dy <= 4; dy++) for (int dz = -10; dz <= 10; dz++) {
+            Block block = world.getBlockAt(origin.getBlockX() + dx, origin.getBlockY() + dy, origin.getBlockZ() + dz);
+            if (!(block.getState() instanceof Sign sign)
+                    || !sign.getPersistentDataContainer().has(districtSignKey, PersistentDataType.BYTE)) continue;
+            String[] original = sign.getLines();
+            sign.setLine(0, ChatColor.DARK_RED + "YOU WERE HERE");
+            sign.setLine(1, ChatColor.DARK_RED + "YOU NEVER LEFT");
+            sign.update(true, false);
+            plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+                if (block.getState() instanceof Sign current
+                        && current.getPersistentDataContainer().has(districtSignKey, PersistentDataType.BYTE)) {
+                    for (int line = 0; line < 4; line++) current.setLine(line, original[line]);
+                    current.update(true, false);
+                }
+            }, 40L);
+            return;
+        }
     }
 
     private final class Builder {
@@ -355,6 +423,7 @@ public final class CivilizationManager implements Listener {
             block.setType(Material.OAK_SIGN, false);
             if (block.getState() instanceof Sign sign) {
                 for (int i = 0; i < 4; i++) sign.setLine(i, i < lines.length ? ChatColor.DARK_GRAY + lines[i] : "");
+                sign.getPersistentDataContainer().set(districtSignKey, PersistentDataType.BYTE, (byte) 1);
                 sign.update(true, false);
             }
         }
