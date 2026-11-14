@@ -266,6 +266,7 @@ public final class CivilizationManager implements Listener {
 
     @EventHandler(ignoreCancelled = true)
     public void onResidentInteract(PlayerInteractEntityEvent event) {
+        if (event.getHand() != org.bukkit.inventory.EquipmentSlot.HAND) return;
         Entity entity = event.getRightClicked();
         String id = entity.getPersistentDataContainer().get(residentKey, PersistentDataType.STRING);
         if (id == null) return;

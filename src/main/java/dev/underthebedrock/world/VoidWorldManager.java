@@ -25,13 +25,11 @@ public final class VoidWorldManager {
     public boolean stop() {
         World current = getWorld();
         if (current != null && !current.getPlayers().isEmpty()) return false;
+        if (current != null && !Bukkit.unloadWorld(current, true)) return false;
         active = false;
         plugin.getConfig().set("world.enabled-on-startup", false);
         plugin.saveConfig();
-        if (current != null) {
-            Bukkit.unloadWorld(current, true);
-            world = null;
-        }
+        world = null;
         return true;
     }
 
