@@ -8,7 +8,7 @@ Six ordered clues form a personal evidence chain: First Signal (768 blocks), Fal
 
 Each site is a small blackstone/crying-obsidian pedestal with a persistent-data-tagged sign. Right-click records the clue for that player, saves their history, and changes the pedestal core to amethyst. Other players may discover the same site independently. /evidence reports personal progress. Evidence is stored alongside player horror memory, preserving compatibility with existing memory files.
 
-## Player chapters and Null memory
+## Procedural structures and regeneration\nStructureDefinition provides fourteen distance-gated, weighted archetypes from campsites and cabins to research facilities, containment sites, impossible corridors, sealed gateways, and the Monolith. StructureManager selects one deterministic site per eligible exploration cell, persists its coordinates/type/reset time in structures.yml, and only touches chunks already loaded by players. It never force-loads chunks and refuses initial placement over occupied footprints. Player placements inside registered footprints are persisted as protected coordinates; breaking those player blocks releases the protection. At the one-hour default interval, missing blocks are reconstructed and container inventories are refilled with a seed/cycle-derived loot roll.\n\n## Player chapters and Null memory
 Chapter calculation incorporates clue count as well as exploration distance, occurrences, and provocation. Null's response logic can recall the player's most recent clue by its specific content. Later environmental occurrences echo discovered evidence, so the mystery can refer back to earlier discoveries. No external LLM or network request is made.
 
 ## Occurrence director and entities
