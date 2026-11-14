@@ -76,6 +76,9 @@ public final class StructureManager implements Listener {
         boolean first=!data.getBoolean(path+".built",false);
         long period=Math.max(1,plugin.getConfig().getLong("horror.structures.regeneration-hours",1))*HOUR;
         if(first||now-last>=period){
+            if(!first && world.getPlayers().stream().anyMatch(player ->
+                    player.getLocation().distanceSquared(new Location(world,x,plugin.getConfig().getInt("world.floor-y",64)+1,z))
+                            <= Math.pow(radius(type)+4,2))) return;
             build(world,x,z,plugin.getConfig().getInt("world.floor-y",64)+1,type,seed,key,data.getInt(path+".cycle",0));
             data.set(path+".built",true);data.set(path+".last-reset",now);
             data.set(path+".cycle",data.getInt(path+".cycle",0)+(first?0:1));save();
@@ -97,8 +100,8 @@ public final class StructureManager implements Listener {
     }
     private boolean areaClear(World world,int x,int z,int r){
         int y=plugin.getConfig().getInt("world.floor-y",64)+1;
-        for(int dx=-r;dx<=r;dx+=2)for(int dz=-r;dz<=r;dz+=2)
-            for(int dy=0;dy<=8;dy+=4)if(!world.getBlockAt(x+dx,y+dy,z+dz).getType().isAir())return false;
+        for(int dx=-r;dx<=r;dx++)for(int dz=-r;dz<=r;dz++)
+            for(int dy=0;dy<=8;dy++)if(!world.getBlockAt(x+dx,y+dy,z+dz).getType().isAir())return false;
         return true;
     }
     private String key(Location l){return l.getWorld().getName()+":"+l.getBlockX()+":"+l.getBlockY()+":"+l.getBlockZ();}

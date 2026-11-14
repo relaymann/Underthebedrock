@@ -20,6 +20,12 @@ horror:
     site-cell-size-blocks: 1024
     minimum-distance-blocks: 768
     evidence-file: player-horror-memory.yml
+  structures:
+    enabled: true
+    scan-interval-ticks: 100
+    site-cell-size-blocks: 1024
+    cell-generation-chance: 0.32
+    regeneration-hours: 1
   entities:
     enabled: true
     safe-radius-blocks: 512
