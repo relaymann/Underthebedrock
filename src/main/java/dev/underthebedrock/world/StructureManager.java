@@ -71,7 +71,15 @@ public final class StructureManager implements Listener {
             data.set(path+".type",type.id());data.set(path+".x",x);data.set(path+".z",z);
             data.set(path+".last-reset",System.currentTimeMillis());data.set(path+".built",false);save();
         }
-        if(!chunksLoaded(world,x,z,radius(type)))return;
+        // Wait until a player is close enough that the site's footprint should already be naturally loaded.
+        // This prevents distant cell scans from silently skipping structures before exploration reaches them.
+        double spawnRadius=Math.max(32,plugin.getConfig().getInt("horror.structures.spawn-check-radius-blocks",96));
+        Location siteCenter=new Location(world,x,plugin.getConfig().getInt("world.floor-y",64)+1,z);
+        boolean playerNearby=false;
+        for(Player player:world.getPlayers()){
+            if(player.getLocation().distanceSquared(siteCenter)<=spawnRadius*spawnRadius){playerNearby=true;break;}
+        }
+        if(!playerNearby||!chunksLoaded(world,x,z,radius(type)))return;
         long now=System.currentTimeMillis(),last=data.getLong(path+".last-reset",now);
         boolean first=!data.getBoolean(path+".built",false);
         long period=Math.max(1,plugin.getConfig().getLong("horror.structures.regeneration-hours",1))*HOUR;

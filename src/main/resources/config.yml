@@ -26,6 +26,13 @@ horror:
     site-cell-size-blocks: 1024
     cell-generation-chance: 0.32
     regeneration-hours: 1
+    spawn-check-radius-blocks: 96
+  supply-drops:
+    enabled: true
+    interval-minutes: 30
+    retry-seconds: 60
+    minimum-radius-blocks: 16
+    maximum-radius-blocks: 40
   entities:
     enabled: true
     safe-radius-blocks: 512
