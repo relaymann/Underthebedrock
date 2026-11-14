@@ -76,12 +76,15 @@ public final class StructureManager implements Listener {
         boolean first=!data.getBoolean(path+".built",false);
         long period=Math.max(1,plugin.getConfig().getLong("horror.structures.regeneration-hours",1))*HOUR;
         if(first||now-last>=period){
-            if(!first && world.getPlayers().stream().anyMatch(player ->
-                    player.getLocation().distanceSquared(new Location(world,x,plugin.getConfig().getInt("world.floor-y",64)+1,z))
-                            <= Math.pow(radius(type)+4,2))) return;
-            build(world,x,z,plugin.getConfig().getInt("world.floor-y",64)+1,type,seed,key,data.getInt(path+".cycle",0));
+            if(!first){
+                Location center=new Location(world,x,plugin.getConfig().getInt("world.floor-y",64)+1,z);
+                double safeDistance=Math.pow(radius(type)+4,2);
+                for(Player nearby:world.getPlayers())if(nearby.getLocation().distanceSquared(center)<=safeDistance)return;
+            }
+            int cycle=data.getInt(path+".cycle",0)+(first?0:1);
+            build(world,x,z,plugin.getConfig().getInt("world.floor-y",64)+1,type,seed,key,cycle);
             data.set(path+".built",true);data.set(path+".last-reset",now);
-            data.set(path+".cycle",data.getInt(path+".cycle",0)+(first?0:1));save();
+            data.set(path+".cycle",cycle);save();
         }
     }
     private int radius(StructureDefinition type){

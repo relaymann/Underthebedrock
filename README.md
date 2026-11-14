@@ -19,7 +19,10 @@ Six discoverable clues form an ordered chain: First Signal, False Exit, Three Ma
 
 Clues affect chapter progression and Null's dialogue. Null can refer to the exact last clue found, while later ambient events echo earlier evidence. Each evidence pedestal changes visually after discovery. The /evidence journal shows personal progress.
 
-## Procedural structures and restoration\nFourteen deterministic structure types are selected by exploration distance and rarity: abandoned campsites, cabins, signal stations, observation towers, Null shrines, railways, research facilities, forgotten chapels, empty settlements, bunkers, sealed gateways, containment facilities, impossible corridors, and the Monolith. Sites are generated only when their complete footprint is already loaded; the generator never force-loads chunks. Player-placed blocks are recorded and excluded from restoration. Once per configured hour (one hour by default), missing structure blocks are rebuilt and container loot is replenished. Structure locations, types, and reset timestamps persist in structures.yml across restarts.\n\n## Horror systems
+## Procedural structures and restoration
+Fourteen deterministic structure types are selected by exploration distance and rarity: abandoned campsites, cabins, signal stations, observation towers, Null shrines, railways, research facilities, forgotten chapels, empty settlements, bunkers, sealed gateways, containment facilities, impossible corridors, and the Monolith. Sites are generated only when their complete footprint is already loaded; the generator never force-loads chunks. Player-placed blocks are recorded and excluded from restoration. Once per configured hour (one hour by default), missing structure blocks are rebuilt and container loot is replenished. Structure locations, types, and reset timestamps persist in structures.yml across restarts.
+
+## Horror systems
 - Six occurrence severity tiers with per-player pacing.
 - Persistent tension, provocation, distance, event history, entity counts, and clue history.
 - Distance-gated entity encounters with a 512-block protected radius and staged archetype unlocks.
