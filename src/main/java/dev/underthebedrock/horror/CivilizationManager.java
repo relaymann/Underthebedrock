@@ -170,9 +170,9 @@ public final class CivilizationManager implements Listener {
             }
             case STATION -> {
                 b.platform(-9, 9, -8, 8, Material.DEEPSLATE_TILES);
-                for (int z = -7; z <= 7; z++) {
-                    b.put(-2, 1, z, Material.RAIL); b.put(2, 1, z, Material.RAIL);
-                    if (z % 4 == 0) { b.put(-2, 0, z, Material.REDSTONE_BLOCK); b.put(2, 0, z, Material.REDSTONE_BLOCK); }
+                for (int railZ = -7; railZ <= 7; railZ++) {
+                    b.put(-2, 1, railZ, Material.RAIL); b.put(2, 1, railZ, Material.RAIL);
+                    if (railZ % 4 == 0) { b.put(-2, 0, railZ, Material.REDSTONE_BLOCK); b.put(2, 0, railZ, Material.REDSTONE_BLOCK); }
                 }
                 b.put(-2, 1, -7, Material.POWERED_RAIL); b.put(2, 1, 7, Material.POWERED_RAIL); b.put(-3, 1, -7, Material.REDSTONE_TORCH); b.put(3, 1, 7, Material.REDSTONE_TORCH);
                 b.put(-7, 1, 0, Material.SOUL_LANTERN); b.put(7, 1, 0, Material.SOUL_LANTERN);
