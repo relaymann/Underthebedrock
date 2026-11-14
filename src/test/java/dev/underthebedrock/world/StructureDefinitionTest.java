@@ -14,11 +14,15 @@ class StructureDefinitionTest {
         assertEquals(StructureDefinition.select(9000,42L),StructureDefinition.select(9000,42L));
         assertTrue(StructureDefinition.select(511,42L).isEmpty());
     }
-    @Test void allFourteenStructureTypesAreRegistered() {
-        assertEquals(14,StructureDefinition.values().length);
+    @Test void allEighteenStructureTypesAreRegistered() {
+        assertEquals(18,StructureDefinition.values().length);
         assertTrue(StructureDefinition.byId("monolith").isPresent());
         assertTrue(StructureDefinition.byId("impossible_corridor").isPresent());
         assertTrue(StructureDefinition.byId("containment_facility").isPresent());
+        assertTrue(StructureDefinition.byId("archive_hall").isPresent());
+        assertTrue(StructureDefinition.byId("keeper_sanctuary").isPresent());
+        assertTrue(StructureDefinition.byId("witness_refuge").isPresent());
+        assertTrue(StructureDefinition.byId("erasure_vault").isPresent());
     }
     @Test void invalidDistancesCannotUnlockStructures() {
         assertTrue(StructureDefinition.eligibleAt(Double.NaN).isEmpty());

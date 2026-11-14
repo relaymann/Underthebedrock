@@ -97,9 +97,9 @@ public final class StructureManager implements Listener {
     }
     private int radius(StructureDefinition type){
         return switch(type){
-            case EMPTY_SETTLEMENT,RESEARCH_FACILITY,CONTAINMENT_FACILITY->17;
-            case MONOLITH,SEALED_GATEWAY,RAILWAY,IMPOSSIBLE_CORRIDOR->15;
-            case UNDERGROUND_BUNKER,FORGOTTEN_CHAPEL->13;
+            case EMPTY_SETTLEMENT,RESEARCH_FACILITY,CONTAINMENT_FACILITY,ARCHIVE_HALL->17;
+            case MONOLITH,SEALED_GATEWAY,RAILWAY,IMPOSSIBLE_CORRIDOR,ERASURE_VAULT->15;
+            case UNDERGROUND_BUNKER,FORGOTTEN_CHAPEL,KEEPER_SANCTUARY,WITNESS_REFUGE->13;
             default->10;
         };
     }
@@ -153,6 +153,10 @@ public final class StructureManager implements Listener {
             case CONTAINMENT_FACILITY->{b.room(-7,7,-7,7,"POLISHED_BLACKSTONE","IRON_BLOCK");for(int i=-3;i<=3;i++){b.put(i,1,0,"IRON_BARS");b.put(i,2,0,"IRON_BARS");}b.put(0,1,0,"SPAWNER");b.put(-5,1,-5,"REDSTONE_LAMP");b.put(5,1,5,"REDSTONE_LAMP");b.chest(-5,1,5,loot,5);b.sign(0,3,7,"CONTAINMENT","FAILED","DO NOT OPEN");}
             case IMPOSSIBLE_CORRIDOR->{for(int i=-7;i<=7;i++){b.put(-2,0,i,"DEEPSLATE_TILES");b.put(2,0,i,"DEEPSLATE_TILES");for(int h=1;h<=3;h++){b.put(-2,h,i,"POLISHED_BLACKSTONE");b.put(2,h,i,"POLISHED_BLACKSTONE");}}b.put(0,1,-6,"IRON_DOOR");b.put(0,1,6,"IRON_DOOR");b.sign(0,2,0,"DISTANCE TRAVELED:","0 BLOCKS");}
             case MONOLITH->{for(int h=0;h<13;h++){int w=Math.max(1,5-h/3);for(int dx=-w;dx<=w;dx++)for(int dz=-w;dz<=w;dz++)b.put(dx,h,dz,"POLISHED_BLACKSTONE");}b.put(0,13,0,"CRYING_OBSIDIAN");b.put(0,14,0,"AMETHYST_BLOCK");b.sign(0,2,4,"YOU CAME BACK");}
+            case ARCHIVE_HALL->{b.room(-7,7,-6,6,"STONE_BRICKS","CHISELED_BOOKSHELF");for(int x=-5;x<=5;x+=2){b.put(x,1,-4,"BOOKSHELF");b.put(x,2,-4,"BOOKSHELF");}b.put(-3,1,0,"LECTERN");b.put(3,1,0,"LECTERN");b.chest(-5,1,4,loot,4);b.chest(5,1,4,loot,4);b.loreSign(-3,2,-5,"architects","THE ARCHITECTS","WE DREW THE LINE");b.loreSign(3,2,-5,"researchers","THE RESEARCHERS","IT ANSWERED FIRST");b.memoryShard(-5,1,4,loot,"first_blueprint");b.memoryShard(5,1,4,loot,"first_contact");}
+            case KEEPER_SANCTUARY->{b.room(-6,6,-6,6,"MOSSY_STONE_BRICKS","POLISHED_BLACKSTONE");b.put(0,1,0,"CRYING_OBSIDIAN");b.put(0,2,0,"AMETHYST_BLOCK");b.put(-4,1,-3,"SOUL_LANTERN");b.put(4,1,-3,"SOUL_LANTERN");b.chest(-4,1,4,loot,3);b.loreSign(0,2,-6,"keepers","THE KEEPERS","WE KEPT HIS NAME");b.memoryShard(-4,1,4,loot,"removal_attempt");b.rareArtifact(-4,1,4,loot);}
+            case WITNESS_REFUGE->{b.room(-6,6,-6,6,"SPRUCE_PLANKS","DARK_OAK_LOG");b.put(-3,1,-2,"RED_BED");b.put(3,1,-2,"RED_BED");b.put(0,1,2,"CAMPFIRE");b.chest(4,1,4,loot,3);b.loreSign(-3,2,-6,"witnesses","THE WITNESSES","IT WORE HIS VOICE");b.loreSign(3,2,-6,"erased","THE ERASED","WE CANNOT REMEMBER");b.memoryShard(4,1,4,loot,"identity_fragment");}
+            case ERASURE_VAULT->{for(int h=0;h<=8;h++){for(int dx=-6;dx<=6;dx++){b.put(dx,h,-6,"DEEPSLATE_BRICKS");b.put(dx,h,6,"DEEPSLATE_BRICKS");}for(int dz=-5;dz<=5;dz++){b.put(-6,h,dz,"DEEPSLATE_BRICKS");b.put(6,h,dz,"DEEPSLATE_BRICKS");}}b.put(0,1,0,"CRYING_OBSIDIAN");b.put(0,2,0,"RESPAWN_ANCHOR");b.put(0,3,0,"AMETHYST_BLOCK");b.loreSign(0,2,-6,"identity_case","ORIGINAL IDENTITY","CASE FILE 0");b.sign(0,2,6,"THE NAME IS","NOT THE THING");}
         }
     }
     private void save(){try{data.set("protected-blocks",new ArrayList<>(protectedBlocks));data.save(file);}catch(IOException e){plugin.getLogger().severe("Could not save structure data: "+e.getMessage());}}
@@ -187,6 +191,8 @@ public final class StructureManager implements Listener {
                 container.getPersistentDataContainer().set(marker,PersistentDataType.STRING,site);container.update(true,false);
             }
         }
+        void loreSign(int x,int y,int z,String id,String... lines){sign(x,y,z,lines);Block block=new Location(world,ox+x,oy+y,oz+z).getBlock();if(block.getState() instanceof Sign sign){plugin.getLoreManager().tagDocument(sign,id);sign.update(true,false);}}
+        void rareArtifact(int x,int y,int z,Random random){if(random.nextDouble()>plugin.getConfig().getDouble("horror.structures.rare-artifact-chance",.04))return;Location l=new Location(world,ox+x,oy+y,oz+z);if(l.getBlock().getState() instanceof Container c){c.getInventory().addItem(plugin.getLoreManager().createArchitectSeal());c.update(true,false);}}\n        void memoryShard(int x,int y,int z,Random random,String recording){if(!plugin.getConfig().getBoolean("horror.structures.ancient-factions-enabled",true))return;if(random.nextDouble()>plugin.getConfig().getDouble("horror.structures.memory-shard-chance",.7))return;Location l=new Location(world,ox+x,oy+y,oz+z);if(l.getBlock().getState() instanceof Container c){c.getInventory().addItem(plugin.getLoreManager().createMemoryShard(recording));c.update(true,false);}}
         void sign(int x,int y,int z,String... lines){
             Location location=new Location(world,ox+x,oy+y,oz+z);
             if(protectedBlocks.contains(key(location)))return;

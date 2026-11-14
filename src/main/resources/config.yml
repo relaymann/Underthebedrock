@@ -29,6 +29,9 @@ horror:
     cell-generation-chance: 0.32
     regeneration-hours: 1
     spawn-check-radius-blocks: 96
+    ancient-factions-enabled: true
+    memory-shard-chance: 1.0
+    rare-artifact-chance: 0.04
   supply-drops:
     enabled: true
     interval-minutes: 30
