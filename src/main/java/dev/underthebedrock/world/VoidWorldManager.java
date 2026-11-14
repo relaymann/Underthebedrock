@@ -11,13 +11,14 @@ public final class VoidWorldManager {
 
     public VoidWorldManager(UnderTheBedrockPlugin plugin) {
         this.plugin = plugin;
-        this.active = plugin.getConfig().getBoolean("world.enabled-on-startup", false);
+        this.active = false;
     }
 
     public boolean start() {
         if (ensureWorld() == null) return false;
         active = true;
         plugin.getConfig().set("world.enabled-on-startup", true);
+        plugin.getConfig().set("world.auto-start", true);
         plugin.saveConfig();
         return true;
     }
@@ -28,6 +29,7 @@ public final class VoidWorldManager {
         if (current != null && !Bukkit.unloadWorld(current, true)) return false;
         active = false;
         plugin.getConfig().set("world.enabled-on-startup", false);
+        plugin.getConfig().set("world.auto-start", false);
         plugin.saveConfig();
         world = null;
         return true;
@@ -51,7 +53,7 @@ public final class VoidWorldManager {
             return null;
         }
 
-        world.setDifficulty(Difficulty.PEACEFUL);
+        world.setDifficulty(Difficulty.NORMAL);
         world.setGameRule(GameRule.DO_MOB_SPAWNING, false);
         world.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, false);
         world.setGameRule(GameRule.DO_WEATHER_CYCLE, false);
@@ -75,7 +77,9 @@ public final class VoidWorldManager {
     public Location getEntranceLocation() {
         World target = ensureWorld();
         if (target == null) return null;
-        return new Location(target, plugin.getConfig().getInt("world.spawn-x", 0) + 0.5, plugin.getConfig().getInt("world.floor-y", 64) + 1, plugin.getConfig().getInt("world.spawn-z", 0) + 0.5);
+        return new Location(target, plugin.getConfig().getInt("world.spawn-x", 0) + 0.5,
+                plugin.getConfig().getInt("world.floor-y", 64) + 1,
+                plugin.getConfig().getInt("world.spawn-z", 0) + 0.5);
     }
 
     public World getWorld() {
