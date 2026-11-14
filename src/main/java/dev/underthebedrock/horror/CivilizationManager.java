@@ -339,13 +339,18 @@ public final class CivilizationManager implements Listener {
         World world = origin.getWorld();
         if (world == null) return;
         for (int dx = -12; dx <= 12; dx++) for (int dy = -3; dy <= 5; dy++) for (int dz = -12; dz <= 12; dz++) {
-            Block block = world.getBlockAt(origin.getBlockX() + dx, origin.getBlockY() + dy, origin.getBlockZ() + dz);
+            int bx = origin.getBlockX() + dx, by = origin.getBlockY() + dy, bz = origin.getBlockZ() + dz;
+            if (!world.isChunkLoaded(Math.floorDiv(bx, 16), Math.floorDiv(bz, 16))) continue;
+            Block block = world.getBlockAt(bx, by, bz);
             if (block.getType() != Material.REDSTONE_LAMP || !(block.getBlockData() instanceof Lightable light) || !light.isLit()) continue;
             Lightable off = (Lightable) block.getBlockData();
             off.setLit(false);
+            String temporaryState = off.getAsString();
             block.setBlockData(off, false);
             plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
-                if (block.getType() == Material.REDSTONE_LAMP && block.getBlockData() instanceof Lightable current) {
+                if (block.getType() == Material.REDSTONE_LAMP
+                        && block.getBlockData() instanceof Lightable current
+                        && current.getAsString().equals(temporaryState)) {
                     current.setLit(true);
                     block.setBlockData(current, false);
                 }
@@ -358,14 +363,18 @@ public final class CivilizationManager implements Listener {
         World world = origin.getWorld();
         if (world == null) return;
         for (int dx = -2; dx <= 2; dx++) for (int dz = -2; dz <= 2; dz++) {
-            Block block = world.getBlockAt(origin.getBlockX() + dx, origin.getBlockY(), origin.getBlockZ() + dz);
+            int bx = origin.getBlockX() + dx, bz = origin.getBlockZ() + dz;
+            if (!world.isChunkLoaded(Math.floorDiv(bx, 16), Math.floorDiv(bz, 16))) continue;
+            Block block = world.getBlockAt(bx, origin.getBlockY(), bz);
             String type = block.getType().name();
             if (!(type.endsWith("_DOOR") || type.endsWith("_TRAPDOOR") || type.endsWith("_FENCE_GATE"))) continue;
             if (!(block.getBlockData() instanceof Openable openable) || openable.isOpen()) continue;
             openable.setOpen(true);
+            String temporaryState = openable.getAsString();
             block.setBlockData(openable, false);
             plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
-                if (block.getBlockData() instanceof Openable current && current.isOpen()) {
+                if (block.getBlockData() instanceof Openable current
+                        && current.isOpen() && current.getAsString().equals(temporaryState)) {
                     current.setOpen(false);
                     block.setBlockData(current, false);
                 }
@@ -378,7 +387,9 @@ public final class CivilizationManager implements Listener {
         World world = origin.getWorld();
         if (world == null) return;
         for (int dx = -10; dx <= 10; dx++) for (int dy = -2; dy <= 4; dy++) for (int dz = -10; dz <= 10; dz++) {
-            Block block = world.getBlockAt(origin.getBlockX() + dx, origin.getBlockY() + dy, origin.getBlockZ() + dz);
+            int bx = origin.getBlockX() + dx, by = origin.getBlockY() + dy, bz = origin.getBlockZ() + dz;
+            if (!world.isChunkLoaded(Math.floorDiv(bx, 16), Math.floorDiv(bz, 16))) continue;
+            Block block = world.getBlockAt(bx, by, bz);
             if (!(block.getState() instanceof Sign sign)
                     || !sign.getPersistentDataContainer().has(districtSignKey, PersistentDataType.BYTE)) continue;
             String[] original = sign.getLines();
@@ -387,7 +398,11 @@ public final class CivilizationManager implements Listener {
             sign.update(true, false);
             plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
                 if (block.getState() instanceof Sign current
-                        && current.getPersistentDataContainer().has(districtSignKey, PersistentDataType.BYTE)) {
+                        && current.getPersistentDataContainer().has(districtSignKey, PersistentDataType.BYTE)
+                        && (ChatColor.DARK_RED + "YOU WERE HERE").equals(current.getLine(0))
+                        && (ChatColor.DARK_RED + "YOU NEVER LEFT").equals(current.getLine(1))
+                        && original[2].equals(current.getLine(2))
+                        && original[3].equals(current.getLine(3))) {
                     for (int line = 0; line < 4; line++) current.setLine(line, original[line]);
                     current.update(true, false);
                 }
