@@ -44,7 +44,7 @@ public final class WorldEntryListener implements Listener {
             plugin.getLogger().warning("Could not route " + player.getName() + ": the experience world is unavailable.");
             return;
         }
-        if (isolateLegacyState && !player.getWorld().equals(target)) isolateLegacyInventory(player);
+        if (isolateLegacyState) isolateLegacyInventory(player);
         if (!player.getWorld().equals(target)) {
             player.teleportAsync(destination).thenAccept(success -> plugin.getServer().getScheduler().runTask(plugin, () -> {
                 if (!success && player.isOnline()) player.sendMessage("§cCould not move you into Under The Bedrock. Please contact an administrator.");
@@ -72,7 +72,7 @@ public final class WorldEntryListener implements Listener {
             return;
         }
         inventory.clear();
-        inventory.setArmorContents(null);
+        inventory.setArmorContents(new org.bukkit.inventory.ItemStack[4]);
         player.getEnderChest().clear();
         player.setLevel(0);
         player.setExp(0);
