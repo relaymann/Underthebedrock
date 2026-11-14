@@ -1,0 +1,17 @@
+world:
+  name: under_the_bedrock
+  enabled-on-startup: false
+  floor-y: 64
+  spawn-x: 0
+  spawn-z: 0
+  time: 18000
+player:
+  return-location-file: player-locations.yml
+integrations:
+  nova:
+    enabled: true
+    required: true
+  bettermodel:
+    enabled: true
+    required: true
+    default-watcher-model: watcher
