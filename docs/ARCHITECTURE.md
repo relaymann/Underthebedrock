@@ -1,28 +1,26 @@
 # Architecture
 
 ## Runtime
-Core plugin manages commands, world lifecycle, player memory, occurrence pacing, and entity control. Void chunks are generated on demand with one bedrock floor layer. Nova provides custom-world-object integration; BetterModel renders model-backed entities.
+Core plugin manages world lifecycle, commands, player memory, occurrence pacing, clue discovery, and entity control. Void chunks generate on demand with one bedrock floor. Nova provides custom-world-object integration; BetterModel renders model-backed apparitions.
 
-## Occurrence director and encounter gate
-The director evaluates players every configured 12 seconds. Six severity levels are weighted by tension, provocation, and cooldowns. TERRIFYING events additionally require late player progression. The entity gate protects the first 512 horizontal blocks from the world spawn, ramps probability quadratically to the configured maximum at 8,192 blocks, unlocks archetypes at staged distances, and persists an eight-minute successful-encounter cooldown.
+## Evidence and ARG progression
+Six ordered clues form a personal evidence chain: First Signal (768 blocks), False Exit (1,536), Three Marks (2,560), Name Fragment (4,096), The Recording (6,144), and The Address (8,192). Each clue requires the previous clue. Sites are deterministic from world seed and 1,024-block grid cells, so players can revisit known coordinates; the manager only builds a site if its chunk is already loaded. No chunk is force-loaded for site generation.
 
-## Model-backed apparitions
-The controller checks at the director cadence, permits one apparition per player, checks configured BetterModel keys, chooses a point behind the player's view, and never force-loads a destination chunk. An invisible invulnerable ArmorStand shell receives the BetterModel renderer. Other players have that shell hidden, producing individualized sightings. Apparitions vanish when directly observed at close range or when the target leaves the active world / moves too far away. Aggressors approach only after provocation; Wanderers occasionally drift. This is intentionally a lightweight first AI pass, not full pathfinding or combat.
+Each site is a small blackstone/crying-obsidian pedestal with a persistent-data-tagged sign. Right-click records the clue for that player, saves their history, and changes the pedestal core to amethyst. Other players may discover the same site independently. /evidence reports personal progress. Evidence is stored alongside player horror memory, preserving compatibility with existing memory files.
 
-Configure model keys under `horror.entities.models`; defaults use `watcher`. Install the corresponding models in BetterModel before enabling encounters on a live server.
+## Player chapters and Null memory
+Chapter calculation incorporates clue count as well as exploration distance, occurrences, and provocation. Null's response logic can recall the player's most recent clue by its specific content. Later environmental occurrences echo discovered evidence, so the mystery can refer back to earlier discoveries. No external LLM or network request is made.
 
-## Player memory, Null, and chapters
-Player memory persists tension, provocation, distance travelled, occurrence history, and archetype encounter counts. StoryChapter is derived deterministically from that persisted history. Null chat reactions are private, chapter-aware, and probabilistic; player provocation influences later reactions. No external LLM or network call is made.
+## Occurrence director and entities
+The director evaluates players every configured 12 seconds. Six severity levels are weighted by tension, provocation, and cooldowns. Entity encounter selection protects the first 512 horizontal blocks, ramps probability quadratically to its cap at 8,192 blocks, unlocks archetypes by distance, and persists successful encounter cooldowns.
 
-## Multiplayer
-Each apparition is hidden from other players. Audio and chat occurrences are also delivered to the affected player only. Coordinated clue logic and shared entity memory are not implemented yet.
+The apparition controller allows one active model per player, uses BetterModel, checks chunk-loaded state, and never force-loads chunks. Other players have each apparition hidden. Aggressors approach after provocation; Wanderers drift. Full navigation, hearing, and perception sensors remain future work.
 
 ## Performance and persistence
-Entity and occurrence checks run on a configurable scheduler cadence, with at most one active apparition per player. The controller checks chunk-loaded state and never force-loads chunks. World chunks use normal world storage; player locations and horror memory use YAML persistence. Entity shells are transient and removed on shutdown or target departure.
+Clue scans run every five seconds by default and inspect only nine nearby grid cells per player. Sites are built only in loaded chunks and only over air blocks. Entity and occurrence checks use scheduled intervals. Player return locations and horror memory use YAML persistence. Apparition shells are transient and removed on shutdown or target departure.
 
-## Remaining work
-1. Add pathfinding, line-of-sight sensors, hearing, and per-entity state.
-2. Persist individual entity identities, escape locations, and learned player patterns.
-3. Add clue graph triggers and irreversible environmental story set pieces.
-4. Add coordinated multiplayer events and conflicting evidence.
-5. Add admin telemetry and performance budgets.
+## Remaining roadmap
+1. Add entity pathfinding, line-of-sight sensors, hearing, and durable individual identities.
+2. Add more clue-specific set pieces and story-state world mutations.
+3. Add coordinated multiplayer clues and conflicting evidence.
+4. Add admin telemetry and configurable performance budgets.

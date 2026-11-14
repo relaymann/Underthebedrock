@@ -1,0 +1,7 @@
+package dev.underthebedrock.horror;
+import org.junit.jupiter.api.Test;import static org.junit.jupiter.api.Assertions.*;
+class ClueDefinitionTest {
+ @Test void clueThresholdsUnlockInOrder(){assertEquals("first_signal",ClueDefinition.forDistance(768).orElseThrow().id());assertEquals("false_exit",ClueDefinition.forDistance(1536).orElseThrow().id());assertEquals("three_marks",ClueDefinition.forDistance(2560).orElseThrow().id());assertEquals("name_fragment",ClueDefinition.forDistance(4096).orElseThrow().id());assertEquals("recording",ClueDefinition.forDistance(6144).orElseThrow().id());assertEquals("final_address",ClueDefinition.forDistance(8192).orElseThrow().id());}
+ @Test void clueSitesCanContainEarlierEvidenceAtGreaterDepth(){assertTrue(ClueDefinition.forSite(9000,1).isPresent());assertTrue(ClueDefinition.forSite(9000,1).equals(ClueDefinition.forSite(9000,1)));assertTrue(ClueDefinition.forSite(700,1).isEmpty());}
+ @Test void cluesRequirePredecessorsAndCannotBeRecordedTwice(){PlayerHorrorMemory m=new PlayerHorrorMemory();assertTrue(ClueDefinition.FIRST_SIGNAL.prerequisiteMet(m));assertFalse(ClueDefinition.FALSE_EXIT.prerequisiteMet(m));assertTrue(m.discoverClue("first_signal",10));assertTrue(ClueDefinition.FALSE_EXIT.prerequisiteMet(m));assertFalse(m.discoverClue("first_signal",20));assertEquals(1,m.discoveredClueCount());}
+}

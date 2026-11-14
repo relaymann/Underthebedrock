@@ -1,0 +1,6 @@
+package dev.underthebedrock.command;
+import dev.underthebedrock.horror.*;import org.bukkit.ChatColor;import org.bukkit.command.Command;import org.bukkit.command.CommandExecutor;import org.bukkit.command.CommandSender;import org.bukkit.entity.Player;
+public final class EvidenceCommand implements CommandExecutor {
+ private final OccurrenceDirector director;public EvidenceCommand(OccurrenceDirector d){director=d;}
+ @Override public boolean onCommand(CommandSender sender,Command command,String label,String[] args){if(!(sender instanceof Player p)){sender.sendMessage("This command is for players.");return true;}PlayerHorrorMemory m=director.memory(p.getUniqueId());p.sendMessage(ChatColor.DARK_GRAY+"§lYOUR EVIDENCE");p.sendMessage(ChatColor.GRAY+"Chapter: "+ChatColor.WHITE+StoryChapter.forPlayer(m).name().replace('_',' '));p.sendMessage(ChatColor.GRAY+"Recorded: "+ChatColor.WHITE+m.discoveredClueCount()+"/"+ClueDefinition.values().length);for(ClueDefinition c:ClueDefinition.values()){boolean found=m.hasClue(c.id());p.sendMessage((found?ChatColor.GREEN+"✓ ":ChatColor.DARK_GRAY+"• ")+ChatColor.GRAY+c.title());}if(!m.lastClueId().equals("none"))p.sendMessage(ChatColor.DARK_GRAY+"Last thing you read: "+ChatColor.GRAY+ClueDefinition.byId(m.lastClueId()).map(ClueDefinition::title).orElse("unknown"));return true;}
+}

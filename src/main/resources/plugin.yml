@@ -12,11 +12,14 @@ commands:
   leave:
     description: Return to your saved previous location.
     usage: /leave
+  evidence:
+    description: Review evidence you have personally discovered.
+    usage: /evidence
   underthebedrock:
     description: Manage the horror world.
     usage: /underthebedrock <start|stop|status>
     permission: underthebedrock.admin
 permissions:
   underthebedrock.admin:
-    description: Manage Under The Bedrock.
+    description: Manage the horror world.
     default: op
