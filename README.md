@@ -1,6 +1,6 @@
 # Under The Bedrock
 
-Standalone Paper 26.1.2 psychological / analog ARG horror plugin with a persistent void world, individualized horror pacing, evidence discovery, and BetterModel apparitions.
+Standalone Paper 26.1.2 psychological / analog ARG horror plugin with a persistent void world, individualized horror pacing, evidence discovery, BetterModel apparitions, and custom exploration equipment.
 
 ## Target platform
 - Minecraft Java / Paper 26.1.2
@@ -14,29 +14,20 @@ Standalone Paper 26.1.2 psychological / analog ARG horror plugin with a persiste
 - /evidence — inspect your personal evidence journal.
 - /underthebedrock status — inspect world and integration status.
 
-## ARG evidence system
-Six discoverable clues form an ordered chain: First Signal, False Exit, Three Marks, Name Fragment, The Recording, and The Address. Evidence sites are deterministic per 1,024-block exploration cell, only placed in already-loaded chunks, and never force-load terrain. The first clue tier begins 768 blocks from spawn. Each clue has a distance threshold and requires the previous clue. Discoveries persist per player in player-horror-memory.yml.
+## Custom equipment
+All 25 custom equipment items have persistent item identities, custom names/lore, cooldowns, and right-click abilities. They are distributed through procedural structure chests and supply drops.
 
-Clues affect chapter progression and Null's dialogue. Null can refer to the exact last clue found, while later ambient events echo earlier evidence. Each evidence pedestal changes visually after discovery. The /evidence journal shows personal progress.
+- Exploration: Distorted Compass, Signal Spyglass, Emergency Lantern, Broken Chronometer.
+- Detection/defense: Motion Detector, Resonance Horn, Emergency Barrier, Null Ward.
+- Survival: Field Medkit, Stabilizer Injection, Emergency Rations, Sedative, Adrenaline Injector (Speed Boost).
+- Investigation: Investigation Journal, Evidence Scanner, Echo Recorder, Anomaly Map.
+- Utility: Portable Storage Device (persistent 27 slots), Signal Beacon, Tripwire Alarm, Emergency Flare.
+- Late-game: Resonance Core, Death Echo, Null Fragment, Last Resort Device.
 
-## Procedural structures and restoration
-Fourteen deterministic structure types are selected by exploration distance and rarity: abandoned campsites, cabins, signal stations, observation towers, Null shrines, railways, research facilities, forgotten chapels, empty settlements, bunkers, sealed gateways, containment facilities, impossible corridors, and the Monolith. A structure site is generated when a player approaches its location and the full footprint is already loaded; the generator never force-loads terrain or overwrites existing blocks. Player-placed blocks are recorded and excluded from restoration. Once per configured hour (one hour by default), missing structure blocks are rebuilt and container loot is replenished. Structure locations, types, and reset timestamps persist in structures.yml across restarts.
+Abilities include entity scans, temporary night vision and barriers, one-hit ward protection, healing/status recovery, evidence and structure detection, persistent portable storage, proximity alarms, death-location recall, a one-use return device, and an 18-second Speed II burst. Horn and Null Fragment increase Null's attention; the compass can mislead. Cooldowns persist in item-cooldowns.yml, portable storage and death echoes persist separately.
 
-## Timed supply drops
-A supply crate spawns every 30 minutes by default at a safe, empty location near a player in the horror world. Its exact X/Y/Z coordinates are announced in server chat, accompanied by a short beacon signal. Crates contain randomized exploration and survival supplies. The schedule and total drop count persist in supply-drops.yml across restarts. If no safe loaded location is available, the drop retries after the configured delay instead of force-loading chunks.
-
-## Horror systems
-- Six occurrence severity tiers with per-player pacing.
-- Persistent tension, provocation, distance, event history, entity counts, and clue history.
-- Distance-gated entity encounters with a 512-block protected radius and staged archetype unlocks.
-- Scheduled BetterModel apparitions, one active per player, private visibility, and no forced chunk loading.
-- Six archetypes and chapter-aware Null chat reactions.
-- Individualized multiplayer sightings.
-
-## Model setup
-The default config maps all archetypes to BetterModel key `watcher`. Change `horror.entities.models` to installed model keys. Missing models are logged and skipped.
-
-The AI remains an initial foundation: apparition movement uses controlled teleports rather than pathfinding. Coordinated multiplayer mysteries, advanced entity memory, and deeper clue-specific set pieces remain future work.
+## ARG and world systems
+Six ordered clues form a personal evidence chain. Fourteen deterministic structure archetypes are selected by exploration distance and rarity, generated only in loaded chunks, and restored hourly. Supply crates appear every 30 minutes and announce exact coordinates in chat. Horror memory, structure state, and supply-drop schedules persist across restarts.
 
 ## Build
 Use JDK 25 and Gradle 9.7.1: `gradle clean test build`. JAR output: `build/libs/`. Install matching Nova 0.23.0 and BetterModel 3.5.1 server plugins.

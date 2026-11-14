@@ -120,6 +120,7 @@ public final class SupplyDropManager {
             };
             container.getInventory().addItem(new ItemStack(item, amount));
         }
+        if(plugin.getCustomItems()!=null){var choices=plugin.getCustomItems().allItems();for(int n=0;n<2+random.nextInt(3);n++)container.getInventory().addItem(plugin.getCustomItems().createItem(choices.get(random.nextInt(choices.size()))));}
         container.update(true, false);
     }
 

@@ -33,6 +33,17 @@ horror:
     retry-seconds: 60
     minimum-radius-blocks: 16
     maximum-radius-blocks: 40
+  items:
+    enabled: true
+    cooldowns:
+      emergency_rations: 45
+      field_medkit: 45
+      stabilizer_injection: 45
+      sedative: 45
+      speed_boost: 35
+      emergency_barrier: 90
+      null_ward: 90
+      last_resort_device: 90
   entities:
     enabled: true
     safe-radius-blocks: 512
