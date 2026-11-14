@@ -87,7 +87,7 @@ public final class HorrorEventDirector {
                 player.sendMessage("§8[ARCHIVE SYNC] §7A resident record has been revised.");
             }
             default -> {
-                Player nearby = world.getPlayers().stream()
+                Player nearby = player.getWorld().getPlayers().stream()
                         .filter(other -> !other.getUniqueId().equals(player.getUniqueId()))
                         .filter(other -> other.getLocation().distanceSquared(origin) <= 48 * 48)
                         .min((a, b) -> Double.compare(a.getLocation().distanceSquared(origin), b.getLocation().distanceSquared(origin)))
