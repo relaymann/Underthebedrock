@@ -15,10 +15,19 @@ horror:
     severe-occurrence-cooldown-minutes: 8
     base-roll-chance: 0.22
   entities:
+    enabled: true
     safe-radius-blocks: 512
     full-threat-distance-blocks: 8192
     maximum-chance-per-check: 0.025
     successful-encounter-cooldown-minutes: 8
+    active-encounters-per-player: 1
+    models:
+      observer: watcher
+      stalker: watcher
+      wanderer: watcher
+      mimic: watcher
+      aggressor: watcher
+      deep_entity: watcher
   memory:
     file: player-horror-memory.yml
 integrations:
