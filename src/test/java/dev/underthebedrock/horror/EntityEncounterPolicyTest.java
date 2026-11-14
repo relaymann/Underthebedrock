@@ -22,6 +22,16 @@ class EntityEncounterPolicyTest {
         assertEquals(0.025, policy.chanceAt(100000), 0.000001);
     }
 
+    @Test void rosterUnlocksAtItsConfiguredDistance() {
+        assertFalse(policy.eligibleAt(767).contains(EntityArchetype.WITNESS));
+        assertTrue(policy.eligibleAt(768).contains(EntityArchetype.WITNESS));
+        assertFalse(policy.eligibleAt(3071).contains(EntityArchetype.PURSUER));
+        assertTrue(policy.eligibleAt(3072).contains(EntityArchetype.PURSUER));
+        assertFalse(policy.eligibleAt(12287).contains(EntityArchetype.ORIGINAL));
+        assertTrue(policy.eligibleAt(12288).contains(EntityArchetype.ORIGINAL));
+        assertEquals(24, EntityArchetype.values().length);
+    }
+
     @Test void dangerousArchetypesUnlockFartherOut() {
         assertFalse(policy.eligibleAt(1024).contains(EntityArchetype.AGGRESSOR));
         assertFalse(policy.eligibleAt(6143).contains(EntityArchetype.DEEP_ENTITY));
@@ -33,5 +43,6 @@ class EntityEncounterPolicyTest {
         assertEquals(0, policy.chanceAt(Double.NaN));
         assertEquals(0, policy.chanceAt(Double.NEGATIVE_INFINITY));
         assertEquals(0, policy.chanceAt(Double.POSITIVE_INFINITY));
+        assertTrue(policy.eligibleAt(Double.NaN).isEmpty());
     }
 }

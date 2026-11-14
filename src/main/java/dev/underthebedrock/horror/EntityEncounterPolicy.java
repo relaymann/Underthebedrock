@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
-/** Distance gate used by model-backed entity controllers before selecting an archetype. */
+/** Distance and rarity gate for all entity encounters. */
 public final class EntityEncounterPolicy {
     private final double safeRadius;
     private final double fullThreatDistance;
@@ -25,13 +25,11 @@ public final class EntityEncounterPolicy {
     }
 
     public List<EntityArchetype> eligibleAt(double distance) {
+        if (!Double.isFinite(distance) || distance <= safeRadius) return List.of();
         List<EntityArchetype> eligible = new ArrayList<>();
-        if (distance >= 768) eligible.add(EntityArchetype.OBSERVER);
-        if (distance >= 1024) eligible.add(EntityArchetype.STALKER);
-        if (distance >= 1536) eligible.add(EntityArchetype.WANDERER);
-        if (distance >= 2048) eligible.add(EntityArchetype.MIMIC);
-        if (distance >= 3072) eligible.add(EntityArchetype.AGGRESSOR);
-        if (distance >= 6144) eligible.add(EntityArchetype.DEEP_ENTITY);
+        for (EntityArchetype type : EntityArchetype.values()) {
+            if (distance >= type.unlockDistance()) eligible.add(type);
+        }
         return List.copyOf(eligible);
     }
 
@@ -39,25 +37,33 @@ public final class EntityEncounterPolicy {
         if (random.nextDouble() >= chanceAt(distance)) return Optional.empty();
         List<EntityArchetype> eligible = eligibleAt(distance);
         if (eligible.isEmpty()) return Optional.empty();
-        double total = 0;
-        for (EntityArchetype type : eligible) total += selectionWeight(type);
+        double total = eligible.stream().mapToDouble(EntityArchetype::selectionWeight).sum();
         double value = random.nextDouble() * total;
         for (EntityArchetype type : eligible) {
-            value -= selectionWeight(type);
+            value -= type.selectionWeight();
             if (value <= 0) return Optional.of(type);
         }
         return Optional.of(eligible.get(0));
     }
 
-    private double selectionWeight(EntityArchetype type) {
-        return switch (type) {
-            case OBSERVER -> 4.0;
-            case STALKER -> 3.5;
-            case WANDERER -> 2.5;
-            case MIMIC -> 1.8;
-            case AGGRESSOR -> 0.8;
-            case DEEP_ENTITY -> 0.12;
-        };
+    /** Repeated sightings gently bias the director toward unfamiliar encounters. */
+    public Optional<EntityArchetype> roll(double distance, Random random, PlayerHorrorMemory memory) {
+        if (random.nextDouble() >= chanceAt(distance)) return Optional.empty();
+        List<EntityArchetype> eligible = eligibleAt(distance);
+        if (eligible.isEmpty()) return Optional.empty();
+        double total = 0;
+        for (EntityArchetype type : eligible) total += adaptiveWeight(type, memory);
+        double value = random.nextDouble() * total;
+        for (EntityArchetype type : eligible) {
+            value -= adaptiveWeight(type, memory);
+            if (value <= 0) return Optional.of(type);
+        }
+        return Optional.of(eligible.get(0));
+    }
+
+    private double adaptiveWeight(EntityArchetype type, PlayerHorrorMemory memory) {
+        int sightings = memory == null ? 0 : memory.entityEncounters().getOrDefault(type, 0);
+        return type.selectionWeight() / (1.0 + Math.min(8, sightings) * 0.18);
     }
 
     public double safeRadius() { return safeRadius; }

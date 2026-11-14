@@ -56,6 +56,15 @@ horror:
     maximum-chance-per-check: 0.025
     successful-encounter-cooldown-minutes: 8
     active-encounters-per-player: 1
+    max-encounter-duration-seconds: 180
+    behavior:
+      observation-range-blocks: 100
+      despawn-range-blocks: 128
+      passive-vanish-range-blocks: 60
+      movement-step-blocks: 0.55
+      remember-last-known-position: true
+      player-specific-visibility: true
+      adaptive-selection: true
     models:
       observer: watcher
       stalker: watcher
@@ -63,6 +72,24 @@ horror:
       mimic: watcher
       aggressor: watcher
       deep_entity: watcher
+      witness: watcher
+      peeker: watcher
+      forgotten_resident: watcher
+      surveyor: watcher
+      lurker: watcher
+      doorframe: watcher
+      ceiling_crawler: watcher
+      echo: watcher
+      pursuer: watcher
+      crawling_one: watcher
+      heavy: watcher
+      imitator: watcher
+      misprint: watcher
+      double: watcher
+      absence: watcher
+      excavator: watcher
+      unperson: watcher
+      original: watcher
   memory:
     file: player-horror-memory.yml
   civilization:
