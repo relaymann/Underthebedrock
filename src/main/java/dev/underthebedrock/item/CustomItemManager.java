@@ -71,7 +71,7 @@ public final class CustomItemManager implements Listener {
   if(e.getAction()!=Action.RIGHT_CLICK_AIR&&e.getAction()!=Action.RIGHT_CLICK_BLOCK)return;ItemStack stack=e.getItem();if(!isCustomItem(stack))return;
   String id=stack.getItemMeta().getPersistentDataContainer().get(itemKey,PersistentDataType.STRING);Type t=Type.byId(id).orElse(null);if(t==null)return;Player p=e.getPlayer();
   if(!worlds.isActive()||!p.getWorld().equals(worlds.getWorld())){p.sendMessage(ChatColor.DARK_GRAY+"This equipment only responds beneath the bedrock.");return;}
-  e.setCancelled(true);if(t==Type.RECONSTRUCTOR){bindRespawn(p);consume(p,stack,e.getHand());return;}if(t==Type.PORTABLE_STORAGE){openStorage(p);return;}if(t==Type.NULL_WARD){ward(p);return;}if(t==Type.TRIPWIRE_ALARM){alarm(p);return;}if(!ready(p,t))return;
+  e.setCancelled(true);if(t==Type.RECONSTRUCTOR){if(e.getHand()!=EquipmentSlot.HAND)return;bindRespawn(p);consume(p,stack,e.getHand());return;}if(t==Type.PORTABLE_STORAGE){openStorage(p);return;}if(t==Type.NULL_WARD){ward(p);return;}if(t==Type.TRIPWIRE_ALARM){alarm(p);return;}if(!ready(p,t))return;
   boolean consume=false;
   switch(t){
    case DISTORTED_COMPASS->compass(p);
@@ -125,7 +125,9 @@ public final class CustomItemManager implements Listener {
  }
  public ItemStack randomLootItem(Random random){
   if(random.nextInt(100)==0)return createItem(Type.CHARM_OF_THE_FORGOTTEN);
-  Type[] common=Arrays.stream(Type.values()).filter(t->t!=Type.CHARM_OF_THE_FORGOTTEN&&t!=Type.RECONSTRUCTOR).toArray(Type[]::new);
+  Type[] components={Type.DISTORTED_COMPASS,Type.EMERGENCY_LANTERN,Type.STABILIZER_INJECTION,Type.FIELD_MEDKIT,Type.SIGNAL_BEACON};
+  if(random.nextDouble()<0.60)return createItem(components[random.nextInt(components.length)]);
+  Type[] common=Arrays.stream(Type.values()).filter(t->t!=Type.CHARM_OF_THE_FORGOTTEN&&t!=Type.RECONSTRUCTOR&&Arrays.stream(components).noneMatch(component->component==t)).toArray(Type[]::new);
   return createItem(common[random.nextInt(common.length)]);
  }
  private long defaultCd(Type t){return switch(t){case FIELD_MEDKIT,STABILIZER_INJECTION,EMERGENCY_RATIONS,SEDATIVE->45;case SPEED_BOOST->35;case EMERGENCY_BARRIER,NULL_WARD,LAST_RESORT_DEVICE->90;case DISTORTED_COMPASS,ANOMALY_MAP,INVESTIGATION_JOURNAL,DEATH_ECHO->15;default->25;};}
