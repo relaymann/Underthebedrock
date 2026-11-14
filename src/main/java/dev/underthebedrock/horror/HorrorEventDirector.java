@@ -51,7 +51,7 @@ public final class HorrorEventDirector {
 
     private void fire(Player player, PlayerHorrorMemory memory) {
         int stage = memory.discoveredClueCount() + memory.loreCount() / 2 + (int) (memory.distanceTravelled() / 4096);
-        int event = random.nextInt(stage >= 8 ? 7 : stage >= 3 ? 5 : 3);
+        int event = random.nextInt(stage >= 8 ? 8 : stage >= 3 ? 5 : 3);
         Location origin = player.getLocation();
         Vector direction = origin.getDirection().setY(0).normalize();
         if (direction.lengthSquared() < .01) direction = new Vector(0, 0, 1);
@@ -82,9 +82,20 @@ public final class HorrorEventDirector {
                 player.playSound(distant, Sound.ENTITY_WARDEN_HEARTBEAT, .22f, .65f);
                 player.sendMessage("§8You hear a second set of footsteps matching your pace.");
             }
-            default -> {
+            case 6 -> {
                 player.playSound(origin, Sound.BLOCK_BEACON_DEACTIVATE, .22f, .4f);
                 player.sendMessage("§8[ARCHIVE SYNC] §7A resident record has been revised.");
+            }
+            default -> {
+                Player nearby = world.getPlayers().stream()
+                        .filter(other -> !other.getUniqueId().equals(player.getUniqueId()))
+                        .filter(other -> other.getLocation().distanceSquared(origin) <= 48 * 48)
+                        .min((a, b) -> Double.compare(a.getLocation().distanceSquared(origin), b.getLocation().distanceSquared(origin)))
+                        .orElse(null);
+                String voice = nearby == null ? "MARA" : nearby.getName();
+                player.sendMessage("§8[LOCAL CHAT] §7" + voice + ": Don't turn around. I can see it.");
+                player.playSound(origin, Sound.ENTITY_ENDERMAN_STARE, .2f, .5f);
+                if (nearby != null) nearby.playSound(nearby.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, .12f, .45f);
             }
         }
         memory.addTension(event >= 4 ? 2.2 : 1.0);
