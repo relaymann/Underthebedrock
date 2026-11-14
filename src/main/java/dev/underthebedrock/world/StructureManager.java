@@ -67,7 +67,7 @@ public final class StructureManager implements Listener {
             type=StructureDefinition.byId(data.getString(path+".type","")).orElse(selected);
             x=data.getInt(path+".x",x);z=data.getInt(path+".z",z);
         }else{
-            if(!areaClear(world,x,z,radius(type)))return;
+            if(!chunksLoaded(world,x,z,radius(type))||!areaClear(world,x,z,radius(type)))return;
             data.set(path+".type",type.id());data.set(path+".x",x);data.set(path+".z",z);
             data.set(path+".last-reset",System.currentTimeMillis());data.set(path+".built",false);save();
         }
@@ -126,7 +126,7 @@ public final class StructureManager implements Listener {
         Random loot=new Random(seed^(cycle*0x9E3779B97F4A7C15L));
         switch(type){
             case CAMPSITE->{b.put(-3,0,-2,"CAMPFIRE");b.put(3,0,-2,"SPRUCE_FENCE");b.put(3,1,-2,"WHITE_WOOL");b.put(3,1,-1,"WHITE_WOOL");b.put(3,1,0,"WHITE_WOOL");b.put(3,1,1,"WHITE_WOOL");b.put(2,1,1,"WHITE_WOOL");b.put(4,1,1,"WHITE_WOOL");b.chest(-2,0,2,loot,2);b.sign(-1,1,3,"WE LEFT AT","THE SAME TIME","DO NOT FOLLOW","THE LIGHT");}
-            case CABIN->{b.room(-4,4,-3,3,"SPRUCE_PLANKS","SPRUCE_LOG");b.put(0,1,0,"RED_BED");b.put(2,1,1,"FURNACE");b.chest(-2,1,1,loot,3);b.sign(0,2,-3,"IF THE DOOR","OPENS, STAY","IN BED");}
+            case CABIN->{b.room(-4,4,-3,3,"SPRUCE_PLANKS","SPRUCE_LOG");b.open(0,1,-3);b.open(0,2,-3);b.put(0,1,0,"RED_BED");b.put(2,1,1,"FURNACE");b.chest(-2,1,1,loot,3);b.sign(0,2,-3,"IF THE DOOR","OPENS, STAY","IN BED");}
             case SIGNAL_STATION->{b.platform(-5,5,-4,4,"DEEPSLATE_TILES");b.put(0,1,0,"LIGHTNING_ROD");b.put(0,2,0,"LIGHTNING_ROD");b.put(-2,1,1,"NOTE_BLOCK");b.put(2,1,1,"JUKEBOX");b.put(0,1,3,"REDSTONE_LAMP");b.chest(-3,1,-2,loot,4);b.sign(0,2,-4,"SIGNAL LOG 07","NO TRANSMITTER","WAS INSTALLED");}
             case OBSERVATION_TOWER->{b.tower(4);b.put(0,6,0,"SOUL_LANTERN");b.chest(1,4,1,loot,3);b.sign(0,5,2,"YOU ARE NOT","THE FIRST ONE","UP HERE");}
             case NULL_SHRINE->{b.platform(-4,4,-4,4,"POLISHED_BLACKSTONE_BRICKS");b.put(0,1,0,"CRYING_OBSIDIAN");b.put(0,2,0,"RESPAWN_ANCHOR");for(int i=-3;i<=3;i+=2){b.put(i,1,-3,"BLACKSTONE_WALL");b.put(i,1,3,"BLACKSTONE_WALL");}b.put(-3,1,0,"SOUL_LANTERN");b.put(3,1,0,"SOUL_LANTERN");b.sign(0,2,4,"IT KNEW","YOU WOULD","FIND THIS");}
@@ -153,6 +153,7 @@ public final class StructureManager implements Listener {
             if(block.getType().isAir())block.setType(material,false);
             if(block.getState() instanceof org.bukkit.block.TileState tile){tile.getPersistentDataContainer().set(marker,PersistentDataType.STRING,site);tile.update(true,false);}
         }
+        void open(int dx,int dy,int dz){Location l=new Location(world,ox+dx,oy+dy,oz+dz);if(!protectedBlocks.contains(key(l)))l.getBlock().setType(Material.AIR,false);}
         void platform(int minX,int maxX,int minZ,int maxZ,String floor){for(int x=minX;x<=maxX;x++)for(int z=minZ;z<=maxZ;z++)put(x,0,z,floor);}
         void room(int minX,int maxX,int minZ,int maxZ,String wall,String trim){
             for(int x=minX;x<=maxX;x++)for(int z=minZ;z<=maxZ;z++){
