@@ -105,7 +105,7 @@ public final class StructureManager implements Listener {
         return true;
     }
     private String key(Location l){return l.getWorld().getName()+":"+l.getBlockX()+":"+l.getBlockY()+":"+l.getBlockZ();}
-    @EventHandler public void onPlace(BlockPlaceEvent event){
+    @EventHandler(ignoreCancelled=true) public void onPlace(BlockPlaceEvent event){
         if(!worlds.isActive()||!event.getBlock().getWorld().equals(worlds.getWorld()))return;
         Location l=event.getBlock().getLocation();int cell=Math.max(256,plugin.getConfig().getInt("horror.structures.site-cell-size-blocks",1024));
         int cx=Math.floorDiv(l.getBlockX()-worlds.getWorld().getSpawnLocation().getBlockX(),cell);
@@ -120,7 +120,7 @@ public final class StructureManager implements Listener {
             }
         }
     }
-    @EventHandler public void onBreak(BlockBreakEvent event){
+    @EventHandler(ignoreCancelled=true) public void onBreak(BlockBreakEvent event){
         String k=key(event.getBlock().getLocation());
         if(protectedBlocks.remove(k))save();
     }
@@ -166,7 +166,9 @@ public final class StructureManager implements Listener {
         }
         void tower(int height){for(int h=0;h<=height;h++){put(-1,h,-1,"SPRUCE_LOG");put(1,h,-1,"SPRUCE_LOG");put(-1,h,1,"SPRUCE_LOG");put(1,h,1,"SPRUCE_LOG");}platform(-2,2,-2,2,"SPRUCE_PLANKS");for(int h=height+1;h<=height+2;h++)for(int dx=-2;dx<=2;dx++)for(int dz=-2;dz<=2;dz++)if(Math.abs(dx)==2||Math.abs(dz)==2)put(dx,h,dz,"OAK_FENCE");}
         void chest(int x,int y,int z,Random random,int rolls){
-            put(x,y,z,"CHEST");Block block=world.getBlockAt(ox+x,oy+y,oz+z);
+            Location location=new Location(world,ox+x,oy+y,oz+z);
+            if(protectedBlocks.contains(key(location)))return;
+            put(x,y,z,"CHEST");Block block=location.getBlock();
             if(block.getState() instanceof Container container){
                 container.getInventory().clear();Material[] loot={Material.BREAD,Material.TORCH,Material.IRON_INGOT,Material.STRING,Material.PAPER,Material.COMPASS,Material.CLOCK,Material.GOLD_NUGGET,Material.ARROW};
                 for(int i=0;i<rolls;i++)container.getInventory().addItem(new ItemStack(loot[random.nextInt(loot.length)],1+random.nextInt(4)));
@@ -174,7 +176,9 @@ public final class StructureManager implements Listener {
             }
         }
         void sign(int x,int y,int z,String... lines){
-            put(x,y,z,"OAK_SIGN");Block block=world.getBlockAt(ox+x,oy+y,oz+z);
+            Location location=new Location(world,ox+x,oy+y,oz+z);
+            if(protectedBlocks.contains(key(location)))return;
+            put(x,y,z,"OAK_SIGN");Block block=location.getBlock();
             if(block.getState() instanceof Sign sign){for(int i=0;i<4;i++)sign.setLine(i,i<lines.length?ChatColor.DARK_GRAY+lines[i]:"");sign.getPersistentDataContainer().set(marker,PersistentDataType.STRING,site);sign.update(true,false);}
         }
     }
