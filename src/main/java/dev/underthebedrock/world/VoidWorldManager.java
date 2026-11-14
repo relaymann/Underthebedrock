@@ -38,9 +38,9 @@ public final class VoidWorldManager {
     public World ensureWorld() {
         String name = plugin.getConfig().getString("world.name", "under_the_bedrock");
         int floorY = plugin.getConfig().getInt("world.floor-y", 64);
-        if (world != null) { setEntranceSpawn(world, floorY); return world; }
+        if (world != null) { applyWorldRules(world, floorY); return world; }
         World loaded = Bukkit.getWorld(name);
-        if (loaded != null) { world = loaded; setEntranceSpawn(world, floorY); return world; }
+        if (loaded != null) { world = loaded; applyWorldRules(world, floorY); return world; }
 
         WorldCreator creator = new WorldCreator(name);
         creator.environment(World.Environment.NORMAL);
@@ -53,17 +53,21 @@ public final class VoidWorldManager {
             return null;
         }
 
-        world.setDifficulty(Difficulty.NORMAL);
-        world.setGameRule(GameRule.DO_MOB_SPAWNING, false);
-        world.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, false);
-        world.setGameRule(GameRule.DO_WEATHER_CYCLE, false);
-        world.setGameRule(GameRule.KEEP_INVENTORY, true);
-        world.setTime(plugin.getConfig().getLong("world.time", 18000L));
-        world.setStorm(false);
-        world.setThundering(false);
-        setEntranceSpawn(world, floorY);
+        applyWorldRules(world, floorY);
         plugin.getLogger().info("Void world created: " + name + " (bedrock Y=" + floorY + ")");
         return world;
+    }
+
+    private void applyWorldRules(World target, int floorY) {
+        target.setDifficulty(Difficulty.NORMAL);
+        target.setGameRule(GameRule.DO_MOB_SPAWNING, false);
+        target.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, false);
+        target.setGameRule(GameRule.DO_WEATHER_CYCLE, false);
+        target.setGameRule(GameRule.KEEP_INVENTORY, true);
+        target.setTime(plugin.getConfig().getLong("world.time", 18000L));
+        target.setStorm(false);
+        target.setThundering(false);
+        setEntranceSpawn(target, floorY);
     }
 
     private void setEntranceSpawn(World target, int floorY) {
