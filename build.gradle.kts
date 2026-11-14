@@ -13,6 +13,7 @@ dependencies {
     compileOnly("io.papermc.paper:paper-api:26.1.2.build.+")
     compileOnly("xyz.xenondevs.nova:nova-api:0.23.0")
     compileOnly("io.github.toxicity188:bettermodel-bukkit-api:3.5.1")
+    testImplementation("io.papermc.paper:paper-api:26.1.2.build.+")
     testImplementation(platform("org.junit:junit-bom:5.12.2"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
