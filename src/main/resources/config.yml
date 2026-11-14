@@ -1,6 +1,8 @@
 world:
   name: under_the_bedrock
   enabled-on-startup: false
+  auto-join-on-connect: true
+  auto-respawn: true
   floor-y: 64
   spawn-x: 0
   spawn-z: 0

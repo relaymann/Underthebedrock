@@ -30,6 +30,8 @@ public final class PlayerLocationStore {
         flush();
     }
 
+    public boolean hasReturnLocation(UUID id) { return data.contains(id.toString() + ".world"); }
+
     public Location getReturnLocation(UUID id) {
         String key = id.toString();
         String name = data.getString(key + ".world");

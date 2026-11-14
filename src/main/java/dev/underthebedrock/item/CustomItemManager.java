@@ -103,7 +103,7 @@ public final class CustomItemManager implements Listener {
  }
  @EventHandler(priority=EventPriority.HIGHEST,ignoreCancelled=true) public void damage(EntityDamageEvent e){if(!(e.getEntity() instanceof Player p)||!p.getPersistentDataContainer().has(wardKey,PersistentDataType.BYTE))return;p.getPersistentDataContainer().remove(wardKey);e.setCancelled(true);p.playSound(p.getLocation(),Sound.ITEM_TOTEM_USE,1,.7f);p.getWorld().spawnParticle(Particle.TOTEM_OF_UNDYING,p.getLocation().add(0,1,0),30,.5,.7,.5,.1);p.sendMessage(ChatColor.LIGHT_PURPLE+"The Null Ward fractures and absorbs the hit.");}
  @EventHandler public void death(PlayerDeathEvent e){Player p=e.getEntity();String k=p.getUniqueId().toString();deaths.set(k+".world",p.getWorld().getName());if(worlds.isActive()&&p.getWorld().equals(worlds.getWorld())){Location l=p.getLocation();deaths.set(k+".x",l.getBlockX());deaths.set(k+".y",l.getBlockY());deaths.set(k+".z",l.getBlockZ());}save(deaths,deathFile);}
- @EventHandler(priority=EventPriority.HIGHEST) public void respawn(PlayerRespawnEvent e){String key=e.getPlayer().getUniqueId().toString();World bedrock=worlds.getWorld();if(bedrock==null||!bedrock.getName().equals(deaths.getString(key+".world")))return;Location saved=loadRespawn(key);e.setRespawnLocation(saved==null?worlds.getEntranceLocation():saved);}
+ 
  @EventHandler public void storageClose(InventoryCloseEvent e){if(e.getInventory().getHolder() instanceof Holder h){saveStorage(h.owner,e.getInventory());open.remove(h.owner);}}
  private void registerReconstructorRecipe(){ShapedRecipe recipe=new ShapedRecipe(recipeKey,createItem(Type.RECONSTRUCTOR));recipe.shape(" D ","LSM"," B ");recipe.setIngredient('D',new RecipeChoice.ExactChoice(createItem(Type.DISTORTED_COMPASS)));recipe.setIngredient('L',new RecipeChoice.ExactChoice(createItem(Type.EMERGENCY_LANTERN)));recipe.setIngredient('S',new RecipeChoice.ExactChoice(createItem(Type.STABILIZER_INJECTION)));recipe.setIngredient('M',new RecipeChoice.ExactChoice(createItem(Type.FIELD_MEDKIT)));recipe.setIngredient('B',new RecipeChoice.ExactChoice(createItem(Type.SIGNAL_BEACON)));Bukkit.removeRecipe(recipeKey);Bukkit.addRecipe(recipe);}
  private boolean bindRespawn(Player p){
@@ -119,6 +119,7 @@ public final class CustomItemManager implements Listener {
   if(memory.hasLore("recognition_event"))p.sendMessage(ChatColor.DARK_PURPLE+"A faint signal distortion follows the anchor. Null has noticed the new location, but the binding holds.");
   return !upgradedCharge;
 }
+ public Location getReconstructorSpawn(UUID id){return loadRespawn(id.toString());}
  private Location loadRespawn(String key){String worldName=respawns.getString(key+".world");if(worldName==null)return null;World world=Bukkit.getWorld(worldName);if(world==null)return null;return new Location(world,respawns.getDouble(key+".x"),respawns.getDouble(key+".y"),respawns.getDouble(key+".z"),(float)respawns.getDouble(key+".yaw"),(float)respawns.getDouble(key+".pitch"));}
  private boolean ready(Player p,Type t){long until=cooldowns.getLong(p.getUniqueId()+"."+t.id);if(until>System.currentTimeMillis()){p.sendMessage(ChatColor.DARK_GRAY+"That device needs "+Math.max(1,(until-System.currentTimeMillis()+999)/1000)+"s to recharge.");return false;}return true;}
  private void applyForgottenCharmEffects(){

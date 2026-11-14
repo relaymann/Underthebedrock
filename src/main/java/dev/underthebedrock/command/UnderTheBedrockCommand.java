@@ -17,7 +17,7 @@ public final class UnderTheBedrockCommand implements CommandExecutor, TabComplet
         if (!sender.hasPermission("underthebedrock.admin")) { sender.sendMessage("§cNo permission."); return true; }
         if (args.length != 1) { sender.sendMessage("§7Usage: /underthebedrock <start|stop|status>"); return true; }
         switch (args[0].toLowerCase()) {
-            case "start" -> sender.sendMessage(worlds.start() ? "§aUnder The Bedrock is active. Use /enter." : "§cWorld initialization failed; check console.");
+            case "start" -> sender.sendMessage(worlds.start() ? "§aUnder The Bedrock is active. New joins and respawns will be sent to its entrance automatically." : "§cWorld initialization failed; check console.");
             case "stop" -> sender.sendMessage(worlds.stop() ? "§eStopped. Generated chunks were preserved." : "§cPlayers are still inside; have them use /leave.");
             case "status" -> {
                 sender.sendMessage("§8[Under The Bedrock]");
