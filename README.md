@@ -27,7 +27,7 @@ All 26 custom equipment items have persistent item identities, custom names/lore
 Abilities include entity scans, temporary night vision and barriers, one-hit ward protection, healing/status recovery, evidence and structure detection, persistent portable storage, proximity alarms, death-location recall, a one-use return device, and an 18-second Speed II burst. The very rare Charm of the Forgotten grants continuous Speed I and Slowness I while held in either hand. Horn and Null Fragment increase Null's attention; the compass can mislead. Cooldowns persist in item-cooldowns.yml, portable storage and death echoes persist separately.
 
 ## ARG and world systems
-Six ordered clues form a personal evidence chain. Fourteen deterministic structure archetypes are selected by exploration distance and rarity, generated only in loaded chunks, and restored hourly. Supply crates appear every 30 minutes and announce exact coordinates in chat. Horror memory, structure state, and supply-drop schedules persist across restarts.
+Ten ordered clues form a personal evidence chain. The first six investigate the anomaly; the final four uncover the Forgotten, the erased creator of the world who tried to remove Null and was erased first. Null's chat presence is silent within 1,000 blocks of spawn. Fourteen deterministic structure archetypes are selected by exploration distance and rarity, generated only in loaded chunks, and restored hourly. Supply crates appear every 30 minutes and announce exact coordinates in chat. Horror memory, structure state, and supply-drop schedules persist across restarts.
 
 ## Build
 Use JDK 25 and Gradle 9.7.1: `gradle clean test build`. JAR output: `build/libs/`. Install matching Nova 0.23.0 and BetterModel 3.5.1 server plugins.

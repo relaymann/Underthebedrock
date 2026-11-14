@@ -50,7 +50,7 @@ public final class CustomItemManager implements Listener {
   NULL_FRAGMENT("null_fragment","Null Fragment",Material.CRYING_OBSIDIAN,"Using it increases Null's attention."),
   LAST_RESORT_DEVICE("last_resort_device","Last Resort Device",Material.ENDER_PEARL,"One-use emergency return to the entrance."),
   SPEED_BOOST("speed_boost","Adrenaline Injector",Material.SUGAR,"Grants Speed II for 18 seconds."),
-  CHARM_OF_THE_FORGOTTEN("charm_of_the_forgotten","Charm of the Forgotten",Material.AMETHYST_SHARD,"Blessed by the Forgotten. While held: Speed II. Mining Fatigue II and Weakness II linger for 30 seconds after unequipping.");
+  CHARM_OF_THE_FORGOTTEN("charm_of_the_forgotten","Charm of the Forgotten",Material.AMETHYST_SHARD,"A surviving fragment of the world's erased creator. Speed III while held. Mining Fatigue II and Weakness II linger for 30 seconds after unequipping.");
   public final String id,title,lore; public final Material material;
   Type(String id,String title,Material material,String lore){this.id=id;this.title=title;this.material=material;this.lore=lore;}
   public static Optional<Type> byId(String id){return Arrays.stream(values()).filter(t->t.id.equals(id)).findFirst();}
@@ -106,7 +106,7 @@ public final class CustomItemManager implements Listener {
   if(!worlds.isActive()||worlds.getWorld()==null)return;
   for(Player p:worlds.getWorld().getPlayers())if(holdsCharm(p)){
    // Speed is the benefit; the drawbacks persist after the charm is unequipped.
-   p.addPotionEffect(new PotionEffect(PotionEffectType.SPEED,25,1,false,false,false));
+   p.addPotionEffect(new PotionEffect(PotionEffectType.SPEED,25,2,false,false,false));
    // Refresh for 30 seconds while equipped; the remaining duration counts down after unequipping.
    p.addPotionEffect(new PotionEffect(PotionEffectType.MINING_FATIGUE,600,1,false,false,false));
    p.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS,600,1,false,false,false));

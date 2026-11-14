@@ -8,6 +8,8 @@ world:
 player:
   return-location-file: player-locations.yml
 horror:
+  null:
+    minimum-distance-blocks: 1000
   director:
     enabled: true
     check-interval-seconds: 12
