@@ -37,6 +37,7 @@ public final class HorrorEntityController implements Listener {
         private final long startedAt;
         private EntityTracker modelTracker;
         private boolean mimicRevealed;
+        private boolean mimicRevealWarningLogged;
         private Location lastKnown;
         private Location lastPlayerPosition;
         private State state = State.OBSERVING;
@@ -224,6 +225,7 @@ public final class HorrorEntityController implements Listener {
                 boolean readyToStrike = provocation >= 12 || (distanceSquared <= 100 && encounter.unseenChecks >= 2);
                 if (!encounter.mimicRevealed && readyToStrike) revealMimic(player, encounter);
                 if (encounter.mimicRevealed) {
+                    encounter.lastKnown = player.getLocation().clone();
                     encounter.state = State.HUNTING;
                 } else if (visible) {
                     encounter.state = State.OBSERVING;
@@ -303,7 +305,10 @@ public final class HorrorEntityController implements Listener {
     private void revealMimic(Player player, Encounter encounter) {
         String revealedModel = plugin.getConfig().getString("horror.entities.models.mimic-revealed", "mimic_revealed");
         if (!models.availableModels().contains(revealedModel)) {
-            plugin.getLogger().warning("Mimic is ready to reveal, but BetterModel '" + revealedModel + "' is not registered.");
+            if (!encounter.mimicRevealWarningLogged) {
+                encounter.mimicRevealWarningLogged = true;
+                plugin.getLogger().warning("Mimic is ready to reveal, but BetterModel '" + revealedModel + "' is not registered.");
+            }
             return;
         }
         models.replaceModel(encounter.shell, encounter.modelTracker, revealedModel).ifPresent(tracker -> {
