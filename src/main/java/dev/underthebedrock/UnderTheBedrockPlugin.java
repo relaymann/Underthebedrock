@@ -34,10 +34,6 @@ public final class UnderTheBedrockPlugin extends JavaPlugin {
   getConfig().set("horror.entities.behavior.despawn-range-blocks",176);
   getConfig().set("horror.events.minimum-cooldown-seconds",75);
   getConfig().set("horror.events.maximum-cooldown-seconds",150);
-  getConfig().set("horror.entities.full-threat-distance-blocks",4096);
-  getConfig().set("horror.entities.maximum-chance-per-check",0.12);
-  getConfig().set("horror.entities.successful-encounter-cooldown-minutes",2);
-  getConfig().set("horror.entities.behavior.encounter-check-interval-ticks",40);
   saveConfig();
   getLogger().info("Applied exploration pacing v3: earlier distant sightings and faster event cadence.");
  }

@@ -29,7 +29,7 @@ horror:
   exploration-pacing-v3: true
   clues:
     enabled: true
-    scan-interval-ticks: 100
+    scan-interval-ticks: 40
     site-cell-size-blocks: 512
     minimum-distance-blocks: 768
     evidence-file: player-horror-memory.yml
