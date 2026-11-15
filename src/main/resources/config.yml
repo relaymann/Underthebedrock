@@ -73,23 +73,23 @@ horror:
       adaptive-selection: true
       crawler-maximum-light-level: 7
     models:
-      observer: watcher
-      stalker: watcher
-      wanderer: watcher
-      mimic: watcher
-      aggressor: watcher
+      observer: observer
+      stalker: stalker
+      wanderer: wanderer
+      mimic: mimic
+      aggressor: aggressor
       deep_entity: watcher
-      witness: watcher
-      peeker: watcher
+      witness: witness
+      peeker: peeker
       forgotten_resident: watcher
       surveyor: watcher
-      lurker: watcher
-      doorframe: watcher
-      ceiling_crawler: watcher
+      lurker: lurker
+      doorframe: doorframe
+      ceiling_crawler: ceiling_crawler
       echo: watcher
-      pursuer: watcher
-      crawling_one: watcher
-      heavy: watcher
+      pursuer: pursuer
+      crawling_one: crawling_one
+      heavy: heavy
       imitator: watcher
       misprint: watcher
       double: watcher
