@@ -5,6 +5,7 @@ import dev.underthebedrock.item.CustomItemManager;
 import dev.underthebedrock.team.TeamManager;
 import dev.underthebedrock.world.VoidWorldManager;
 import org.bukkit.*;
+import org.bukkit.command.*;
 import org.bukkit.block.*;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -169,7 +170,7 @@ public final class BaseManager implements Listener, CommandExecutor, TabComplete
         Block security=w.getBlockAt(x-4,y+1,z+3);security.setType(Material.LODESTONE,false);mark(security,id);
         Block terminal=w.getBlockAt(x+4,y+1,z+3);terminal.setType(Material.LECTERN,false);mark(terminal,id);
         w.getBlockAt(x-7,y+1,z+1).setType(Material.CAMPFIRE,false);
-        w.getBlockAt(x+7,y+1,z-1).setType(Material.CHAIN,false);
+        w.getBlockAt(x+7,y+1,z-1).setType(Material.IRON_BARS,false);
         w.getBlockAt(x+7,y+2,z-1).setType(Material.LANTERN,false);
         for(int[] c:new int[][]{{-7,1,0},{7,1,0},{0,1,4}})w.getBlockAt(x+c[0],y+c[1],z+c[2]).setType(Material.COMPOSTER,false);
     }

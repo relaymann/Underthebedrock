@@ -2,6 +2,7 @@ package dev.underthebedrock.team;
 
 import dev.underthebedrock.UnderTheBedrockPlugin;
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.ChatColor;
 import org.bukkit.command.*;
 import org.bukkit.configuration.file.YamlConfiguration;
