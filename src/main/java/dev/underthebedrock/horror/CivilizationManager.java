@@ -68,7 +68,7 @@ public final class CivilizationManager implements Listener {
         if (!plugin.getWorlds().isActive()) return;
         World world = plugin.getWorlds().getWorld();
         if (world == null) return;
-        int cell = Math.max(512, plugin.getConfig().getInt("horror.civilization.site-cell-size-blocks", 2048));
+        int cell = Math.max(512, plugin.getConfig().getInt("horror.civilization.site-cell-size-blocks", 1792));
         for (Player player : world.getPlayers()) {
             int cx = Math.floorDiv(player.getLocation().getBlockX() - world.getSpawnLocation().getBlockX(), cell);
             int cz = Math.floorDiv(player.getLocation().getBlockZ() - world.getSpawnLocation().getBlockZ(), cell);
