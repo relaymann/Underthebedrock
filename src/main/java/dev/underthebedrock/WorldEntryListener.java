@@ -83,9 +83,13 @@ public final class WorldEntryListener implements Listener {
                 || (!forceEntry && !plugin.getConfig().getBoolean("world.lock-to-experience", true))) return false;
 
         World target = worlds.ensureWorld();
-        Location destination = resumeSavedPosition ? savedPosition(player, target) : worlds.getEntranceLocation();
-        if (target == null || destination == null) {
+        if (target == null) {
             plugin.getLogger().warning("Could not route " + player.getName() + ": the experience world is unavailable.");
+            return false;
+        }
+        Location destination = resumeSavedPosition ? savedPosition(player, target) : worlds.getEntranceLocation();
+        if (destination == null) {
+            plugin.getLogger().warning("Could not route " + player.getName() + ": the experience destination is unavailable.");
             return false;
         }
 
