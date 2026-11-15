@@ -13,6 +13,7 @@ import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
@@ -527,10 +528,22 @@ public final class HorrorEntityController implements Listener {
 
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
+        hideForeignEncounters(event.getPlayer());
+    }
+
+    @EventHandler
+    public void onWorldChange(PlayerChangedWorldEvent event) {
+        // A player can enter the horror world after an encounter already exists.
+        // Re-apply per-player hiding after every world transition, not only at login.
+        hideForeignEncounters(event.getPlayer());
+    }
+
+    private void hideForeignEncounters(Player viewer) {
         for (Encounter encounter : active.values()) {
-            if (encounter.shell.isValid() && encounter.shell.getWorld().equals(event.getPlayer().getWorld())
-                    && !encounter.target.equals(event.getPlayer().getUniqueId())) {
-                event.getPlayer().hideEntity(plugin, encounter.shell);
+            if (encounter.shell.isValid()
+                    && encounter.shell.getWorld().equals(viewer.getWorld())
+                    && !encounter.target.equals(viewer.getUniqueId())) {
+                viewer.hideEntity(plugin, encounter.shell);
             }
         }
     }
