@@ -10,32 +10,55 @@ public final class UnderTheBedrockPlugin extends JavaPlugin {
   if(getConfig().getBoolean("world.auto-start",true)||getConfig().getBoolean("world.enabled-on-startup",false)){if(worlds.start())getServer().getScheduler().runTask(this,worldEntry::routeOnlinePlayers);else getLogger().severe("Could not initialize the configured horror world.");}
   getLogger().info("Under The Bedrock enabled; auto-start="+worlds.isActive()+", world lockdown="+getConfig().getBoolean("world.lock-to-experience",true)+".");}
  private void applyExplorationPacingDefaults(){
-  if(getConfig().getBoolean("horror.exploration-pacing-v3",false))return;
-  getConfig().set("horror.exploration-pacing-v3",true);
-  getConfig().set("horror.director.check-interval-seconds",4);
-  getConfig().set("horror.director.minimum-occurrence-gap-seconds",10);
-  getConfig().set("horror.director.severe-occurrence-cooldown-minutes",1);
-  getConfig().set("horror.director.base-roll-chance",0.62);
-  getConfig().set("horror.structures.site-cell-size-blocks",512);
-  getConfig().set("horror.structures.cell-generation-chance",0.82);
-  getConfig().set("horror.structures.spawn-check-radius-blocks",160);
-  getConfig().set("horror.structures.scan-interval-ticks",40);
-  getConfig().set("horror.civilization.cell-generation-chance",0.58);
-  getConfig().set("horror.civilization.scan-interval-ticks",40);
-  getConfig().set("horror.clues.scan-interval-ticks",40);
-  getConfig().set("horror.entities.safe-radius-blocks",256);
-  getConfig().set("horror.entities.full-threat-distance-blocks",3072);
-  getConfig().set("horror.entities.maximum-chance-per-check",0.18);
-  getConfig().set("horror.entities.successful-encounter-cooldown-minutes",1);
-  getConfig().set("horror.entities.behavior.encounter-check-interval-ticks",20);
-  getConfig().set("horror.entities.behavior.minimum-spawn-distance-blocks",48);
-  getConfig().set("horror.entities.behavior.maximum-spawn-distance-blocks",96);
-  getConfig().set("horror.entities.behavior.observation-range-blocks",128);
-  getConfig().set("horror.entities.behavior.despawn-range-blocks",176);
-  getConfig().set("horror.events.minimum-cooldown-seconds",75);
-  getConfig().set("horror.events.maximum-cooldown-seconds",150);
+  if(!getConfig().getBoolean("horror.exploration-pacing-v3",false)){
+   getConfig().set("horror.exploration-pacing-v3",true);
+   getConfig().set("horror.director.check-interval-seconds",4);
+   getConfig().set("horror.director.minimum-occurrence-gap-seconds",10);
+   getConfig().set("horror.director.severe-occurrence-cooldown-minutes",1);
+   getConfig().set("horror.director.base-roll-chance",0.62);
+   getConfig().set("horror.structures.site-cell-size-blocks",512);
+   getConfig().set("horror.structures.cell-generation-chance",0.82);
+   getConfig().set("horror.structures.spawn-check-radius-blocks",160);
+   getConfig().set("horror.structures.scan-interval-ticks",40);
+   getConfig().set("horror.civilization.cell-generation-chance",0.58);
+   getConfig().set("horror.civilization.scan-interval-ticks",40);
+   getConfig().set("horror.clues.scan-interval-ticks",40);
+   getConfig().set("horror.entities.safe-radius-blocks",256);
+   getConfig().set("horror.entities.full-threat-distance-blocks",3072);
+   getConfig().set("horror.entities.maximum-chance-per-check",0.18);
+   getConfig().set("horror.entities.successful-encounter-cooldown-minutes",1);
+   getConfig().set("horror.entities.behavior.encounter-check-interval-ticks",20);
+   getConfig().set("horror.entities.behavior.minimum-spawn-distance-blocks",48);
+   getConfig().set("horror.entities.behavior.maximum-spawn-distance-blocks",96);
+   getConfig().set("horror.entities.behavior.observation-range-blocks",128);
+   getConfig().set("horror.entities.behavior.despawn-range-blocks",176);
+   getConfig().set("horror.events.minimum-cooldown-seconds",75);
+   getConfig().set("horror.events.maximum-cooldown-seconds",150);
+   getLogger().info("Applied exploration pacing v3.");
+  }
+  if(getConfig().getBoolean("horror.exploration-pacing-v4",false))return;
+  getConfig().set("horror.exploration-pacing-v4",true);
+  getConfig().set("horror.director.check-interval-seconds",20);
+  getConfig().set("horror.director.minimum-occurrence-gap-seconds",180);
+  getConfig().set("horror.director.severe-occurrence-cooldown-minutes",15);
+  getConfig().set("horror.director.base-roll-chance",0.10);
+  getConfig().set("horror.director.maximum-adaptive-bonus",0.05);
+  getConfig().set("horror.events.minimum-cooldown-seconds",480);
+  getConfig().set("horror.events.maximum-cooldown-seconds",720);
+  getConfig().set("horror.structures.site-cell-size-blocks",1536);
+  getConfig().set("horror.structures.cell-generation-chance",0.16);
+  getConfig().set("horror.structures.spawn-check-radius-blocks",48);
+  getConfig().set("horror.structures.scan-interval-ticks",100);
+  getConfig().set("horror.civilization.cell-generation-chance",0.20);
+  getConfig().set("horror.civilization.scan-interval-ticks",100);
+  getConfig().set("horror.clues.scan-interval-ticks",100);
+  getConfig().set("horror.entities.maximum-chance-per-check",0.06);
+  getConfig().set("horror.entities.successful-encounter-cooldown-minutes",8);
+  getConfig().set("horror.entities.behavior.encounter-check-interval-ticks",40);
+  getConfig().set("horror.entities.behavior.minimum-spawn-distance-blocks",64);
+  getConfig().set("horror.entities.behavior.maximum-spawn-distance-blocks",128);
   saveConfig();
-  getLogger().info("Applied exploration pacing v3: earlier distant sightings and faster event cadence.");
+  getLogger().info("Applied exploration pacing v4: lower structure density and longer horror-event downtime.");
  }
  @Override public void onDisable(){if(worldEntry!=null)worldEntry.stop();if(bases!=null)bases.stop();if(teams!=null)teams.stop();if(facilities!=null)facilities.stop();if(horrorEvents!=null)horrorEvents.stop();if(civilization!=null)civilization.stop();if(customItems!=null)customItems.stop();if(supplyDrops!=null)supplyDrops.stop();if(structures!=null)structures.stop();if(clues!=null)clues.stop();if(entities!=null)entities.stop();if(occurrences!=null)occurrences.stop();}
  public boolean requestFullReset(){return FullResetService.request(this);}
