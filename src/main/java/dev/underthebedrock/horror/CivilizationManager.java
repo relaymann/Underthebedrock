@@ -54,7 +54,7 @@ public final class CivilizationManager implements Listener {
     public void start() {
         if (task != null) return;
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
-        long interval = Math.max(40, plugin.getConfig().getLong("horror.civilization.scan-interval-ticks", 100));
+        long interval = Math.max(40, plugin.getConfig().getLong("horror.civilization.scan-interval-ticks", 120));
         task = plugin.getServer().getScheduler().runTaskTimer(plugin, this::tick, 80, interval);
     }
 
@@ -87,7 +87,7 @@ public final class CivilizationManager implements Listener {
         Random rng = new Random(seed);
         if (!data.contains(path + ".type")) {
             if (explorer == null || distanceFromSpawn(world, explorer.getLocation()) < minimumSpawnDistance()
-                    || rng.nextDouble() > plugin.getConfig().getDouble("horror.civilization.cell-generation-chance", 0.16)) return;
+                    || rng.nextDouble() > plugin.getConfig().getDouble("horror.civilization.cell-generation-chance", 0.18)) return;
             int[] candidate = siteCandidate(world, explorer, rng);
             int x = candidate[0], z = candidate[1];
             Site type = Site.values()[rng.nextInt(Site.values().length)];
@@ -129,7 +129,7 @@ public final class CivilizationManager implements Listener {
     }
 
     private double minimumSpawnDistance() {
-        return Math.max(0, plugin.getConfig().getDouble("horror.civilization.minimum-distance-from-spawn-blocks", 600));
+        return Math.max(0, plugin.getConfig().getDouble("horror.civilization.minimum-distance-from-spawn-blocks", 900));
     }
 
     private double distanceFromSpawn(World world, Location location) {
