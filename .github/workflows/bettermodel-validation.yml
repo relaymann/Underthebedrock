@@ -37,7 +37,9 @@ jobs:
           distribution: temurin
           java-version: "25"
           cache: gradle
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "9.7.1"
       - name: Build and test plugin
-        run: |
-          chmod +x gradlew
-          ./gradlew clean test build
+        run: gradle clean test build
