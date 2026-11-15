@@ -37,10 +37,10 @@ public final class EntityEncounterPolicy {
         if (random.nextDouble() >= chanceAt(distance)) return Optional.empty();
         List<EntityArchetype> eligible = eligibleAt(distance);
         if (eligible.isEmpty()) return Optional.empty();
-        double total = eligible.stream().mapToDouble(EntityArchetype::selectionWeight).sum();
+        double total = eligible.stream().mapToDouble(type -> type.selectionWeight() * type.rarity().selectionMultiplier()).sum();
         double value = random.nextDouble() * total;
         for (EntityArchetype type : eligible) {
-            value -= type.selectionWeight();
+            value -= type.selectionWeight() * type.rarity().selectionMultiplier();
             if (value <= 0) return Optional.of(type);
         }
         return Optional.of(eligible.get(0));
