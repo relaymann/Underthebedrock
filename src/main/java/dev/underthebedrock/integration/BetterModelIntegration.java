@@ -45,6 +45,15 @@ public final class BetterModelIntegration {
         return replacement;
     }
 
+    public boolean playAnimation(EntityTracker tracker, String animation) {
+        if (!enabled || tracker == null || tracker.isClosed()) return false;
+        try { return tracker.animate(animation); }
+        catch (RuntimeException error) {
+            plugin.getLogger().warning("Could not play BetterModel animation '" + animation + "': " + error.getMessage());
+            return false;
+        }
+    }
+
     public Set<String> availableModels() { return enabled ? BetterModel.modelKeys() : Set.of(); }
     public String statusText() { return enabled ? "§aConnected (" + availableModels().size() + " models)" : "§cUnavailable"; }
 }

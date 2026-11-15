@@ -38,6 +38,9 @@ public final class HorrorEntityController implements Listener {
         private EntityTracker modelTracker;
         private boolean mimicRevealed;
         private boolean mimicRevealWarningLogged;
+        private String activeAnimation = "";
+        private long animationUntil;
+        private boolean disappearanceStarted;
         private long mimicLastAttackAt;
         private Location lastKnown;
         private Location lastPlayerPosition;
@@ -147,7 +150,9 @@ public final class HorrorEntityController implements Listener {
         for (Player viewer : player.getWorld().getPlayers()) {
             if (!viewer.getUniqueId().equals(player.getUniqueId())) viewer.hideEntity(plugin, shell);
         }
-        active.put(player.getUniqueId(), new Encounter(player.getUniqueId(), type, shell, player.getLocation(), tracker.get()));
+        Encounter encounter = new Encounter(player.getUniqueId(), type, shell, player.getLocation(), tracker.get());
+        active.put(player.getUniqueId(), encounter);
+        setAnimation(encounter, "idle");
         director.recordEntityEncounter(player, type);
         player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_STARE, .12f, .55f);
     }
@@ -262,9 +267,24 @@ public final class HorrorEntityController implements Listener {
         }
 
         if (encounter.state == State.DISAPPEARING) {
-            remove(encounter);
-            active.remove(player.getUniqueId());
+            if (!encounter.disappearanceStarted) {
+                encounter.disappearanceStarted = true;
+                setAnimation(encounter, "disappear");
+                shell.getWorld().spawnParticle(Particle.SMOKE, shell.getLocation().add(0, 1, 0), 18, .25, .5, .25, .025);
+                plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+                    remove(encounter);
+                    active.remove(encounter.target, encounter);
+                }, 22L);
+            }
             return;
+        }
+        boolean oneShotPlaying = (encounter.activeAnimation.equals("reveal") || encounter.activeAnimation.equals("attack"))
+                && System.currentTimeMillis() < encounter.animationUntil;
+        if (!oneShotPlaying) {
+            if (encounter.state == State.HUNTING) setAnimation(encounter, "walk");
+            else if (encounter.state == State.STALKING || encounter.state == State.SEARCHING || encounter.state == State.RETREATING)
+                setAnimation(encounter, encounter.type == EntityArchetype.CRAWLER || encounter.type == EntityArchetype.CRAWLING_ONE || encounter.type == EntityArchetype.CEILING_CRAWLER ? "crawl" : "walk");
+            else setAnimation(encounter, "idle");
         }
         if (encounter.state == State.RETREATING) {
             moveAway(shell, player.getLocation(), encounter.type == EntityArchetype.CEILING_CRAWLER ? 2.2 : 1.4);
@@ -288,6 +308,7 @@ public final class HorrorEntityController implements Listener {
             if (encounter.type == EntityArchetype.MIMIC && distanceSquared <= 4.0
                     && System.currentTimeMillis() - encounter.mimicLastAttackAt >= 3000) {
                 encounter.mimicLastAttackAt = System.currentTimeMillis();
+                setAnimation(encounter, "attack");
                 player.damage(4.0, shell);
                 Vector knockback = player.getLocation().toVector().subtract(shell.getLocation().toVector());
                 if (knockback.lengthSquared() > .01) {
@@ -330,12 +351,30 @@ public final class HorrorEntityController implements Listener {
             encounter.modelTracker = tracker;
             encounter.mimicRevealed = true;
             encounter.state = State.HUNTING;
+            encounter.activeAnimation = "";
+            setAnimation(encounter, "reveal");
             Location at = encounter.shell.getLocation();
             encounter.shell.getWorld().spawnParticle(Particle.SMOKE, at.clone().add(0, 1, 0), 42, .38, .72, .38, .035);
             encounter.shell.getWorld().spawnParticle(Particle.CRIT, at.clone().add(0, 1, 0), 24, .28, .55, .28, .12);
             player.playSound(at, Sound.ENTITY_ENDERMAN_SCREAM, 1.25f, .58f);
             player.playSound(at, Sound.ENTITY_WARDEN_ROAR, .85f, .72f);
         });
+    }
+
+
+    private void setAnimation(Encounter encounter, String animation) {
+        long now = System.currentTimeMillis();
+        if (animation.equals(encounter.activeAnimation)
+                && (encounter.animationUntil == 0 || now < encounter.animationUntil)) return;
+        if (models.playAnimation(encounter.modelTracker, animation)) {
+            encounter.activeAnimation = animation;
+            encounter.animationUntil = switch (animation) {
+                case "attack" -> now + 900L;
+                case "reveal" -> now + 750L;
+                case "disappear" -> now + 1100L;
+                default -> 0L;
+            };
+        }
     }
 
     private void moveToward(ArmorStand shell, Location target, double maximumStep) {
