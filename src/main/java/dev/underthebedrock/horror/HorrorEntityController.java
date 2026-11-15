@@ -99,7 +99,7 @@ public final class HorrorEntityController implements Listener {
             if (encounter == null) {
                 long due = nextAttemptTick.getOrDefault(player.getUniqueId(), tickCounter);
                 if (tickCounter >= due) {
-                    long attemptInterval = Math.max(20, plugin.getConfig().getLong("horror.entities.behavior.encounter-check-interval-ticks", 40));
+                    long attemptInterval = Math.max(20, plugin.getConfig().getLong("horror.entities.behavior.encounter-check-interval-ticks", 60));
                     nextAttemptTick.put(player.getUniqueId(), tickCounter + attemptInterval);
                     attempt(player);
                 }
@@ -170,8 +170,8 @@ public final class HorrorEntityController implements Listener {
         Vector forward = origin.getDirection().setY(0).normalize();
         if (forward.lengthSquared() < .01) forward = new Vector(0, 0, 1);
         int floor = plugin.getConfig().getInt("world.floor-y", 64);
-        double minimum = Math.max(32, plugin.getConfig().getDouble("horror.entities.behavior.minimum-spawn-distance-blocks", 48));
-        double maximum = Math.max(minimum + 8, plugin.getConfig().getDouble("horror.entities.behavior.maximum-spawn-distance-blocks", 96));
+        double minimum = Math.max(32, plugin.getConfig().getDouble("horror.entities.behavior.minimum-spawn-distance-blocks", 64));
+        double maximum = Math.max(minimum + 8, plugin.getConfig().getDouble("horror.entities.behavior.maximum-spawn-distance-blocks", 112));
 
         for (int i = 0; i < 20; i++) {
             double angle = Math.toRadians(105 + random.nextDouble() * 150);
@@ -196,7 +196,7 @@ public final class HorrorEntityController implements Listener {
         Location here = shell.getLocation();
         double distanceSquared = here.distanceSquared(player.getLocation());
         boolean inViewRange = distanceSquared < Math.pow(plugin.getConfig().getDouble(
-            "horror.entities.behavior.observation-range-blocks", 128), 2);
+            "horror.entities.behavior.observation-range-blocks", 144), 2);
         boolean visible = inViewRange && player.hasLineOfSight(shell);
 
         if (visible) {
@@ -209,7 +209,7 @@ public final class HorrorEntityController implements Listener {
         }
 
         long maxDuration = Math.max(15, plugin.getConfig().getLong("horror.entities.max-encounter-duration-seconds", 180)) * 1000L;
-        double despawnRange = Math.max(32, plugin.getConfig().getDouble("horror.entities.behavior.despawn-range-blocks", 176));
+        double despawnRange = Math.max(32, plugin.getConfig().getDouble("horror.entities.behavior.despawn-range-blocks", 208));
         if (distanceSquared > despawnRange * despawnRange || System.currentTimeMillis() - encounter.startedAt > maxDuration) {
             encounter.state = State.DISAPPEARING;
         }
@@ -252,7 +252,7 @@ public final class HorrorEntityController implements Listener {
             return;
         }
 
-        double step = Math.max(.04, plugin.getConfig().getDouble("horror.entities.behavior.movement-step-blocks", .16));
+        double step = Math.max(.04, plugin.getConfig().getDouble("horror.entities.behavior.movement-step-blocks", .20));
         if (encounter.state == State.RETREATING) {
             moveAway(shell, player.getLocation(), step * 1.8);
             if (distanceSquared > 10000) { remove(encounter); active.remove(player.getUniqueId()); }
