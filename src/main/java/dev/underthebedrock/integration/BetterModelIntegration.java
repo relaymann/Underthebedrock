@@ -36,6 +36,15 @@ public final class BetterModelIntegration {
         if (!enabled) return Optional.empty();
         return BetterModel.model(modelId).map(renderer -> renderer.create(BukkitAdapter.adapt(entity)));
     }
+    /** Attach the replacement before closing the current tracker to avoid a blank frame if lookup fails. */
+    public Optional<EntityTracker> replaceModel(Entity entity, EntityTracker current, String modelId) {
+        Optional<EntityTracker> replacement = attachModel(entity, modelId);
+        replacement.ifPresent(next -> {
+            if (current != null && !current.isClosed()) current.close();
+        });
+        return replacement;
+    }
+
     public Set<String> availableModels() { return enabled ? BetterModel.modelKeys() : Set.of(); }
     public String statusText() { return enabled ? "§aConnected (" + availableModels().size() + " models)" : "§cUnavailable"; }
 }
