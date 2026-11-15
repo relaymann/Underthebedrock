@@ -61,7 +61,14 @@ public final class SupplyDropManager {
             save();
             return;
         }
-        spawnCrate(drop);
+        if (!spawnCrate(drop)) {
+            plugin.getLogger().severe("Supply drop crate could not be populated at "
+                    + drop.getBlockX() + " " + drop.getBlockY() + " " + drop.getBlockZ()
+                    + "; retrying instead of announcing an empty drop.");
+            data.set("next-drop-at", now + 10_000L);
+            save();
+            return;
+        }
         long sequence = data.getLong("total-drops", 0L) + 1L;
         data.set("total-drops", sequence);
         data.set("last-drop", world.getName() + "," + drop.getBlockX() + "," + drop.getBlockY() + "," + drop.getBlockZ());
@@ -99,29 +106,94 @@ public final class SupplyDropManager {
         return null;
     }
 
-    private void spawnCrate(Location location) {
+    /**
+     * Creates and verifies the live block inventory. Container#getInventory can
+     * represent a combined/snapshot inventory depending on the block state;
+     * use the placed chest's block inventory and verify it after population.
+     */
+    private boolean spawnCrate(Location location) {
         Block block = location.getBlock();
-        block.setType(Material.CHEST, false);
-        if (!(block.getState() instanceof Container container)) return;
-        container.getInventory().clear();
-        container.getPersistentDataContainer().set(marker, PersistentDataType.BYTE, (byte) 1);
-        Material[] loot = {Material.BREAD, Material.COOKED_BEEF, Material.TORCH, Material.SOUL_TORCH,
-                Material.IRON_INGOT, Material.GOLD_NUGGET, Material.STRING, Material.ARROW,
-                Material.COMPASS, Material.CLOCK, Material.PAPER, Material.GOLDEN_CARROT,
-                Material.COOKED_COD, Material.LEATHER, Material.EXPERIENCE_BOTTLE};
-        int rolls = 7 + random.nextInt(5);
-        for (int i = 0; i < rolls; i++) {
-            Material item = loot[random.nextInt(loot.length)];
-            int amount = switch (item) {
-                case IRON_INGOT -> 2 + random.nextInt(5);
-                case TORCH, SOUL_TORCH, ARROW, BREAD, COOKED_BEEF, COOKED_COD -> 3 + random.nextInt(6);
-                case GOLD_NUGGET -> 2 + random.nextInt(7);
-                default -> 1 + random.nextInt(2);
+        try {
+            block.setType(Material.CHEST, false);
+            if (!(block.getState() instanceof org.bukkit.block.Chest chest)) {
+                plugin.getLogger().severe("Supply drop location did not become a chest: " + location);
+                return false;
+            }
+
+            chest.getPersistentDataContainer().set(marker, PersistentDataType.BYTE, (byte) 1);
+            if (!chest.update(true, false)) {
+                plugin.getLogger().warning("Could not persist supply drop chest state at " + location);
+                return false;
+            }
+
+            // Re-read the state after placing it so all item writes target the
+            // actual block inventory, not a stale state captured before update.
+            if (!(block.getState() instanceof org.bukkit.block.Chest placedChest)) return false;
+            org.bukkit.inventory.Inventory inventory = placedChest.getBlockInventory();
+            inventory.clear();
+
+            // Guaranteed baseline: every successful crate has useful supplies.
+            java.util.List<ItemStack> loot = new java.util.ArrayList<>();
+            loot.add(new ItemStack(Material.BREAD, 4 + random.nextInt(5)));
+            loot.add(new ItemStack(Material.TORCH, 8 + random.nextInt(9)));
+            loot.add(new ItemStack(Material.IRON_INGOT, 3 + random.nextInt(5)));
+            loot.add(new ItemStack(Material.GOLD_NUGGET, 4 + random.nextInt(7)));
+            loot.add(new ItemStack(random.nextBoolean() ? Material.COOKED_BEEF : Material.GOLDEN_CARROT,
+                    2 + random.nextInt(4)));
+
+            Material[] bonusLoot = {
+                    Material.SOUL_TORCH, Material.STRING, Material.ARROW, Material.COMPASS,
+                    Material.CLOCK, Material.PAPER, Material.COOKED_COD, Material.LEATHER,
+                    Material.EXPERIENCE_BOTTLE
             };
-            container.getInventory().addItem(new ItemStack(item, amount));
+            int bonusRolls = 3 + random.nextInt(4);
+            for (int i = 0; i < bonusRolls; i++) {
+                Material item = bonusLoot[random.nextInt(bonusLoot.length)];
+                int amount = item == Material.SOUL_TORCH || item == Material.ARROW
+                        ? 3 + random.nextInt(6) : 1 + random.nextInt(3);
+                loot.add(new ItemStack(item, amount));
+            }
+
+            java.util.Map<Integer, ItemStack> leftovers = inventory.addItem(loot.toArray(ItemStack[]::new));
+            if (!leftovers.isEmpty()) {
+                plugin.getLogger().warning("Some supply drop items did not fit at " + location
+                        + " (leftover stacks: " + leftovers.size() + ").");
+            }
+
+            // Custom equipment is bonus loot only; it can never replace the
+            // guaranteed vanilla supplies if the custom item system is absent.
+            if (plugin.getCustomItems() != null) {
+                int customRolls = 2 + random.nextInt(3);
+                for (int i = 0; i < customRolls; i++) {
+                    try {
+                        ItemStack custom = plugin.getCustomItems().randomLootItem(random);
+                        if (custom != null && !custom.getType().isAir()) inventory.addItem(custom);
+                    } catch (RuntimeException exception) {
+                        plugin.getLogger().warning("Could not generate a custom supply item: "
+                                + exception.getMessage());
+                    }
+                }
+            }
+
+            // Verify the placed inventory itself, not the pre-update state.
+            org.bukkit.block.BlockState verifyState = block.getState();
+            if (!(verifyState instanceof org.bukkit.block.Chest verifyChest)) return false;
+            org.bukkit.inventory.Inventory verified = verifyChest.getBlockInventory();
+            boolean hasGuaranteedLoot = verified.contains(Material.BREAD)
+                    && verified.contains(Material.TORCH)
+                    && verified.contains(Material.IRON_INGOT)
+                    && verified.contains(Material.GOLD_NUGGET);
+            if (!hasGuaranteedLoot || verified.isEmpty()) {
+                plugin.getLogger().severe("Supply drop inventory verification failed at " + location
+                        + "; verified contents=" + verified.getContents().length);
+                return false;
+            }
+            return true;
+        } catch (RuntimeException exception) {
+            plugin.getLogger().severe("Failed to populate supply drop at " + location + ": "
+                    + exception.getMessage());
+            return false;
         }
-        if(plugin.getCustomItems()!=null){for(int n=0;n<2+random.nextInt(3);n++)container.getInventory().addItem(plugin.getCustomItems().randomLootItem(random));}
-        container.update(true, false);
     }
 
     private long intervalMillis() {
