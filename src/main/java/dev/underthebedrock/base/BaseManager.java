@@ -92,7 +92,7 @@ public final class BaseManager implements Listener, CommandExecutor, TabComplete
             if(siteClaimed(key))continue;
             String type=current.getString("sites."+key+".type","");
             if(!current.getBoolean("sites."+key+".built",false))continue;
-            if(!Set.of("empty_settlement","research_facility","base_constructor_lab","underground_bunker","railway").contains(type))continue;
+            if(!Set.of("empty_settlement","research_facility","underground_bunker","railway").contains(type))continue;
             int x=current.getInt("sites."+key+".x"),z=current.getInt("sites."+key+".z");
             double d=Math.pow(at.getX()-x,2)+Math.pow(at.getZ()-z,2);
             if(d<bestDistance){bestDistance=d;best=key;}

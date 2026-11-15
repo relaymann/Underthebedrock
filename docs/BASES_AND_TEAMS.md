@@ -12,7 +12,7 @@ Base Constructors have three discovery routes:
 - **Abandoned Research Facility:** a 12% chance for the prototype to appear in one of its supply chests.
 - **Airdrops:** a 2.5% bonus chance per successfully populated crate, configurable with `horror.supply-drops.base-constructor-chance`.
 
-Use or drop the item within 32 blocks of an unclaimed abandoned settlement, research facility, Constructor Lab, bunker, or railway site. Each site can be converted once. Choose one of four handcrafted base layouts. Construction checks the entire footprint and loaded chunks before placing anything; the Constructor is consumed only after a successful build.
+Use or drop the item within 32 blocks of an unclaimed abandoned settlement, research facility, bunker, or railway site. The Constructor Lab is a discovery location, not a construction site; its own warning directs players to take the prototype elsewhere. Each site can be converted once. Choose one of four handcrafted base layouts. Construction checks the entire footprint and loaded chunks before placing anything; the Constructor is consumed only after a successful build.
 
 ## Base profiles
 
