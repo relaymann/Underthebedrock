@@ -360,6 +360,10 @@ public final class WorldEntryListener implements Listener {
             if (anchor != null && anchor.getWorld() != null && anchor.getWorld().equals(target)) destination = anchor;
         }
         event.setRespawnLocation(destination);
+        // Respawning from another world can bypass the join/world-change migration path.
+        // Run the same durable inventory isolation after Bukkit completes the respawn.
+        plugin.getServer().getScheduler().runTaskLater(plugin,
+            () -> route(player, true, false), 1L);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
