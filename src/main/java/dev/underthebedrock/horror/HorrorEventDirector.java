@@ -63,7 +63,7 @@ public final class HorrorEventDirector implements Listener {
 
         for (Player player : world.getPlayers()) {
             UUID id = player.getUniqueId();
-            long due = nextEvent.computeIfAbsent(id, ignored -> now + 20_000L);
+            long due = nextEvent.computeIfAbsent(id, ignored -> now + 60_000L);
             if (now < due || random.nextDouble() > .45) continue;
 
             if (plugin.getFacilityManager() != null && plugin.getFacilityManager().isInsideSafeRoom(player.getLocation())) {
@@ -72,9 +72,16 @@ public final class HorrorEventDirector implements Listener {
             }
 
             PlayerHorrorMemory memory = plugin.getOccurrenceDirector().memory(id);
+            long occurrenceGap = Math.max(0, plugin.getConfig().getLong(
+                "horror.events.minimum-gap-from-occurrence-seconds", 90)) * 1000L;
+            if (now - memory.lastOccurrenceAt() < occurrenceGap) {
+                nextEvent.put(id, now + 30_000L);
+                continue;
+            }
+
             fire(player, memory);
-            long minimum = Math.max(30, plugin.getConfig().getLong("horror.events.minimum-cooldown-seconds", 75));
-            long maximum = Math.max(minimum, plugin.getConfig().getLong("horror.events.maximum-cooldown-seconds", 150));
+            long minimum = Math.max(30, plugin.getConfig().getLong("horror.events.minimum-cooldown-seconds", 300));
+            long maximum = Math.max(minimum, plugin.getConfig().getLong("horror.events.maximum-cooldown-seconds", 420));
             long cooldown = minimum + (maximum == minimum ? 0 : random.nextLong(maximum - minimum + 1));
             nextEvent.put(id, now + cooldown * 1000L);
         }
@@ -82,9 +89,13 @@ public final class HorrorEventDirector implements Listener {
     }
 
     private void fire(Player player, PlayerHorrorMemory memory) {
-        int stage = memory.discoveredClueCount() + memory.loreCount() / 2
-            + (int) (memory.distanceTravelled() / 4096);
-        int eventCount = stage >= 8 ? 14 : stage >= 3 ? 8 : 3;
+        int eventCount = switch (StoryChapter.forPlayer(memory)) {
+            case ARRIVAL, ANOMALIES -> 3;
+            case SUSPICION -> 5;
+            case INVESTIGATION -> 8;
+            case NULL_INFLUENCE -> 11;
+            case DEEP_EXPLORATION -> 14;
+        };
         int event = selectEvent(eventCount, memory);
         memory.recordBehavior("event_" + event);
         Location origin = player.getLocation();
