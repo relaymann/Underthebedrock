@@ -103,8 +103,11 @@ public final class CivilizationManager implements Listener {
         catch (IllegalArgumentException ex) { return; }
         int x = data.getInt(path + ".x"), z = data.getInt(path + ".z");
         int y = plugin.getConfig().getInt("world.floor-y", 64) + 1;
+        double relocationThreshold = Math.max(180,
+            plugin.getConfig().getInt("horror.civilization.maximum-site-offset-blocks", 420) + 32);
         if (!data.getBoolean(path + ".built", false) && explorer != null
-                && explorer.getLocation().distanceSquared(new Location(world, x, y, z)) > 180 * 180) {
+                && explorer.getLocation().distanceSquared(new Location(world, x, y, z))
+                    > relocationThreshold * relocationThreshold) {
             if (distanceFromSpawn(world, explorer.getLocation()) < minimumSpawnDistance()) return;
             int[] candidate = siteCandidate(world, explorer, rng);
             x = candidate[0]; z = candidate[1];
