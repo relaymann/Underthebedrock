@@ -92,12 +92,25 @@ public final class StructureManager implements Listener {
         long now=System.currentTimeMillis(),last=data.getLong(path+".last-reset",now);
         boolean first=!data.getBoolean(path+".built",false);
         long period=Math.max(1,plugin.getConfig().getLong("horror.structures.regeneration-hours",1))*HOUR;
+        // One-time migration: labs generated before Upgrade Tokens existed receive their
+        // exclusive token in the original prototype cache, never in a replacement loot source.
+        if(selected==StructureDefinition.BASE_CONSTRUCTOR_LAB&&!first&&!data.getBoolean(path+".upgrade-token-issued",false)){
+            int cacheY=plugin.getConfig().getInt("world.floor-y",64)+2;
+            Block cache=world.getBlockAt(x-6,cacheY,z+5);
+            if(cache.getState() instanceof Container container&&plugin.getBaseManager()!=null){
+                ItemStack token=plugin.getBaseManager().upgradeTokenItem();
+                if(!container.getInventory().containsAtLeast(token,1))container.getInventory().addItem(token);
+                container.update(true,false);data.set(path+".upgrade-token-issued",true);save();
+            }
+        }
         if(first||now-last>=period){
             if(selected==StructureDefinition.BASE_CONSTRUCTOR_LAB&&!first)return;
             if(!first){double safeDistance=Math.pow(radius(selected)+4,2);for(Player nearby:world.getPlayers())if(nearby.getLocation().distanceSquared(siteCenter)<=safeDistance)return;}
             int cycle=data.getInt(path+".cycle",0)+(first?0:1);
             build(world,x,z,plugin.getConfig().getInt("world.floor-y",64)+1,selected,seed,key,cycle);
-            data.set(path+".built",true);data.set(path+".last-reset",now);data.set(path+".cycle",cycle);save();
+            data.set(path+".built",true);data.set(path+".last-reset",now);data.set(path+".cycle",cycle);
+            if(selected==StructureDefinition.BASE_CONSTRUCTOR_LAB)data.set(path+".upgrade-token-issued",true);
+            save();
         }
     }
     private int radius(StructureDefinition type){
