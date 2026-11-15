@@ -366,15 +366,41 @@ public final class HorrorEntityController implements Listener {
         long now = System.currentTimeMillis();
         if (animation.equals(encounter.activeAnimation)
                 && (encounter.animationUntil == 0 || now < encounter.animationUntil)) return;
-        if (models.playAnimation(encounter.modelTracker, animation)) {
-            encounter.activeAnimation = animation;
-            encounter.animationUntil = switch (animation) {
-                case "attack" -> now + 900L;
-                case "reveal" -> now + 750L;
-                case "disappear" -> now + 1100L;
-                default -> 0L;
-            };
+        if (!models.playAnimation(encounter.modelTracker, animation)) return;
+
+        encounter.activeAnimation = animation;
+        long duration = switch (animation) {
+            case "attack" -> 900L;
+            case "reveal" -> 750L;
+            case "disappear" -> 1100L;
+            default -> 0L;
+        };
+        encounter.animationUntil = duration == 0L ? 0L : now + duration;
+
+        // One-shot clips must hand control back to the current locomotion/idle pose.
+        // The director's decision loop is intentionally slow; without this callback an
+        // apparition can remain frozen in the final attack/reveal keyframe for many seconds.
+        if (duration > 0L && !animation.equals("disappear")) {
+            plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+                if (!encounter.shell.isValid()
+                        || active.get(encounter.target) != encounter
+                        || !animation.equals(encounter.activeAnimation)
+                        || encounter.state == State.DISAPPEARING) return;
+                encounter.activeAnimation = "";
+                setAnimation(encounter, loopAnimation(encounter));
+            }, Math.max(1L, (duration + 49L) / 50L));
         }
+    }
+
+    private String loopAnimation(Encounter encounter) {
+        if (encounter.state == State.HUNTING) return "walk";
+        if (encounter.state == State.STALKING || encounter.state == State.SEARCHING
+                || encounter.state == State.RETREATING) {
+            return encounter.type == EntityArchetype.CRAWLER
+                    || encounter.type == EntityArchetype.CRAWLING_ONE
+                    || encounter.type == EntityArchetype.CEILING_CRAWLER ? "crawl" : "walk";
+        }
+        return "idle";
     }
 
     private void moveToward(ArmorStand shell, Location target, double maximumStep) {
