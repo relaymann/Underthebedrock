@@ -3,7 +3,9 @@ package dev.underthebedrock.horror;
 import dev.underthebedrock.UnderTheBedrockPlugin;
 import dev.underthebedrock.integration.BetterModelIntegration;
 import dev.underthebedrock.world.VoidWorldManager;
+import kr.toxicity.model.api.tracker.EntityTracker;
 import org.bukkit.Location;
+import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -33,19 +35,22 @@ public final class HorrorEntityController implements Listener {
         private final EntityArchetype type;
         private final ArmorStand shell;
         private final long startedAt;
+        private EntityTracker modelTracker;
+        private boolean mimicRevealed;
         private Location lastKnown;
         private Location lastPlayerPosition;
         private State state = State.OBSERVING;
         private int unseenChecks;
         private int observedChecks;
 
-        private Encounter(UUID target, EntityArchetype type, ArmorStand shell, Location lastKnown) {
+        private Encounter(UUID target, EntityArchetype type, ArmorStand shell, Location lastKnown, EntityTracker modelTracker) {
             this.target = target;
             this.type = type;
             this.shell = shell;
             this.lastKnown = lastKnown.clone();
             this.lastPlayerPosition = lastKnown.clone();
             this.startedAt = System.currentTimeMillis();
+            this.modelTracker = modelTracker;
         }
     }
 
@@ -131,7 +136,8 @@ public final class HorrorEntityController implements Listener {
             stand.setPersistent(false);
             stand.setCustomNameVisible(false);
         });
-        if (models.attachModel(shell, model).isEmpty()) {
+        var tracker = models.attachModel(shell, model);
+        if (tracker.isEmpty()) {
             shell.remove();
             plugin.getLogger().warning("Could not attach BetterModel '" + model + "' for " + type + ".");
             return;
@@ -139,7 +145,7 @@ public final class HorrorEntityController implements Listener {
         for (Player viewer : player.getWorld().getPlayers()) {
             if (!viewer.getUniqueId().equals(player.getUniqueId())) viewer.hideEntity(plugin, shell);
         }
-        active.put(player.getUniqueId(), new Encounter(player.getUniqueId(), type, shell, player.getLocation()));
+        active.put(player.getUniqueId(), new Encounter(player.getUniqueId(), type, shell, player.getLocation(), tracker.get()));
         director.recordEntityEncounter(player, type);
         player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_STARE, .12f, .55f);
     }
@@ -214,10 +220,16 @@ public final class HorrorEntityController implements Listener {
                 else if (visible) encounter.state = State.OBSERVING;
             }
             case MIMIC -> {
-                if (visible) encounter.state = State.OBSERVING;
-                else if (encounter.unseenChecks >= 2) {
+                double provocation = director.memory(player.getUniqueId()).provocation();
+                boolean readyToStrike = provocation >= 12 || (distanceSquared <= 100 && encounter.unseenChecks >= 2);
+                if (!encounter.mimicRevealed && readyToStrike) revealMimic(player, encounter);
+                if (encounter.mimicRevealed) {
+                    encounter.state = State.HUNTING;
+                } else if (visible) {
+                    encounter.state = State.OBSERVING;
+                } else if (encounter.unseenChecks >= 2) {
                     encounter.state = State.SEARCHING;
-                    // Imitate a footstep only after the player has moved, keeping the sound occasional.
+                    // It imitates the player's footfalls while the disguise is still intact.
                     if (playerMovementSquared >= 0.36 && random.nextDouble() < 0.45) {
                         player.playSound(shell.getLocation(), Sound.BLOCK_STONE_STEP, 0.24f, 0.62f + random.nextFloat() * 0.22f);
                     } else if (random.nextDouble() < 0.10) {
@@ -288,6 +300,24 @@ public final class HorrorEntityController implements Listener {
         }
     }
 
+    private void revealMimic(Player player, Encounter encounter) {
+        String revealedModel = plugin.getConfig().getString("horror.entities.models.mimic-revealed", "mimic_revealed");
+        if (!models.availableModels().contains(revealedModel)) {
+            plugin.getLogger().warning("Mimic is ready to reveal, but BetterModel '" + revealedModel + "' is not registered.");
+            return;
+        }
+        models.replaceModel(encounter.shell, encounter.modelTracker, revealedModel).ifPresent(tracker -> {
+            encounter.modelTracker = tracker;
+            encounter.mimicRevealed = true;
+            encounter.state = State.HUNTING;
+            Location at = encounter.shell.getLocation();
+            encounter.shell.getWorld().spawnParticle(Particle.SMOKE, at.clone().add(0, 1, 0), 42, .38, .72, .38, .035);
+            encounter.shell.getWorld().spawnParticle(Particle.CRIT, at.clone().add(0, 1, 0), 24, .28, .55, .28, .12);
+            player.playSound(at, Sound.ENTITY_ENDERMAN_SCREAM, 1.25f, .58f);
+            player.playSound(at, Sound.ENTITY_WARDEN_ROAR, .85f, .72f);
+        });
+    }
+
     private void moveToward(ArmorStand shell, Location target, double maximumStep) {
         if (target == null || !target.getWorld().equals(shell.getWorld())) return;
         Vector direction = target.toVector().subtract(shell.getLocation().toVector());
@@ -328,6 +358,7 @@ public final class HorrorEntityController implements Listener {
     }
 
     private void remove(Encounter encounter) {
+        if (encounter.modelTracker != null && !encounter.modelTracker.isClosed()) encounter.modelTracker.close();
         if (encounter.shell.isValid()) encounter.shell.remove();
     }
 
