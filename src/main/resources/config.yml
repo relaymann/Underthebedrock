@@ -20,6 +20,8 @@ horror:
     minimum-occurrence-gap-seconds: 10
     severe-occurrence-cooldown-minutes: 1
     base-roll-chance: 0.62
+    adaptive-pacing: true
+    maximum-adaptive-bonus: 0.20
   events:
     enabled: true
     minimum-cooldown-seconds: 75
@@ -112,7 +114,9 @@ horror:
     scan-interval-ticks: 40
     cell-generation-chance: 0.58
     ambient-effects-enabled: true
-    resident-echoes-enabled: true
+    abandoned-only: true
+    resident-echoes-enabled: false
+    trains-enabled: false
   facilities:
     enabled: true
     maximum-safe-room-level: 3

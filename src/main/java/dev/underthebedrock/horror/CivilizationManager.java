@@ -14,8 +14,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.NamespacedKey;
@@ -26,8 +24,8 @@ import java.io.IOException;
 import java.util.*;
 
 /**
- * Adds the lived-in civilization layer: deterministic districts, resident memory echoes,
- * rail infrastructure, player-specific relationships, and restrained environmental scares.
+ * Generates abandoned districts and archaeological traces of the erased population.
+ * No living residents, active settlements, or moving civilization infrastructure are spawned.
  * It only generates in already-loaded chunks near players and never force-loads terrain.
  */
 public final class CivilizationManager implements Listener {
@@ -36,7 +34,6 @@ public final class CivilizationManager implements Listener {
     private final File file;
     private final YamlConfiguration data;
     private final NamespacedKey residentKey;
-    private final NamespacedKey echoKey;
     private final NamespacedKey districtSignKey;
     private final Random random = new Random();
     private BukkitTask task;
@@ -45,27 +42,6 @@ public final class CivilizationManager implements Listener {
         RESIDENTIAL, STATION, MEDICAL, CANTEEN, ARCHIVE, POWER
     }
 
-    private record Resident(String id, String name, String role, String first, String later, String finalLine) {}
-
-    private static final List<Resident> RESIDENTS = List.of(
-        new Resident("mara", "Mara Venn", "Transit clerk",
-            "You know that name. I used to save you a seat on the late train. You always said you were only going one stop.",
-            "Your employee file says you were a civilian resident. Mine says I was supposed to forget you. I couldn't.",
-            "I waited at Platform Two after the lights went out. The board kept displaying your arrival. No train came."),
-        new Resident("elias", "Elias Rook", "Research technician",
-            "You brought the first signal logs to my desk. You told me the static sounded like someone breathing.",
-            "The researchers called it a response pattern. You called it listening. You were right, and we were late.",
-            "The removal order listed you before the rest of us. The system crossed your name out, then left the room occupied."),
-        new Resident("june", "June Aster", "Archive keeper",
-            "I remember your handwriting. You used to leave notes in books and put them back on the wrong shelf.",
-            "I hid a copy of your resident record. The official archive says you never existed. The paper disagrees.",
-            "If you are hearing this, the archive did not keep you safe. It only kept proof that you were here."),
-        new Resident("tomas", "Tomas Vale", "Medical attendant",
-            "You came through the medical wing once with a split hand. You apologized for getting blood on the forms.",
-            "There was no illness. No evacuation. People vanished while their monitors still showed a pulse.",
-            "I kept your chart open because your name kept returning after the system erased it. Then the monitors went quiet.")
-    );
-
     public CivilizationManager(UnderTheBedrockPlugin plugin) {
         this.plugin = plugin;
         File folder = plugin.getDataFolder();
@@ -73,7 +49,6 @@ public final class CivilizationManager implements Listener {
         file = new File(folder, "civilization-sites.yml");
         data = YamlConfiguration.loadConfiguration(file);
         residentKey = new NamespacedKey(plugin, "civilization-resident");
-        echoKey = new NamespacedKey(plugin, "civilization-echo");
         districtSignKey = new NamespacedKey(plugin, "civilization-sign");
     }
 
@@ -99,6 +74,7 @@ public final class CivilizationManager implements Listener {
             int cz = Math.floorDiv(player.getLocation().getBlockZ() - world.getSpawnLocation().getBlockZ(), CELL);
             for (int dx = -1; dx <= 1; dx++) for (int dz = -1; dz <= 1; dz++)
                 ensureSite(world, cx + dx, cz + dz, dx == 0 && dz == 0 ? player : null);
+            purgeLegacyResidents(player);
             ambient(player);
         }
     }
@@ -148,18 +124,7 @@ public final class CivilizationManager implements Listener {
             data.set(path + ".built", true);
             save();
         }
-        if (plugin.getConfig().getBoolean("horror.civilization.resident-echoes-enabled", true)
-                && (type == Site.RESIDENTIAL || type == Site.STATION || type == Site.MEDICAL || type == Site.ARCHIVE || type == Site.POWER)) {
-            Resident resident = switch (type) {
-                case RESIDENTIAL, STATION -> RESIDENTS.get(0);
-                case ARCHIVE -> RESIDENTS.get(2);
-                case MEDICAL -> RESIDENTS.get(3);
-                case POWER -> RESIDENTS.get(1);
-                default -> RESIDENTS.get(Math.floorMod((int) (seed ^ (seed >>> 32)), RESIDENTS.size()));
-            };
-            spawnResident(world, new Location(world, x + .5, y, z + .5), resident);
-        }
-        if (type == Site.STATION) spawnTrainIfDue(world, x, y, z, path);
+        // These sites are archaeological remains. No resident NPCs or moving services survive.
     }
 
     private boolean loaded(World world, int x, int z, int radius) {
@@ -254,75 +219,16 @@ public final class CivilizationManager implements Listener {
         }
     }
 
-    private void spawnTrainIfDue(World world, int x, int y, int z, String path) {
-        long now = System.currentTimeMillis();
-        if (now - data.getLong(path + ".last-train", 0) < 8 * 60_000L) return;
-        Location start = new Location(world, x - 1.5, y + .05, z - 6.5);
-        if (world.getNearbyEntities(start, 5, 3, 5).stream().anyMatch(e -> e instanceof Minecart)) return;
-        Minecart train = world.spawn(start, Minecart.class, cart -> {
-            cart.setSlowWhenEmpty(false);
-            cart.setMaxSpeed(.35);
-            cart.setVelocity(new org.bukkit.util.Vector(0, 0, .22));
-            cart.setCustomName(ChatColor.DARK_GRAY + "SERVICE 02");
-            cart.setCustomNameVisible(true);
-            cart.setPersistent(false);
-        });
-        train.setVelocity(new org.bukkit.util.Vector(0, 0, .22));
-        data.set(path + ".last-train", now);
-        save();
-    }
-
-    private void spawnResident(World world, Location location, Resident resident) {
-        for (Entity entity : world.getNearbyEntities(location, 12, 5, 12)) {
-            if (entity.getPersistentDataContainer().has(residentKey, PersistentDataType.STRING)
-                    && resident.id().equals(entity.getPersistentDataContainer().get(residentKey, PersistentDataType.STRING))) return;
+    /** Remove resident echoes and automated service carts left by earlier plugin versions. */
+    private void purgeLegacyResidents(Player player) {
+        for (Entity entity : player.getWorld().getNearbyEntities(player.getLocation(), 128, 32, 128)) {
+            if (entity instanceof Villager && entity.getPersistentDataContainer().has(residentKey, PersistentDataType.STRING)) {
+                entity.remove();
+                continue;
+            }
+            if (entity instanceof Minecart && entity.getCustomName() != null
+                    && entity.getCustomName().contains("SERVICE 02")) entity.remove();
         }
-        Location spawn = location.clone().add(0, 0, 3);
-        Villager villager = world.spawn(spawn, Villager.class, v -> {
-            v.setAI(false); v.setInvulnerable(true); v.setSilent(true); v.setCollidable(false);
-            v.setPersistent(true); v.setRemoveWhenFarAway(false); v.setProfession(Villager.Profession.LIBRARIAN);
-            v.setCustomName(ChatColor.GRAY + resident.name() + ChatColor.DARK_GRAY + " · " + resident.role());
-            v.setCustomNameVisible(true);
-            v.getPersistentDataContainer().set(residentKey, PersistentDataType.STRING, resident.id());
-            v.getPersistentDataContainer().set(echoKey, PersistentDataType.BYTE, (byte) 1);
-        });
-        villager.setVillagerLevel(1);
-    }
-
-    @EventHandler(ignoreCancelled = true)
-    public void onResidentInteract(PlayerInteractEntityEvent event) {
-        if (event.getHand() != org.bukkit.inventory.EquipmentSlot.HAND) return;
-        Entity entity = event.getRightClicked();
-        String id = entity.getPersistentDataContainer().get(residentKey, PersistentDataType.STRING);
-        if (id == null) return;
-        Player player = event.getPlayer();
-        if (!plugin.getWorlds().isActive() || !player.getWorld().equals(plugin.getWorlds().getWorld())) return;
-        event.setCancelled(true);
-        Resident resident = RESIDENTS.stream().filter(r -> r.id().equals(id)).findFirst().orElse(null);
-        if (resident == null) return;
-        PlayerHorrorMemory memory = plugin.getOccurrenceDirector().memory(player.getUniqueId());
-        String loreId = "resident_" + id;
-        boolean first = memory.discoverLore(loreId);
-        String line = first ? resident.first() : memory.hasLore("orphaned_identity") ? resident.finalLine() : resident.later();
-        player.sendMessage("");
-        player.sendMessage(ChatColor.DARK_GRAY + "§l" + resident.name().toUpperCase(Locale.ROOT));
-        for (String part : wrap(line.replace("[player]", player.getName()), 66))
-            player.sendMessage(ChatColor.GRAY + "§o" + part);
-        if (first) {
-            plugin.getOccurrenceDirector().recordBehavior(player, "helped_resident");
-            memory.addTension(4.5);
-            plugin.getOccurrenceDirector().saveMemory(player.getUniqueId());
-            player.playSound(player.getLocation(), Sound.BLOCK_AMETHYST_BLOCK_CHIME, .55f, .65f);
-            player.sendMessage(ChatColor.DARK_PURPLE + "A familiar voice has been preserved in your personal archive.");
-        } else {
-            player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, .25f, .55f);
-        }
-    }
-
-    @EventHandler(ignoreCancelled = true)
-    public void protectResidentEcho(EntityDamageEvent event) {
-        if (event.getEntity().getPersistentDataContainer().has(echoKey, PersistentDataType.BYTE))
-            event.setCancelled(true);
     }
 
     private void ambient(Player player) {
@@ -505,20 +411,6 @@ public final class CivilizationManager implements Listener {
             if (rng.nextBoolean()) container.getInventory().addItem(new ItemStack(Material.TORCH, 4));
             container.update(true, false);
         }
-    }
-
-    private List<String> wrap(String input, int width) {
-        List<String> lines = new ArrayList<>();
-        StringBuilder line = new StringBuilder();
-        for (String word : input.split(" ")) {
-            if (line.length() + word.length() + 1 > width && !line.isEmpty()) {
-                lines.add(line.toString()); line.setLength(0);
-            }
-            if (!line.isEmpty()) line.append(' ');
-            line.append(word);
-        }
-        if (!line.isEmpty()) lines.add(line.toString());
-        return lines;
     }
 
     private void save() {
