@@ -14,8 +14,9 @@ class StructureDefinitionTest {
         assertEquals(StructureDefinition.select(9000,42L),StructureDefinition.select(9000,42L));
         assertTrue(StructureDefinition.select(511,42L).isEmpty());
     }
-    @Test void allEighteenStructureTypesAreRegistered() {
-        assertEquals(18,StructureDefinition.values().length);
+    @Test void allNineteenStructureTypesAreRegistered() {
+        assertEquals(19,StructureDefinition.values().length);
+        assertTrue(StructureDefinition.byId("base_constructor_lab").isPresent());
         assertTrue(StructureDefinition.byId("monolith").isPresent());
         assertTrue(StructureDefinition.byId("impossible_corridor").isPresent());
         assertTrue(StructureDefinition.byId("containment_facility").isPresent());

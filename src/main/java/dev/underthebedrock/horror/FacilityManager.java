@@ -81,10 +81,13 @@ public final class FacilityManager implements Listener {
         String world = location.getWorld().getName();
         ConfigurationSection generators = data.getConfigurationSection("generators");
         if (generators == null) return false;
+        double radius = Math.max(4, plugin.getConfig().getDouble("horror.facilities.generator-illumination-radius-blocks", 28));
         for (String key : generators.getKeys(false)) {
             String path = "generators." + key;
-            if (data.getBoolean(path + ".restored", false)
-                    && world.equals(data.getString(path + ".world"))) return true;
+            if (!data.getBoolean(path + ".restored", false) || !world.equals(data.getString(path + ".world"))) continue;
+            double dx = location.getX() - (data.getInt(path + ".x") + .5);
+            double dz = location.getZ() - (data.getInt(path + ".z") + .5);
+            if (dx * dx + dz * dz <= radius * radius) return true;
         }
         return false;
     }
@@ -213,11 +216,12 @@ public final class FacilityManager implements Listener {
         int floorY = plugin.getConfig().getInt("world.floor-y", 64);
         World world = signLocation.getWorld();
         int topFloor = floorY + 12;
-        int chunkX = Math.floorDiv(centerX, 16), chunkZ = Math.floorDiv(centerZ, 16);
-        if (!world.isChunkLoaded(chunkX, chunkZ)) {
-            player.sendMessage(ChatColor.RED + "The lift has no power in this section.");
-            return;
-        }
+        for (int chunkX = Math.floorDiv(centerX - 2, 16); chunkX <= Math.floorDiv(centerX + 2, 16); chunkX++)
+            for (int chunkZ = Math.floorDiv(centerZ - 2, 16); chunkZ <= Math.floorDiv(centerZ + 2, 16); chunkZ++)
+                if (!world.isChunkLoaded(chunkX, chunkZ)) {
+                    player.sendMessage(ChatColor.RED + "The lift has no power in this section. Load the entire lift shaft and try again.");
+                    return;
+                }
 
         for (int y = floorY + 1; y <= topFloor; y++) {
             for (int offset = -1; offset <= 1; offset++) {
