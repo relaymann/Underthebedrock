@@ -26,6 +26,7 @@ horror:
     enabled: true
     minimum-cooldown-seconds: 300
     maximum-cooldown-seconds: 420
+    minimum-gap-from-occurrence-seconds: 90
     event-variation-memory: true
   exploration-pacing-v2: true
   exploration-pacing-v3: true
@@ -128,9 +129,9 @@ horror:
     scan-interval-ticks: 120
     site-cell-size-blocks: 2048
     cell-generation-chance: 0.16
-    minimum-distance-from-spawn-blocks: 600
-    minimum-site-offset-blocks: 220
-    maximum-site-offset-blocks: 360
+    minimum-distance-from-spawn-blocks: 900
+    minimum-site-offset-blocks: 260
+    maximum-site-offset-blocks: 420
     ambient-effects-enabled: true
     abandoned-only: true
     resident-echoes-enabled: false
