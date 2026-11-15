@@ -16,16 +16,17 @@ horror:
     minimum-distance-blocks: 1000
   director:
     enabled: true
-    check-interval-seconds: 6
-    minimum-occurrence-gap-seconds: 18
-    severe-occurrence-cooldown-minutes: 3
-    base-roll-chance: 0.48
+    check-interval-seconds: 4
+    minimum-occurrence-gap-seconds: 10
+    severe-occurrence-cooldown-minutes: 1
+    base-roll-chance: 0.62
   events:
     enabled: true
-    minimum-cooldown-seconds: 150
-    maximum-cooldown-seconds: 360
+    minimum-cooldown-seconds: 75
+    maximum-cooldown-seconds: 150
     event-variation-memory: true
   exploration-pacing-v2: true
+  exploration-pacing-v3: true
   clues:
     enabled: true
     scan-interval-ticks: 100
@@ -62,19 +63,19 @@ horror:
   entities:
     enabled: true
     safe-radius-blocks: 256
-    full-threat-distance-blocks: 4096
-    maximum-chance-per-check: 0.12
-    successful-encounter-cooldown-minutes: 2
+    full-threat-distance-blocks: 3072
+    maximum-chance-per-check: 0.18
+    successful-encounter-cooldown-minutes: 1
     active-encounters-per-player: 1
     max-encounter-duration-seconds: 180
     behavior:
-      observation-range-blocks: 100
-      despawn-range-blocks: 128
+      observation-range-blocks: 128
+      despawn-range-blocks: 176
       passive-vanish-range-blocks: 60
       movement-tick-interval: 2
-      encounter-check-interval-ticks: 40
-      minimum-spawn-distance-blocks: 26
-      maximum-spawn-distance-blocks: 64
+      encounter-check-interval-ticks: 20
+      minimum-spawn-distance-blocks: 48
+      maximum-spawn-distance-blocks: 96
       movement-step-blocks: 0.16
       remember-last-known-position: true
       player-specific-visibility: true

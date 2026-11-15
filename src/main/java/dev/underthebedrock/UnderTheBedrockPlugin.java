@@ -10,12 +10,12 @@ public final class UnderTheBedrockPlugin extends JavaPlugin {
   if(getConfig().getBoolean("world.auto-start",true)||getConfig().getBoolean("world.enabled-on-startup",false)){if(worlds.start())getServer().getScheduler().runTask(this,worldEntry::routeOnlinePlayers);else getLogger().severe("Could not initialize the configured horror world.");}
   getLogger().info("Under The Bedrock enabled; auto-start="+worlds.isActive()+", world lockdown="+getConfig().getBoolean("world.lock-to-experience",true)+".");}
  private void applyExplorationPacingDefaults(){
-  if(getConfig().getBoolean("horror.exploration-pacing-v2",false))return;
-  getConfig().set("horror.exploration-pacing-v2",true);
-  getConfig().set("horror.director.check-interval-seconds",6);
-  getConfig().set("horror.director.minimum-occurrence-gap-seconds",18);
-  getConfig().set("horror.director.severe-occurrence-cooldown-minutes",3);
-  getConfig().set("horror.director.base-roll-chance",0.48);
+  if(getConfig().getBoolean("horror.exploration-pacing-v3",false))return;
+  getConfig().set("horror.exploration-pacing-v3",true);
+  getConfig().set("horror.director.check-interval-seconds",4);
+  getConfig().set("horror.director.minimum-occurrence-gap-seconds",10);
+  getConfig().set("horror.director.severe-occurrence-cooldown-minutes",1);
+  getConfig().set("horror.director.base-roll-chance",0.62);
   getConfig().set("horror.structures.site-cell-size-blocks",512);
   getConfig().set("horror.structures.cell-generation-chance",0.82);
   getConfig().set("horror.structures.spawn-check-radius-blocks",160);
@@ -24,12 +24,22 @@ public final class UnderTheBedrockPlugin extends JavaPlugin {
   getConfig().set("horror.civilization.scan-interval-ticks",40);
   getConfig().set("horror.clues.scan-interval-ticks",40);
   getConfig().set("horror.entities.safe-radius-blocks",256);
+  getConfig().set("horror.entities.full-threat-distance-blocks",3072);
+  getConfig().set("horror.entities.maximum-chance-per-check",0.18);
+  getConfig().set("horror.entities.successful-encounter-cooldown-minutes",1);
+  getConfig().set("horror.entities.behavior.encounter-check-interval-ticks",20);
+  getConfig().set("horror.entities.behavior.minimum-spawn-distance-blocks",48);
+  getConfig().set("horror.entities.behavior.maximum-spawn-distance-blocks",96);
+  getConfig().set("horror.entities.behavior.observation-range-blocks",128);
+  getConfig().set("horror.entities.behavior.despawn-range-blocks",176);
+  getConfig().set("horror.events.minimum-cooldown-seconds",75);
+  getConfig().set("horror.events.maximum-cooldown-seconds",150);
   getConfig().set("horror.entities.full-threat-distance-blocks",4096);
   getConfig().set("horror.entities.maximum-chance-per-check",0.12);
   getConfig().set("horror.entities.successful-encounter-cooldown-minutes",2);
   getConfig().set("horror.entities.behavior.encounter-check-interval-ticks",40);
   saveConfig();
-  getLogger().info("Applied exploration pacing v2: denser route-based discoveries and more responsive encounters.");
+  getLogger().info("Applied exploration pacing v3: earlier distant sightings and faster event cadence.");
  }
  @Override public void onDisable(){if(worldEntry!=null)worldEntry.stop();if(facilities!=null)facilities.stop();if(horrorEvents!=null)horrorEvents.stop();if(civilization!=null)civilization.stop();if(customItems!=null)customItems.stop();if(supplyDrops!=null)supplyDrops.stop();if(structures!=null)structures.stop();if(clues!=null)clues.stop();if(entities!=null)entities.stop();if(occurrences!=null)occurrences.stop();}
  public OccurrenceDirector getOccurrenceDirector(){return occurrences;}public CustomItemManager getCustomItems(){return customItems;}public LoreManager getLoreManager(){return lore;}public VoidWorldManager getWorlds(){return worlds;}public FacilityManager getFacilityManager(){return facilities;}

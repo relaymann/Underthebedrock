@@ -37,7 +37,7 @@ public final class HorrorEventDirector implements Listener {
     public void start() {
         if (task != null) return;
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
-        task = plugin.getServer().getScheduler().runTaskTimer(plugin, this::tick, 100L, 100L);
+        task = plugin.getServer().getScheduler().runTaskTimer(plugin, this::tick, 40L, 40L);
     }
 
     public void stop() {
@@ -63,8 +63,8 @@ public final class HorrorEventDirector implements Listener {
 
         for (Player player : world.getPlayers()) {
             UUID id = player.getUniqueId();
-            long due = nextEvent.computeIfAbsent(id, ignored -> now + 60_000L);
-            if (now < due || random.nextDouble() > .22) continue;
+            long due = nextEvent.computeIfAbsent(id, ignored -> now + 20_000L);
+            if (now < due || random.nextDouble() > .45) continue;
 
             if (plugin.getFacilityManager() != null && plugin.getFacilityManager().isInsideSafeRoom(player.getLocation())) {
                 nextEvent.put(id, now + 30_000L);
@@ -73,8 +73,8 @@ public final class HorrorEventDirector implements Listener {
 
             PlayerHorrorMemory memory = plugin.getOccurrenceDirector().memory(id);
             fire(player, memory);
-            long minimum = Math.max(30, plugin.getConfig().getLong("horror.events.minimum-cooldown-seconds", 150));
-            long maximum = Math.max(minimum, plugin.getConfig().getLong("horror.events.maximum-cooldown-seconds", 360));
+            long minimum = Math.max(30, plugin.getConfig().getLong("horror.events.minimum-cooldown-seconds", 75));
+            long maximum = Math.max(minimum, plugin.getConfig().getLong("horror.events.maximum-cooldown-seconds", 150));
             long cooldown = minimum + (maximum == minimum ? 0 : random.nextLong(maximum - minimum + 1));
             nextEvent.put(id, now + cooldown * 1000L);
         }

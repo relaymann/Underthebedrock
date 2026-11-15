@@ -5,7 +5,7 @@ import java.util.Random;
 import static org.junit.jupiter.api.Assertions.*;
 
 class EntityEncounterPolicyTest {
-    private final EntityEncounterPolicy policy = new EntityEncounterPolicy(256, 4096, 0.12);
+    private final EntityEncounterPolicy policy = new EntityEncounterPolicy(256, 3072, 0.18);
 
     @Test void startingAreaIsCompletelySafe() {
         assertEquals(0, policy.chanceAt(0));
@@ -18,8 +18,9 @@ class EntityEncounterPolicyTest {
         assertTrue(policy.chanceAt(1024) > 0);
         assertTrue(policy.chanceAt(2048) > policy.chanceAt(1024));
         assertTrue(policy.chanceAt(4096) > policy.chanceAt(2048));
-        assertEquals(0.12, policy.chanceAt(4096), 0.000001);
-        assertEquals(0.12, policy.chanceAt(100000), 0.000001);
+        assertTrue(policy.chanceAt(1024) >= 0.04);
+        assertEquals(0.18, policy.chanceAt(3072), 0.000001);
+        assertEquals(0.18, policy.chanceAt(100000), 0.000001);
     }
 
     @Test void rosterUnlocksAtItsConfiguredDistance() {
