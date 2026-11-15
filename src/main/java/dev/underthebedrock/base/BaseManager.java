@@ -41,10 +41,11 @@ public final class BaseManager implements Listener, CommandExecutor, TabComplete
     private static final double[] HOURS={1.5,3,8,16,19};
     private final UnderTheBedrockPlugin plugin; private final VoidWorldManager worlds; private final TeamManager teams;
     private final File file,sitesFile; private final YamlConfiguration data,sites;
-    private final NamespacedKey constructorKey,baseBlockKey;
+    private final NamespacedKey constructorKey,baseBlockKey,upgradeTokenKey,machineKey;
     private final Map<UUID,String> selection=new HashMap<>();
     private final Map<UUID,Inventory> menus=new HashMap<>();
     private final Map<UUID,String> forgeBase=new HashMap<>();
+    private final Map<UUID,String> farmBase=new HashMap<>();
     private final Map<String,Long> lastSecurityAlert=new HashMap<>();
     private final Map<String,Long> lastAmbientDisturbance=new HashMap<>();
     private final Random random=new Random();
@@ -52,7 +53,7 @@ public final class BaseManager implements Listener, CommandExecutor, TabComplete
     public BaseManager(UnderTheBedrockPlugin p,VoidWorldManager w,TeamManager t){
         plugin=p;worlds=w;teams=t;file=new File(p.getDataFolder(),"bases.yml");sitesFile=new File(p.getDataFolder(),"structures.yml");
         data=YamlConfiguration.loadConfiguration(file);sites=YamlConfiguration.loadConfiguration(sitesFile);
-        constructorKey=new NamespacedKey(p,"base-constructor");baseBlockKey=new NamespacedKey(p,"player-base-block");
+        constructorKey=new NamespacedKey(p,"base-constructor");baseBlockKey=new NamespacedKey(p,"player-base-block");upgradeTokenKey=new NamespacedKey(p,"upgrade-token");machineKey=new NamespacedKey(p,"base-machine");
     }
     public void start(){ConfigurationSection all=data.getConfigurationSection("bases");if(all!=null)for(String id:all.getKeys(false)){String path="bases."+id;if(data.getBoolean(path+".powered",false)&&!data.contains(path+".generator-until")){data.set(path+".generator-installed",true);data.set(path+".generator-until",System.currentTimeMillis()+capacityMillis());data.set(path+".powered",null);}}save();plugin.getServer().getPluginManager().registerEvents(this,plugin);securityTask=plugin.getServer().getScheduler().runTaskTimer(plugin,this::securityTick,100L,100L);}
     public void stop(){if(securityTask!=null)securityTask.cancel();securityTask=null;save();}
@@ -86,6 +87,40 @@ public final class BaseManager implements Listener, CommandExecutor, TabComplete
         meta.getPersistentDataContainer().set(constructorKey,PersistentDataType.BYTE,(byte)1);item.setItemMeta(meta);return item;
     }
     private boolean isConstructor(ItemStack i){return i!=null&&i.hasItemMeta()&&i.getItemMeta().getPersistentDataContainer().has(constructorKey,PersistentDataType.BYTE);}
+    public ItemStack upgradeTokenItem(){
+        ItemStack item=new ItemStack(Material.NETHER_STAR);ItemMeta meta=item.getItemMeta();
+        meta.setDisplayName(ChatColor.GOLD+"Upgrade Token");
+        meta.setLore(List.of(ChatColor.GRAY+"A calibration key from the Base Constructor program.",
+            ChatColor.YELLOW+"Exclusive to Base Constructor Labs.",
+            ChatColor.DARK_GRAY+"Upgrades one base system by one level."));
+        meta.getPersistentDataContainer().set(upgradeTokenKey,PersistentDataType.BYTE,(byte)1);item.setItemMeta(meta);return item;
+    }
+    private boolean isUpgradeToken(ItemStack item){return item!=null&&item.hasItemMeta()
+        &&item.getItemMeta().getPersistentDataContainer().has(upgradeTokenKey,PersistentDataType.BYTE);}
+    private boolean hasUpgradeToken(Player p){
+        for(ItemStack item:p.getInventory().getStorageContents())if(isUpgradeToken(item))return true;
+        return isUpgradeToken(p.getInventory().getItemInOffHand());
+    }
+    private boolean consumeUpgradeToken(Player p){
+        for(int slot=0;slot<p.getInventory().getStorageContents().length;slot++){
+            ItemStack item=p.getInventory().getItem(slot);if(!isUpgradeToken(item))continue;
+            if(item.getAmount()==1)p.getInventory().setItem(slot,null);else item.setAmount(item.getAmount()-1);return true;
+        }
+        ItemStack off=p.getInventory().getItemInOffHand();if(isUpgradeToken(off)){
+            if(off.getAmount()==1)p.getInventory().setItemInOffHand(null);else off.setAmount(off.getAmount()-1);return true;
+        }return false;
+    }
+    private String machineType(Block block){
+        if(!(block.getState() instanceof TileState tile))return "";
+        return tile.getPersistentDataContainer().getOrDefault(machineKey,PersistentDataType.STRING,"");
+    }
+    private void markMachine(Block block,String baseId,String machine){
+        if(block.getState() instanceof TileState tile){
+            tile.getPersistentDataContainer().set(baseBlockKey,PersistentDataType.STRING,baseId);
+            tile.getPersistentDataContainer().set(machineKey,PersistentDataType.STRING,machine);
+            tile.update(true,false);
+        }
+    }
     private boolean hasConstructor(Player p){for(ItemStack item:p.getInventory().getContents())if(isConstructor(item))return true;return isConstructor(p.getInventory().getItemInOffHand());}
     private boolean consumeConstructor(Player p){for(int slot=0;slot<p.getInventory().getSize();slot++){ItemStack item=p.getInventory().getItem(slot);if(!isConstructor(item))continue;if(item.getAmount()==1)p.getInventory().setItem(slot,null);else item.setAmount(item.getAmount()-1);return true;}ItemStack off=p.getInventory().getItemInOffHand();if(isConstructor(off)){if(off.getAmount()==1)p.getInventory().setItemInOffHand(null);else off.setAmount(off.getAmount()-1);return true;}return false;}
     @EventHandler(priority=EventPriority.HIGHEST,ignoreCancelled=true)
@@ -143,6 +178,12 @@ public final class BaseManager implements Listener, CommandExecutor, TabComplete
             if(k!=null){String site=selection.remove(p.getUniqueId());p.closeInventory();if(site!=null)construct(p,site,k);}
             return;
         }
+        if("Farmanator".equals(title)){
+            e.setCancelled(true);String id=farmBase.get(p.getUniqueId());
+            if(id==null||!allowed(p,id,"storage")){p.closeInventory();return;}
+            int slot=e.getRawSlot();if(slot>=10&&slot<17)collectFarmProduct(p,id,slot-10,e.getInventory());
+            return;
+        }
         if("Artifact Forge".equals(title)){
             e.setCancelled(true);String id=forgeBase.get(p.getUniqueId());if(id==null||!allowed(p,id,"forge")){p.closeInventory();return;}
             int slot=e.getRawSlot();if(slot>=0&&slot<5)startRecipe(p,id,slot);
@@ -181,6 +222,7 @@ public final class BaseManager implements Listener, CommandExecutor, TabComplete
         }
         p.sendTitle(ChatColor.GOLD+"BASE ESTABLISHED",ChatColor.GRAY+kind.name,10,60,15);
         p.sendMessage(ChatColor.GREEN+"Your "+kind.name+" is online. Use /base to manage it.");
+        p.sendMessage(ChatColor.GRAY+"Installed: Food Printer, Farmanator and a starter hydroponic plot.");
     }
     private void rollbackBlueprint(World world,int x,int y,int z,String id){
         for(int dx=-9;dx<=14;dx++)for(int dz=-6;dz<=6;dz++)for(int dy=0;dy<=6;dy++)
@@ -220,6 +262,17 @@ public final class BaseManager implements Listener, CommandExecutor, TabComplete
         Block forge=w.getBlockAt(x+4,y+1,z-2);mark(forge,id);
         Block security=w.getBlockAt(x-4,y+1,z+3);security.setType(Material.LODESTONE,false);mark(security,id);
         Block terminal=w.getBlockAt(x+4,y+1,z+3);terminal.setType(Material.LECTERN,false);mark(terminal,id);
+        Block foodPrinter=w.getBlockAt(x-2,y+1,z+1);foodPrinter.setType(Material.SMOKER,false);markMachine(foodPrinter,id,"food_printer");
+        Block farmanator=w.getBlockAt(x+3,y+1,z+1);farmanator.setType(Material.DISPENSER,false);markMachine(farmanator,id,"farmanator");
+        // A compact, lit hydroponic plot gives the Farmanator a visible working area.
+        for(int dx=0;dx<3;dx++)for(int dz=-1;dz<=1;dz++){
+            Block soil=w.getBlockAt(x+dx,y+1,z+dz);soil.setType(dx==1&&dz==0?Material.WATER:Material.FARMLAND,false);
+            if(!(dx==1&&dz==0)){
+                Material crop=switch((dx+dz+4)%4){case 0->Material.WHEAT;case 1->Material.CARROTS;case 2->Material.BEETROOTS;default->Material.POTATOES;};
+                w.getBlockAt(x+dx,y+2,z+dz).setType(crop,false);
+            }
+        }
+        w.getBlockAt(x+1,y+3,z).setType(Material.SEA_LANTERN,false);
         w.getBlockAt(x-7,y+1,z+1).setType(Material.CAMPFIRE,false);
         w.getBlockAt(x+7,y+1,z-1).setType(Material.IRON_BARS,false);
         w.getBlockAt(x+7,y+2,z-1).setType(Material.LANTERN,false);
@@ -260,13 +313,13 @@ public final class BaseManager implements Listener, CommandExecutor, TabComplete
             String path="bases."+id;if(data.getBoolean(path+".abandoned",false))continue;World world=Bukkit.getWorld(data.getString(path+".world",""));
             if(world==null||!world.equals(worlds.getWorld()))continue;
             int x=data.getInt(path+".x"),y=data.getInt(path+".y"),z=data.getInt(path+".z");Kind k=kind(id);int lampX=x-6,lampZ=z-4;boolean lampChunkLoaded=world.isChunkLoaded(Math.floorDiv(lampX,16),Math.floorDiv(lampZ,16));
-            Location center=new Location(world,x,y+1,z);if(!world.isChunkLoaded(Math.floorDiv(x,16),Math.floorDiv(z,16)))continue;List<Player> occupants=world.getPlayers().stream().filter(p->id.equals(baseAt(p.getLocation()))).toList();long until=data.getLong(path+".generator-until",0L);boolean powered=data.getBoolean(path+".generator-installed",false)&&until>now;if(lampChunkLoaded)setLamp(world.getBlockAt(lampX,y+1,lampZ),powered);
+            Location center=new Location(world,x,y+1,z);if(!world.isChunkLoaded(Math.floorDiv(x,16),Math.floorDiv(z,16)))continue;List<Player> occupants=world.getPlayers().stream().filter(p->id.equals(baseAt(p.getLocation()))).toList();long until=data.getLong(path+".generator-until",0L);boolean powered=data.getBoolean(path+".generator-installed",false)&&until>now;farmProduction(id,now,until);if(lampChunkLoaded)setLamp(world.getBlockAt(lampX,y+1,lampZ),powered);
             if(data.getBoolean(path+".generator-installed",false)&&!powered&&!data.getBoolean(path+".generator-expired-notified",false)){data.set(path+".generator-expired-notified",true);save();for(Player member:world.getPlayers())if(member.getUniqueId().equals(UUID.fromString(data.getString(path+".owner")))||allowed(member,id,"security"))member.sendMessage(ChatColor.RED+"[GENERATOR] Fuel depleted. Add fuel with /base fuel.");}
             if(plugin.getConfig().getBoolean("horror.base.ambient-disturbances",true)&&!occupants.isEmpty()&&now-lastAmbientDisturbance.getOrDefault(id,0L)>180_000L&&random.nextDouble()<0.012){lastAmbientDisturbance.put(id,now);Player target=occupants.get(random.nextInt(occupants.size()));target.playSound(target.getLocation(),Sound.BLOCK_IRON_DOOR_CLOSE,0.45f,0.55f);target.sendMessage(ChatColor.DARK_GRAY+"A mechanism clicks somewhere behind the walls.");if(lampChunkLoaded){Block light=world.getBlockAt(lampX,y+1,lampZ);setLamp(light,false);plugin.getServer().getScheduler().runTaskLater(plugin,()->setLamp(light,data.getLong(path+".generator-until",0L)>System.currentTimeMillis()),8L);}}
             if(!powered)continue;
-            double radius=10+k.security*7.5;
+            double radius=BaseUpgradeRules.securityRadius(k.security,data.getInt(path+".upgrades.security",0));
             boolean threat=!world.getNearbyEntities(center,radius,8,radius,e->e instanceof Monster).isEmpty();
-            if(!threat||now-lastSecurityAlert.getOrDefault(id,0L)<30_000L)continue;
+            if(!threat||now-lastSecurityAlert.getOrDefault(id,0L)<BaseUpgradeRules.securityAlertCooldownMillis(data.getInt(path+".upgrades.security",0)))continue;
             lastSecurityAlert.put(id,now);UUID owner=UUID.fromString(data.getString(path+".owner"));
             for(Player member:world.getPlayers())if(member.getUniqueId().equals(owner)||allowed(member,id,"security")){
                 member.playSound(member.getLocation(),Sound.BLOCK_NOTE_BLOCK_BELL,0.8f,0.65f);
@@ -287,6 +340,14 @@ public final class BaseManager implements Listener, CommandExecutor, TabComplete
         if(e.getHand()!=EquipmentSlot.HAND||e.getClickedBlock()==null)return;String id=baseAt(e.getClickedBlock().getLocation());if(id==null)return;
         if(!allowed(e.getPlayer(),id,"enter")){e.setCancelled(true);e.getPlayer().sendMessage(ChatColor.RED+"You are not permitted to enter this base.");return;}
         Material type=e.getClickedBlock().getType();
+        String machine=machineType(e.getClickedBlock());
+        if(!machine.isEmpty()){
+            e.setCancelled(true);
+            if(!allowed(e.getPlayer(),id,"storage")){e.getPlayer().sendMessage(ChatColor.RED+"Machine access is disabled for you.");return;}
+            if(machine.equals("food_printer"))printMeat(e.getPlayer(),id);
+            else if(machine.equals("farmanator"))openFarmanator(e.getPlayer(),id);
+            return;
+        }
         if(type==Material.CHEST||type==Material.BARREL){if(!allowed(e.getPlayer(),id,"enter")||!allowed(e.getPlayer(),id,"storage")){e.setCancelled(true);e.getPlayer().sendMessage(ChatColor.RED+"Storage access is disabled for you.");}}
         if(type==Material.SMITHING_TABLE){e.setCancelled(true);if(allowed(e.getPlayer(),id,"forge"))openForge(e.getPlayer(),id);else e.getPlayer().sendMessage(ChatColor.RED+"Forge access is disabled for you.");}
         if(type==Material.LODESTONE){e.setCancelled(true);if(allowed(e.getPlayer(),id,"security")){String path="bases."+id;long remaining=Math.max(0,data.getLong(path+".generator-until",0L)-System.currentTimeMillis());e.getPlayer().sendMessage(ChatColor.AQUA+"Security tier "+kind(id).security+" / 4. Generator: "+(remaining>0?"ONLINE":"OFFLINE")+" ("+(remaining/3_600_000L)+"h fuel).");}else e.getPlayer().sendMessage(ChatColor.RED+"Security console access is disabled for you.");}
@@ -312,15 +373,123 @@ public final class BaseManager implements Listener, CommandExecutor, TabComplete
     @EventHandler(priority=EventPriority.HIGHEST,ignoreCancelled=true) public void piston(BlockPistonRetractEvent e){if(e.getBlocks().stream().anyMatch(b->baseAt(b.getLocation())!=null))e.setCancelled(true);}
     @EventHandler(priority=EventPriority.HIGHEST,ignoreCancelled=true) public void inventoryOpen(InventoryOpenEvent e){if(!(e.getPlayer() instanceof Player p))return;Location l=e.getInventory().getLocation();if(l==null)return;String id=baseAt(l);if(id!=null&&(!allowed(p,id,"enter")||!allowed(p,id,"storage")))e.setCancelled(true);}
     @EventHandler(priority=EventPriority.HIGHEST,ignoreCancelled=true) public void hopperMove(InventoryMoveItemEvent e){Location a=e.getSource().getLocation(),b=e.getDestination().getLocation();if((a!=null&&baseAt(a)!=null)||(b!=null&&baseAt(b)!=null))e.setCancelled(true);}
-    @EventHandler public void closeMenu(InventoryCloseEvent e){if(!(e.getPlayer() instanceof Player p))return;String title=ChatColor.stripColor(e.getView().getTitle());if("Choose your base".equals(title))selection.remove(p.getUniqueId());if("Artifact Forge".equals(title))forgeBase.remove(p.getUniqueId());}
+    @EventHandler public void closeMenu(InventoryCloseEvent e){if(!(e.getPlayer() instanceof Player p))return;String title=ChatColor.stripColor(e.getView().getTitle());if("Choose your base".equals(title))selection.remove(p.getUniqueId());if("Artifact Forge".equals(title))forgeBase.remove(p.getUniqueId());if("Farmanator".equals(title))farmBase.remove(p.getUniqueId());}
+    private static final Material[] FARM_PRODUCTS={Material.APPLE,Material.CARROT,Material.BEETROOT,Material.POTATO,Material.WHEAT,Material.MELON_SLICE,Material.PUMPKIN};
+    private static final int[] FARM_BASE_YIELDS={1,2,2,2,3,1,1};
+    private void printMeat(Player p,String id){
+        String path="bases."+id;long now=System.currentTimeMillis();
+        if(!data.getBoolean(path+".generator-installed",false)||data.getLong(path+".generator-until",0L)<=now){
+            p.sendMessage(ChatColor.RED+"FOOD PRINTER OFFLINE: restore generator fuel first.");return;
+        }
+        int level=BaseUpgradeRules.clampLevel(data.getInt(path+".upgrades.food_printer",0));
+        long cooldown=BaseUpgradeRules.foodPrinterCooldownMillis(level),last=data.getLong(path+".food-printer.last-print",0L);
+        if(now-last<cooldown){p.sendMessage(ChatColor.YELLOW+"Food Printer cooling down: "+Math.max(1,(cooldown-(now-last)+999)/1000)+"s.");return;}
+        int amount=BaseUpgradeRules.foodPrinterOutput(level);
+        if(!canFit(p,Material.COOKED_BEEF,amount)){p.sendMessage(ChatColor.RED+"Make room in your inventory before printing meat.");return;}
+        data.set(path+".food-printer.last-print",now);
+        if(!save()){data.set(path+".food-printer.last-print",last);p.sendMessage(ChatColor.RED+"Food Printer could not save its cycle. Nothing was printed.");return;}
+        p.getInventory().addItem(new ItemStack(Material.COOKED_BEEF,amount));
+        p.playSound(p.getLocation(),Sound.BLOCK_SMOKER_SMOKE,0.8f,1.15f);
+        p.sendMessage(ChatColor.GREEN+"Food Printer produced "+amount+" cooked beef. System level "+level+"/3.");
+    }
+    private boolean canFit(Player p,Material material,int amount){
+        int remaining=amount,max=new ItemStack(material).getMaxStackSize();
+        for(ItemStack stack:p.getInventory().getStorageContents()){
+            if(stack==null||stack.getType().isAir())remaining-=max;
+            else if(stack.getType()==material)remaining-=Math.max(0,stack.getMaxStackSize()-stack.getAmount());
+            if(remaining<=0)return true;
+        }return false;
+    }
+    private void openFarmanator(Player p,String id){
+        farmProduction(id,System.currentTimeMillis(),data.getLong("bases."+id+".generator-until",0L));
+        farmBase.put(p.getUniqueId(),id);
+        Inventory inv=Bukkit.createInventory(null,27,ChatColor.DARK_GREEN+"Farmanator");
+        refreshFarmMenu(inv,id);p.openInventory(inv);
+    }
+    private void refreshFarmMenu(Inventory inv,String id){
+        inv.clear();String[] names={"Apples","Carrots","Beetroots","Potatoes","Wheat","Melon Slices","Pumpkins"};
+        for(int i=0;i<FARM_PRODUCTS.length;i++){
+            int count=data.getInt("bases."+id+".farm.stock."+FARM_PRODUCTS[i].name().toLowerCase(Locale.ROOT),0);
+            ItemStack icon=new ItemStack(FARM_PRODUCTS[i],Math.max(1,Math.min(64,count)));ItemMeta meta=icon.getItemMeta();
+            meta.setDisplayName(ChatColor.GREEN+names[i]);meta.setLore(List.of(ChatColor.GRAY+"Stored: "+count,
+                count>0?ChatColor.YELLOW+"Click to collect up to 64":ChatColor.DARK_GRAY+"The Farmanator is still growing this crop."));
+            icon.setItemMeta(meta);inv.setItem(10+i,icon);
+        }
+        ItemStack status=new ItemStack(Material.DISPENSER);ItemMeta meta=status.getItemMeta();
+        int level=data.getInt("bases."+id+".upgrades.farmanator",0);
+        boolean powered=data.getBoolean("bases."+id+".generator-installed",false)&&data.getLong("bases."+id+".generator-until",0L)>System.currentTimeMillis();
+        meta.setDisplayName(ChatColor.GOLD+"Farmanator · Level "+level+"/3");
+        meta.setLore(List.of(ChatColor.GRAY+(powered?"Automatic farming active":"Generator offline · farming paused"),
+            ChatColor.GRAY+"Harvest cycle: "+(BaseUpgradeRules.farmIntervalMillis(level)/60000)+" minutes"));
+        status.setItemMeta(meta);inv.setItem(4,status);
+    }
+    private void collectFarmProduct(Player p,String id,int index,Inventory menu){
+        if(index<0||index>=FARM_PRODUCTS.length)return;
+        String key=FARM_PRODUCTS[index].name().toLowerCase(Locale.ROOT),path="bases."+id+".farm.stock."+key;
+        int stored=data.getInt(path,0),amount=Math.min(64,stored);if(amount<=0)return;
+        Material material=FARM_PRODUCTS[index];if(!canFit(p,material,amount)){p.sendMessage(ChatColor.RED+"Make room in your inventory first.");return;}
+        data.set(path,stored-amount);
+        if(!save()){data.set(path,stored);p.sendMessage(ChatColor.RED+"Farm storage could not be saved. Nothing was collected.");return;}
+        p.getInventory().addItem(new ItemStack(material,amount));p.sendMessage(ChatColor.GREEN+"Collected "+amount+" "+key.replace('_',' ')+".");
+        refreshFarmMenu(menu,id);
+    }
+    private void farmProduction(String id,long now,long generatorUntil){
+        String path="bases."+id;long last=data.getLong(path+".farm.last-production",0L);
+        if(last==0L){data.set(path+".farm.last-production",now);save();return;}
+        if(!data.getBoolean(path+".generator-installed",false)){
+            if(now-last>60_000L){data.set(path+".farm.last-production",now);save();}return;
+        }
+        long productionEnd=Math.min(now,generatorUntil);
+        int level=BaseUpgradeRules.clampLevel(data.getInt(path+".upgrades.farmanator",0));
+        long interval=BaseUpgradeRules.farmIntervalMillis(level);
+        long elapsed=Math.max(0,productionEnd-last),cycles=elapsed/interval;
+        if(cycles>0){
+            for(int i=0;i<FARM_PRODUCTS.length;i++){
+                String stock=path+".farm.stock."+FARM_PRODUCTS[i].name().toLowerCase(Locale.ROOT);
+                int current=data.getInt(stock,0),add=(int)Math.min(64L,(long)FARM_BASE_YIELDS[i]*(level+1)*cycles);
+                data.set(stock,Math.min(64,current+add));
+            }
+            data.set(path+".farm.last-production",last+cycles*interval);save();
+        }
+        if(now>generatorUntil&&data.getLong(path+".farm.last-production",last)<now){
+            data.set(path+".farm.last-production",now);save();
+        }
+    }
+    private void upgradeSystem(Player p,String requested){
+        String id=baseOf(p.getUniqueId());if(id==null){p.sendMessage(ChatColor.RED+"You do not own a base.");return;}
+        String system=switch(requested.toLowerCase(Locale.ROOT)){
+            case "forge"->"forge";case "farm","farmanator"->"farmanator";
+            case "food","food-printer","food_printer"->"food_printer";
+            case "security","cameras"->"security";default->null;
+        };
+        if(system==null){p.sendMessage(ChatColor.YELLOW+"Use /base upgrade <forge|farmanator|food-printer|security>.");return;}
+        String path="bases."+id+".upgrades."+system;int level=BaseUpgradeRules.clampLevel(data.getInt(path,0));
+        if(level>=3){p.sendMessage(ChatColor.GREEN+system.replace('_',' ')+" is already Level III.");return;}
+        if(!hasUpgradeToken(p)){p.sendMessage(ChatColor.RED+"This upgrade requires 1 Upgrade Token. Tokens are found ONLY in Base Constructor Labs.");return;}
+        if(!consumeUpgradeToken(p)){p.sendMessage(ChatColor.RED+"Upgrade Token could not be consumed. Nothing changed.");return;}
+        data.set(path,level+1);
+        if(!save()){
+            data.set(path,level);p.getInventory().addItem(upgradeTokenItem());
+            p.sendMessage(ChatColor.RED+"Upgrade could not be saved. Your token was returned.");return;
+        }
+        p.sendMessage(ChatColor.GREEN+system.replace('_',' ')+" upgraded to Level "+(level+1)+"/3.");
+        switch(system){
+            case "forge"->p.sendMessage(ChatColor.GRAY+"Forge jobs now complete 15% faster per upgrade level.");
+            case "farmanator"->p.sendMessage(ChatColor.GRAY+"Crop output and farming speed increased.");
+            case "food_printer"->p.sendMessage(ChatColor.GRAY+"More cooked meat per print, with a shorter cooldown.");
+            case "security"->p.sendMessage(ChatColor.GRAY+"Perimeter detection range and alert response improved.");
+        }
+    }
     private void researchTerminal(Player p,String id){String output=data.getString("jobs."+p.getUniqueId()+".output");p.sendMessage(ChatColor.LIGHT_PURPLE+"RESEARCH ARCHIVE: "+ChatColor.WHITE+"Recovered artifacts, expedition records, and site telemetry.");if(output!=null)p.sendMessage(ChatColor.GRAY+"Your active forge output: "+output.replace('_',' ')+".");p.sendMessage(ChatColor.GRAY+"Base security tier: "+kind(id).security+"/4. Use the map table to locate nearby ruins.");}
-    private void cameraFeed(Player p,String id){String path="bases."+id;if(!data.getBoolean(path+".generator-installed",false)||data.getLong(path+".generator-until",0L)<=System.currentTimeMillis()){p.sendMessage(ChatColor.RED+"CAMERA NETWORK OFFLINE: restore generator fuel first.");return;}int x=data.getInt(path+".x"),y=data.getInt(path+".y"),z=data.getInt(path+".z");World world=p.getWorld();double radius=10+kind(id).security*7.5;Entity threat=world.getNearbyEntities(new Location(world,x,y+1,z),radius,8,radius,e->e instanceof Monster).stream().findFirst().orElse(null);if(threat==null)p.sendMessage(ChatColor.GREEN+"CAMERA NETWORK: no hostile movement detected.");else p.sendMessage(ChatColor.RED+"CAMERA NETWORK: movement at X "+threat.getLocation().getBlockX()+", Z "+threat.getLocation().getBlockZ()+".");p.playSound(p.getLocation(),Sound.BLOCK_NOTE_BLOCK_BELL,.5f,1.4f);}
+    private void cameraFeed(Player p,String id){String path="bases."+id;if(!data.getBoolean(path+".generator-installed",false)||data.getLong(path+".generator-until",0L)<=System.currentTimeMillis()){p.sendMessage(ChatColor.RED+"CAMERA NETWORK OFFLINE: restore generator fuel first.");return;}int x=data.getInt(path+".x"),y=data.getInt(path+".y"),z=data.getInt(path+".z");World world=p.getWorld();double radius=BaseUpgradeRules.securityRadius(kind(id).security,data.getInt(path+".upgrades.security",0));Entity threat=world.getNearbyEntities(new Location(world,x,y+1,z),radius,8,radius,e->e instanceof Monster).stream().findFirst().orElse(null);if(threat==null)p.sendMessage(ChatColor.GREEN+"CAMERA NETWORK: no hostile movement detected.");else p.sendMessage(ChatColor.RED+"CAMERA NETWORK: movement at X "+threat.getLocation().getBlockX()+", Z "+threat.getLocation().getBlockZ()+".");p.playSound(p.getLocation(),Sound.BLOCK_NOTE_BLOCK_BELL,.5f,1.4f);}
     private void showMap(Player p){if(!worlds.isActive()||!p.getWorld().equals(worlds.getWorld())){p.sendMessage(ChatColor.RED+"The exploration map only works beneath the bedrock.");return;}YamlConfiguration current=YamlConfiguration.loadConfiguration(sitesFile);ConfigurationSection all=current.getConfigurationSection("sites");if(all==null){p.sendMessage(ChatColor.GRAY+"No sites have been recorded yet.");return;}Set<String> claimed=new HashSet<>();ConfigurationSection bases=data.getConfigurationSection("bases");if(bases!=null)for(String baseId:bases.getKeys(false))claimed.add(data.getString("bases."+baseId+".site",""));Location best=null;double distance=Double.MAX_VALUE;for(String key:all.getKeys(false)){if(claimed.contains(key)||!current.getBoolean("sites."+key+".built",false))continue;Location candidate=new Location(p.getWorld(),current.getInt("sites."+key+".x"),plugin.getConfig().getInt("world.floor-y",64)+1,current.getInt("sites."+key+".z"));double d=candidate.distanceSquared(p.getLocation());if(d<distance){distance=d;best=candidate;}}if(best==null){p.sendMessage(ChatColor.GRAY+"No sites have been recorded yet.");return;}p.setCompassTarget(best);p.sendMessage(ChatColor.GOLD+"EXPLORATION MAP: "+ChatColor.WHITE+"Nearest recorded site at X "+best.getBlockX()+", Z "+best.getBlockZ()+" ("+(int)Math.sqrt(distance)+" blocks).");}
     private Kind kind(String id){String k=data.getString("bases."+id+".kind","");return Arrays.stream(Kind.values()).filter(v->v.id.equals(k)).findFirst().orElse(Kind.WORKSHOP);}
     private void openForge(Player p,String id){
         forgeBase.put(p.getUniqueId(),id);Inventory inv=Bukkit.createInventory(null,9,ChatColor.DARK_GRAY+"Artifact Forge");
+        int forgeLevel=data.getInt("bases."+id+".upgrades.forge",0);
+        double forgeRate=BaseUpgradeRules.forgeMultiplier(kind(id).forge,forgeLevel);
         String[] names={"Null Fragment → Resonance Core","Resonance Core → Forgotten Charm","Forgotten Charm → Null Ward","Null Ward → Power Cell","Power Cell → Reconstructor"};
-        for(int i=0;i<5;i++){ItemStack icon=new ItemStack(Material.AMETHYST_SHARD);ItemMeta m=icon.getItemMeta();m.setDisplayName(ChatColor.LIGHT_PURPLE+names[i]);m.setLore(List.of(ChatColor.GRAY+"Base time: "+HOURS[i]+" hour(s)",ChatColor.GRAY+"Forge-adjusted time: "+Math.max(1,Math.min(24,Math.round(HOURS[i]*kind(id).forge*100)/100.0))+" hour(s)",ChatColor.YELLOW+"Click to begin"));icon.setItemMeta(m);inv.setItem(i,icon);}
+        for(int i=0;i<5;i++){ItemStack icon=new ItemStack(Material.AMETHYST_SHARD);ItemMeta m=icon.getItemMeta();m.setDisplayName(ChatColor.LIGHT_PURPLE+names[i]);m.setLore(List.of(ChatColor.GRAY+"Base time: "+HOURS[i]+" hour(s)",ChatColor.GRAY+"Forge-adjusted time: "+Math.max(1,Math.min(24,Math.round(HOURS[i]*forgeRate*100)/100.0))+" hour(s)",ChatColor.YELLOW+"Click to begin"));icon.setItemMeta(m);inv.setItem(i,icon);}
         ItemStack claim=new ItemStack(Material.CHEST);ItemMeta cm=claim.getItemMeta();cm.setDisplayName(ChatColor.GREEN+"Claim completed artifact");claim.setItemMeta(cm);inv.setItem(8,claim);
         p.openInventory(inv);
     }
@@ -330,7 +499,7 @@ public final class BaseManager implements Listener, CommandExecutor, TabComplete
         if(slot<0){p.sendMessage(ChatColor.RED+"Required artifact: "+input.replace('_',' '));return;}
         String path="jobs."+p.getUniqueId();if(data.contains(path+".finish")){p.sendMessage(ChatColor.RED+"You already have an artifact in the forge queue.");return;}
         ItemStack stack=p.getInventory().getItem(slot);if(stack.getAmount()==1)p.getInventory().setItem(slot,null);else stack.setAmount(stack.getAmount()-1);
-        long duration=Math.max(3_600_000L,Math.min(24L*3_600_000L,(long)(HOURS[recipe]*kind(id).forge*3_600_000L)));
+        long duration=Math.max(3_600_000L,Math.min(24L*3_600_000L,(long)(HOURS[recipe]*BaseUpgradeRules.forgeMultiplier(kind(id).forge,data.getInt("bases."+id+".upgrades.forge",0))*3_600_000L)));
         data.set(path+".finish",System.currentTimeMillis()+duration);data.set(path+".output",output);data.set(path+".base",id);data.set(path+".owner",p.getUniqueId().toString());save();
         p.sendMessage(ChatColor.LIGHT_PURPLE+"Forge started. It will finish in approximately "+Math.max(1,Math.round(duration/3600000.0*10)/10.0)+" hours. Offline time counts.");
     }
@@ -349,10 +518,11 @@ public final class BaseManager implements Listener, CommandExecutor, TabComplete
     @Override public boolean onCommand(CommandSender sender,Command command,String label,String[] args){
         if(!(sender instanceof Player p)){sender.sendMessage("Players only.");return true;}
         if(args.length==0||args[0].equalsIgnoreCase("info")){String id=baseOf(p.getUniqueId());if(id==null){p.sendMessage(ChatColor.GRAY+"You do not own a base.");return true;}Kind k=kind(id);long remaining=Math.max(0,data.getLong("bases."+id+".generator-until",0L)-System.currentTimeMillis());p.sendMessage(ChatColor.GOLD+k.name+" §7| Storage: "+k.chests+" chests | Forge: "+k.forge+"x | Security: "+k.security+"/4 | Upgrade: "+data.getInt("bases."+id+".upgrade-level",0)+"/3");p.sendMessage(ChatColor.GRAY+"Generator: "+(data.getBoolean("bases."+id+".generator-installed",false)?(remaining/3_600_000L)+"h fuel remaining":"not installed"));return true;}
-        if(args[0].equalsIgnoreCase("power")){String id=baseOf(p.getUniqueId());if(id==null){p.sendMessage(ChatColor.RED+"You do not own a base.");return true;}String path="bases."+id;if(data.getBoolean(path+".generator-installed",false)){p.sendMessage(ChatColor.YELLOW+"Generator installed. Remaining fuel: "+Math.max(0,(data.getLong(path+".generator-until",0L)-System.currentTimeMillis())/3_600_000L)+" hour(s). Use /base fuel while holding an item to refuel.");return true;}if(!hasCustom(p,"insulated_wire",2)||!hasCustom(p,"fuse",2)||!hasCustom(p,"power_cell",1)){p.sendMessage(ChatColor.RED+"Installing the generator requires 2 Insulated Wire, 2 Ceramic Fuses and 1 Resonance Power Cell. Nothing was consumed.");return true;}consumeCustom(p,"insulated_wire",2);consumeCustom(p,"fuse",2);consumeCustom(p,"power_cell",1);data.set(path+".generator-installed",true);data.set(path+".generator-until",System.currentTimeMillis()+capacityMillis());data.set(path+".generator-expired-notified",false);save();p.sendMessage(ChatColor.GREEN+"Generator installed and fully fueled. It can run for up to four days before needing fuel.");return true;}
+        if(args[0].equalsIgnoreCase("power")){String id=baseOf(p.getUniqueId());if(id==null){p.sendMessage(ChatColor.RED+"You do not own a base.");return true;}String path="bases."+id;if(data.getBoolean(path+".generator-installed",false)){p.sendMessage(ChatColor.YELLOW+"Generator installed. Remaining fuel: "+Math.max(0,(data.getLong(path+".generator-until",0L)-System.currentTimeMillis())/3_600_000L)+" hour(s). Use /base fuel while holding an item to refuel.");return true;}if(!hasCustom(p,"insulated_wire",2)||!hasCustom(p,"fuse",2)||!hasCustom(p,"power_cell",1)){p.sendMessage(ChatColor.RED+"Installing the generator requires 2 Insulated Wire, 2 Ceramic Fuses and 1 Resonance Power Cell. Nothing was consumed.");return true;}consumeCustom(p,"insulated_wire",2);consumeCustom(p,"fuse",2);consumeCustom(p,"power_cell",1);data.set(path+".generator-installed",true);data.set(path+".generator-until",System.currentTimeMillis()+capacityMillis());data.set(path+".generator-expired-notified",false);data.set(path+".farm.last-production",System.currentTimeMillis());save();p.sendMessage(ChatColor.GREEN+"Generator installed and fully fueled. It can run for up to four days before needing fuel.");return true;}
         if(args[0].equalsIgnoreCase("fuel")){String id=baseOf(p.getUniqueId());if(id==null){p.sendMessage(ChatColor.RED+"You do not own a base.");return true;}String path="bases."+id;if(!data.getBoolean(path+".generator-installed",false)){p.sendMessage(ChatColor.RED+"Install your generator first with /base power.");return true;}ItemStack held=p.getInventory().getItemInMainHand();if(held.getType().isAir()||isConstructor(held)){p.sendMessage(ChatColor.YELLOW+"Hold a vanilla item or an artifact in your main hand, then use /base fuel.");return true;}long level=data.getInt(path+".upgrade-level",0);long hours=plugin.getCustomItems().isCustomItem(held)?plugin.getConfig().getLong("horror.base.generator.artifact-fuel-hours",24)+level*2:plugin.getConfig().getLong("horror.base.generator.vanilla-fuel-hours",4)+level;long now=System.currentTimeMillis(),remaining=Math.max(0,data.getLong(path+".generator-until",now)-now),capacity=capacityMillis(),added=Math.min(hours*3_600_000L,Math.max(0,capacity-remaining));if(added<=0){p.sendMessage(ChatColor.GREEN+"The generator fuel tank is already full (96 hours).");return true;}if(held.getAmount()==1)p.getInventory().setItemInMainHand(null);else held.setAmount(held.getAmount()-1);data.set(path+".generator-until",now+remaining+added);data.set(path+".generator-expired-notified",false);save();p.sendMessage(ChatColor.GREEN+"Generator refueled: +"+(added/3_600_000L)+" hour(s). Tank: "+Math.min(96,(remaining+added)/3_600_000L)+"/96 hours.");return true;}
         if(args[0].equalsIgnoreCase("map")){String accessBase=baseOf(p.getUniqueId());if(accessBase==null)accessBase=baseAt(p.getLocation());if(accessBase==null||!allowed(p,accessBase,"research")){p.sendMessage(ChatColor.RED+"Research access to a base is required to use its exploration map.");return true;}showMap(p);return true;}
         if(args[0].equalsIgnoreCase("abandon")){String id=baseOf(p.getUniqueId());if(id==null){p.sendMessage(ChatColor.RED+"You do not own an active base.");return true;}if(args.length!=2||!args[1].equalsIgnoreCase("confirm")){p.sendMessage(ChatColor.YELLOW+"This leaves your base behind as an abandoned structure and releases your ownership. It does not delete the building or its stored items. Use /base abandon confirm to proceed.");return true;}String path="bases."+id;data.set(path+".abandoned",true);data.set(path+".owner",null);data.set(path+".team",null);data.set(path+".permissions",null);data.set(path+".generator-installed",false);data.set(path+".generator-until",0L);save();p.sendMessage(ChatColor.YELLOW+"Base abandoned. The structure remains in the world; you may claim another unclaimed site with a new Base Constructor.");return true;}
+        if(args[0].equalsIgnoreCase("upgrade")&&args.length>=2){upgradeSystem(p,args[1]);return true;}
         if(args[0].equalsIgnoreCase("upgrade")){String id=baseOf(p.getUniqueId());if(id==null){p.sendMessage(ChatColor.RED+"You do not own a base.");return true;}String path="bases."+id;int level=data.getInt(path+".upgrade-level",0);if(level>=3){p.sendMessage(ChatColor.GREEN+"Your base systems are fully upgraded (Level III).");return true;}if(!hasCustom(p,"power_cell",1)||!p.getInventory().containsAtLeast(new ItemStack(Material.IRON_INGOT),4)){p.sendMessage(ChatColor.RED+"Upgrade requires 1 Resonance Power Cell and 4 Iron Ingots. Nothing was consumed.");return true;}consumeCustom(p,"power_cell",1);consumeMaterial(p,Material.IRON_INGOT,4);level++;data.set(path+".upgrade-level",level);save();p.sendMessage(ChatColor.GREEN+"Base systems upgraded to Level "+level+". Fuel value improved for every fuel type.");return true;}
         if(args[0].equalsIgnoreCase("permissions")&&args.length==4){
             String id=baseOf(p.getUniqueId());if(id==null){p.sendMessage(ChatColor.RED+"You do not own a base.");return true;}
@@ -363,10 +533,11 @@ public final class BaseManager implements Listener, CommandExecutor, TabComplete
             data.set("bases."+id+".permissions."+target.getUniqueId()+"."+perm,args[3].equalsIgnoreCase("on"));save();
             p.sendMessage(ChatColor.GREEN+perm+" permission for "+target.getName()+" set to "+args[3]+".");return true;
         }
-        p.sendMessage(ChatColor.YELLOW+"/base [info|power|fuel|map|upgrade|abandon] | /base permissions <teammate> <enter|storage|forge|build|security|research> <on|off>");return true;
+        p.sendMessage(ChatColor.YELLOW+"/base [info|power|fuel|map|upgrade [forge|farmanator|food-printer|security]|abandon] | /base permissions <teammate> <enter|storage|forge|build|security|research> <on|off>");return true;
     }
     @Override public List<String> onTabComplete(CommandSender s,Command c,String a,String[] args){
         if(args.length==1)return List.of("info","power","fuel","map","upgrade","abandon","permissions").stream().filter(v->v.startsWith(args[0].toLowerCase())).toList();
+        if(args.length==2&&args[0].equalsIgnoreCase("upgrade"))return List.of("forge","farmanator","food-printer","security").stream().filter(v->v.startsWith(args[1].toLowerCase(Locale.ROOT))).toList();
         if(args.length==2&&args[0].equalsIgnoreCase("permissions"))return Bukkit.getOnlinePlayers().stream().map(Player::getName).toList();
         if(args.length==3&&args[0].equalsIgnoreCase("permissions"))return List.of(PERMS);
         if(args.length==4&&args[0].equalsIgnoreCase("permissions"))return List.of("on","off");

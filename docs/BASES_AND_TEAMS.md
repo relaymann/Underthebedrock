@@ -50,3 +50,14 @@ Powered bases run a perimeter scan; hostile mobs detected within range alert the
 
 ## Reset and persistence
 Teams, base ownership, permissions, generator fuel, upgrades, and forge jobs are stored in plugin YAML data. The existing full-reset workflow backs up plugin data and clears it on reset, so bases and teams reset with the world.
+
+
+## Automated base systems and Upgrade Tokens
+
+Every newly constructed base includes a **Food Printer** and a **Farmanator**, both powered by the base generator and protected by normal base permissions. Teammates need the base `storage` permission to use either machine.
+
+- **Food Printer:** right-click the smoker to print cooked beef. It pauses when the generator is offline and has a per-base cooldown.
+- **Farmanator:** right-click the dispenser to open its harvest inventory. It automatically produces apples, carrots, beetroots, potatoes, wheat, melon slices, and pumpkins while the generator is powered. Its stock persists through restarts.
+- **Upgrade Token:** a one-time guaranteed item in the Base Constructor Lab prototype cache. It is not added to airdrops, ordinary research-facility loot, or random loot.
+
+Use `/base upgrade forge`, `/base upgrade farmanator`, `/base upgrade food-printer`, or `/base upgrade security` while carrying one Upgrade Token. Each system has three levels. Forge levels shorten crafting time; Farmanator levels increase crop output and shorten harvest cycles; Food Printer levels increase meat output and reduce cooldown; security levels extend detection range and reduce alert cooldown. The existing `/base upgrade` command without a system name remains the legacy generator-fuel upgrade.
