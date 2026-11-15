@@ -39,8 +39,8 @@ horror:
   structures:
     enabled: true
     scan-interval-ticks: 100
-    site-cell-size-blocks: 2048
-    cell-generation-chance: 0.24
+    site-cell-size-blocks: 1792
+    cell-generation-chance: 0.30
     minimum-distance-from-spawn-blocks: 600
     minimum-site-offset-blocks: 200
     maximum-site-offset-blocks: 340
@@ -127,8 +127,8 @@ horror:
   civilization:
     enabled: true
     scan-interval-ticks: 120
-    site-cell-size-blocks: 2048
-    cell-generation-chance: 0.16
+    site-cell-size-blocks: 1792
+    cell-generation-chance: 0.18
     minimum-distance-from-spawn-blocks: 900
     minimum-site-offset-blocks: 260
     maximum-site-offset-blocks: 420
