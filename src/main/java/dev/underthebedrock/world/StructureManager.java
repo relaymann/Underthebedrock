@@ -46,7 +46,7 @@ public final class StructureManager implements Listener {
     private void tick(){
         if(!worlds.isActive())return;
         World world=worlds.getWorld(); if(world==null)return;
-        int cell=Math.max(512,plugin.getConfig().getInt("horror.structures.site-cell-size-blocks",2048));
+        int cell=Math.max(512,plugin.getConfig().getInt("horror.structures.site-cell-size-blocks",1792));
         for(Player player:world.getPlayers()){
             int cx=Math.floorDiv(player.getLocation().getBlockX()-world.getSpawnLocation().getBlockX(),cell);
             int cz=Math.floorDiv(player.getLocation().getBlockZ()-world.getSpawnLocation().getBlockZ(),cell);
