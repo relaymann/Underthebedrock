@@ -69,3 +69,15 @@ The first 14 entity archetypes now have dedicated Blockbench Generic-model asset
 The plugin configuration maps these 14 archetypes to their own model IDs. The remaining 13 archetypes still use the configured `watcher` fallback until the second model batch is completed. These first-pass assets are static geometry; bespoke idle, walking, crawling, and disappearance animation clips are a separate follow-up pass.
 
 BetterModel 3.5.1 imports Blockbench `.bbmodel` files from its `models` directory. Its reload command rebuilds the model registry and resource pack; clients must receive the generated pack to see the custom geometry.
+
+
+### Mimic: Steve disguise and predator reveal
+
+The Mimic now has two separate BetterModel assets:
+
+- `mimic.bbmodel`: a deliberately ordinary Steve-like player disguise (classic blue shirt, indigo trousers, brown hair, normal player proportions) with subtle facial asymmetry and an unsettlingly fixed expression.
+- `mimic_revealed.bbmodel`: a nonhuman predator form with a split skull/jaw, exposed neck, ribbed torso, elongated arms, claws, and protruding spines.
+
+The controller keeps the Steve disguise while the Mimic observes and imitates footsteps. It reveals the predator form once player provocation reaches 12, or when it has closed to within 10 blocks after remaining unseen for at least two director checks. The model is swapped on the same player-specific carrier, with smoke/critical-hit particles and a layered scream/warden roar, then the Mimic enters its hunting state and tracks the player's current position. The old BetterModel tracker is closed after the replacement is created to prevent tracker leaks.
+
+Install both files from `bettermodel/models/` into `plugins/BetterModel/models/`, reload BetterModel, and distribute the generated resource pack. The revealed form is a separate model asset; it must be registered as `mimic_revealed` for the transformation to occur.
