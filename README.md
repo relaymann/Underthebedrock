@@ -81,3 +81,8 @@ The Mimic now has two separate BetterModel assets:
 The controller keeps the Steve disguise while the Mimic observes and imitates footsteps. It reveals the predator form once player provocation reaches 12, or when it has closed to within 10 blocks after remaining unseen for at least two director checks. The model is swapped on the same player-specific carrier, with smoke/critical-hit particles and a layered scream/warden roar, then the Mimic enters its hunting state and tracks the player's current position. At close range it performs a damaging strike (4 damage, with knockback) with a three-second minimum cooldown; the controller's configured check interval also caps how frequently it can act (12 seconds by default). The old BetterModel tracker is closed after the replacement is created to prevent tracker leaks.
 
 Install both files from `bettermodel/models/` into `plugins/BetterModel/models/`, reload BetterModel, and distribute the generated resource pack. The revealed form is a separate model asset; it must be registered as `mimic_revealed` for the transformation to occur.
+
+
+## BetterModel apparition assets — second batch
+
+The second batch completes dedicated Blockbench Generic-model assets for the remaining 13 archetypes: Deep Entity, Forgotten Resident, Surveyor, Echo, Imitator, Misprint, Double, Absence, Excavator, Unperson, Original, Drifter, and Crawler. Each model has its own geometry and embedded pixel texture. The plugin configuration now maps every archetype to its matching model ID instead of using the Watcher fallback. These are static first-pass models; bespoke animation clips and live server/resource-pack verification remain follow-up work.
