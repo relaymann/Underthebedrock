@@ -64,8 +64,9 @@ public final class StructureManager implements Listener {
             selected=StructureDefinition.byId(data.getString(path+".type","")).orElse(null);
             if(selected==null)return;
             x=data.getInt(path+".x");z=data.getInt(path+".z");
+            double relocationThreshold=Math.max(180,plugin.getConfig().getInt("horror.structures.maximum-site-offset-blocks",340)+32);
             if(!data.getBoolean(path+".built",false)&&explorer!=null
-                    &&explorer.getLocation().distanceSquared(new Location(world,x,plugin.getConfig().getInt("world.floor-y",64)+1,z))>180*180){
+                    &&explorer.getLocation().distanceSquared(new Location(world,x,plugin.getConfig().getInt("world.floor-y",64)+1,z))>relocationThreshold*relocationThreshold){
                 if(distanceFromSpawn(world,explorer.getLocation())<minimumSpawnDistance())return;
                 int[] candidate=siteCandidate(world,explorer,random);x=candidate[0];z=candidate[1];
                 if(!chunksLoaded(world,x,z,radius(selected))||!areaClear(world,x,z,radius(selected)))return;
