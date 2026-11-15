@@ -45,6 +45,8 @@ horror:
     ancient-factions-enabled: true
     memory-shard-chance: 1.0
     rare-artifact-chance: 0.04
+    # Extra Upgrade Tokens are exceptionally rare outside the guaranteed lab cache.
+    upgrade-token-chance: 0.005
   base:
     generator:
       capacity-hours: 96
@@ -58,6 +60,8 @@ horror:
     minimum-radius-blocks: 16
     maximum-radius-blocks: 40
     base-constructor-chance: 0.025
+    # 0.1% chance per successfully populated airdrop crate.
+    upgrade-token-chance: 0.001
   items:
     enabled: true
     cooldowns:

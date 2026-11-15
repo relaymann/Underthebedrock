@@ -8,9 +8,11 @@
 
 ## Base Constructor discovery
 Base Constructors have three discovery routes:
-- **Abandoned Constructor Lab:** a rare, one-time research structure containing a guaranteed prototype cache. It does not regenerate its cache.
-- **Abandoned Research Facility:** a 12% chance for the prototype to appear in one of its supply chests.
-- **Airdrops:** a 2.5% bonus chance per successfully populated crate, configurable with `horror.supply-drops.base-constructor-chance`.
+- **Abandoned Constructor Lab:** a rare, one-time research structure with a guaranteed Base Constructor and one guaranteed Upgrade Token in its prototype cache. It does not regenerate its cache.
+- **Abandoned Research Facility:** a 12% chance for a Base Constructor to appear in one of its supply chests.
+- **Airdrops:** a 2.5% bonus chance per successfully populated crate for a Base Constructor, configurable with `horror.supply-drops.base-constructor-chance`.
+
+Upgrade Tokens are guaranteed in every Base Constructor Lab. Extra tokens are exceptionally rare: a configurable 0.5% chance in Research Facility loot and a 0.1% chance in a successfully populated airdrop crate. They are not part of ordinary random loot. The default chances are controlled by `horror.structures.upgrade-token-chance` and `horror.supply-drops.upgrade-token-chance`.
 
 Use or drop the item within 32 blocks of an unclaimed abandoned settlement, research facility, bunker, or railway site. The Constructor Lab is a discovery location, not a construction site; its own warning directs players to take the prototype elsewhere. Each site can be converted once. Choose one of four handcrafted base layouts. Construction checks the entire footprint and loaded chunks before placing anything; the Constructor is consumed only after a successful build.
 
@@ -58,6 +60,6 @@ Every newly constructed base includes a **Food Printer** and a **Farmanator**, b
 
 - **Food Printer:** right-click the smoker to print cooked beef. It pauses when the generator is offline and has a per-base cooldown.
 - **Farmanator:** right-click the dispenser to open its harvest inventory. It automatically produces apples, carrots, beetroots, potatoes, wheat, melon slices, and pumpkins while the generator is powered. Its stock persists through restarts.
-- **Upgrade Token:** a one-time guaranteed item in the Base Constructor Lab prototype cache. It is not added to airdrops, ordinary research-facility loot, or random loot.
+- **Upgrade Token:** one guaranteed token in every one-time Base Constructor Lab prototype cache. Additional tokens have only a 0.5% Research Facility chance and a 0.1% airdrop chance; they are excluded from ordinary random loot.
 
 Use `/base upgrade forge`, `/base upgrade farmanator`, `/base upgrade food-printer`, or `/base upgrade security` while carrying one Upgrade Token. Each system has three levels. Forge levels shorten crafting time; Farmanator levels increase crop output and shorten harvest cycles; Food Printer levels increase meat output and reduce cooldown; security levels extend detection range and reduce alert cooldown. The existing `/base upgrade` command without a system name remains the legacy generator-fuel upgrade.

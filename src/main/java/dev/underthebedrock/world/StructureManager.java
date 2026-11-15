@@ -92,15 +92,17 @@ public final class StructureManager implements Listener {
         long now=System.currentTimeMillis(),last=data.getLong(path+".last-reset",now);
         boolean first=!data.getBoolean(path+".built",false);
         long period=Math.max(1,plugin.getConfig().getLong("horror.structures.regeneration-hours",1))*HOUR;
-        // One-time migration: labs generated before Upgrade Tokens existed receive their
-        // exclusive token in the original prototype cache, never in a replacement loot source.
-        if(selected==StructureDefinition.BASE_CONSTRUCTOR_LAB&&!first&&!data.getBoolean(path+".upgrade-token-issued",false)){
+        // One-time migration for previously generated labs: ensure both guaranteed
+        // prototype rewards exist in the original cache without replacing player loot.
+        if(selected==StructureDefinition.BASE_CONSTRUCTOR_LAB&&!first&&!data.getBoolean(path+".lab-rewards-issued",false)){
             int cacheY=plugin.getConfig().getInt("world.floor-y",64)+2;
             Block cache=world.getBlockAt(x-6,cacheY,z+5);
             if(cache.getState() instanceof Container container&&plugin.getBaseManager()!=null){
+                ItemStack constructor=plugin.getBaseManager().constructorItem();
                 ItemStack token=plugin.getBaseManager().upgradeTokenItem();
+                if(!container.getInventory().containsAtLeast(constructor,1))container.getInventory().addItem(constructor);
                 if(!container.getInventory().containsAtLeast(token,1))container.getInventory().addItem(token);
-                container.update(true,false);data.set(path+".upgrade-token-issued",true);save();
+                container.update(true,false);data.set(path+".lab-rewards-issued",true);save();
             }
         }
         if(first||now-last>=period){
@@ -109,7 +111,7 @@ public final class StructureManager implements Listener {
             int cycle=data.getInt(path+".cycle",0)+(first?0:1);
             build(world,x,z,plugin.getConfig().getInt("world.floor-y",64)+1,selected,seed,key,cycle);
             data.set(path+".built",true);data.set(path+".last-reset",now);data.set(path+".cycle",cycle);
-            if(selected==StructureDefinition.BASE_CONSTRUCTOR_LAB)data.set(path+".upgrade-token-issued",true);
+            if(selected==StructureDefinition.BASE_CONSTRUCTOR_LAB)data.set(path+".lab-rewards-issued",true);
             save();
         }
     }
@@ -162,7 +164,7 @@ public final class StructureManager implements Listener {
             case SIGNAL_STATION->{b.platform(-5,5,-4,4,"DEEPSLATE_TILES");b.put(0,1,0,"LIGHTNING_ROD");b.put(0,2,0,"LIGHTNING_ROD");b.put(-2,1,1,"NOTE_BLOCK");b.put(2,1,1,"JUKEBOX");b.put(0,1,3,"REDSTONE_LAMP");b.chest(-3,1,-2,loot,4);b.sign(0,2,-4,"SIGNAL LOG 07","NO TRANSMITTER","WAS INSTALLED");}
             case OBSERVATION_TOWER->{b.tower(4);b.put(0,6,0,"SOUL_LANTERN");b.chest(1,4,1,loot,3);b.sign(0,5,2,"YOU ARE NOT","THE FIRST ONE","UP HERE");}
             case NULL_SHRINE->{b.platform(-4,4,-4,4,"POLISHED_BLACKSTONE_BRICKS");b.put(0,1,0,"CRYING_OBSIDIAN");b.put(0,2,0,"RESPAWN_ANCHOR");for(int i=-3;i<=3;i+=2){b.put(i,1,-3,"BLACKSTONE_WALL");b.put(i,1,3,"BLACKSTONE_WALL");}b.put(-3,1,0,"SOUL_LANTERN");b.put(3,1,0,"SOUL_LANTERN");b.sign(0,2,4,"IT KNEW","YOU WOULD","FIND THIS");}
-            case RESEARCH_FACILITY->{b.room(-7,7,-5,5,"POLISHED_ANDESITE","IRON_BLOCK");b.open(0,1,-5);b.open(0,2,-5);b.put(-4,1,-2,"IRON_BARS");b.put(-4,2,-2,"IRON_BARS");b.put(0,1,0,"BREWING_STAND");b.put(2,1,0,"LECTERN");b.put(4,1,2,"CAULDRON");b.chest(-5,1,3,loot,5);b.chest(5,1,-3,loot,5);if(loot.nextDouble()<0.12)b.baseConstructor(-5,1,3);b.sign(0,1,-4,"OBSERVATION 04","SUBJECT RESPONDS","TO CHAT");b.loreSign(-6,1,4,"protection_system","BOUNDARY SAFEGUARD","TEST: INCOMPLETE");b.memoryShard(-5,1,3,loot,"protection_loop");}
+            case RESEARCH_FACILITY->{b.room(-7,7,-5,5,"POLISHED_ANDESITE","IRON_BLOCK");b.open(0,1,-5);b.open(0,2,-5);b.put(-4,1,-2,"IRON_BARS");b.put(-4,2,-2,"IRON_BARS");b.put(0,1,0,"BREWING_STAND");b.put(2,1,0,"LECTERN");b.put(4,1,2,"CAULDRON");b.chest(-5,1,3,loot,5);b.chest(5,1,-3,loot,5);if(loot.nextDouble()<0.12)b.baseConstructor(-5,1,3);if(loot.nextDouble()<plugin.getConfig().getDouble("horror.structures.upgrade-token-chance",0.005))b.upgradeToken(-5,1,3);b.sign(0,1,-4,"OBSERVATION 04","SUBJECT RESPONDS","TO CHAT");b.loreSign(-6,1,4,"protection_system","BOUNDARY SAFEGUARD","TEST: INCOMPLETE");b.memoryShard(-5,1,3,loot,"protection_loop");}
             case BASE_CONSTRUCTOR_LAB->{b.room(-8,8,-8,8,"POLISHED_DEEPSLATE","IRON_BLOCK");b.open(0,1,-8);b.open(0,2,-8);for(int i=-5;i<=5;i+=5){b.put(i,1,-4,"IRON_BARS");b.put(i,2,-4,"IRON_BARS");b.put(i,1,4,"IRON_BARS");b.put(i,2,4,"IRON_BARS");}b.put(-5,1,0,"BREWING_STAND");b.put(-5,1,1,"BLAST_FURNACE");b.put(5,1,0,"SMITHING_TABLE");b.put(5,1,1,"ANVIL");b.put(0,1,0,"RESPAWN_ANCHOR");b.put(0,2,0,"AMETHYST_BLOCK");b.put(-2,1,-2,"OBSERVER");b.put(2,1,-2,"OBSERVER");b.put(-2,1,2,"OBSERVER");b.put(2,1,2,"OBSERVER");b.chest(-6,1,5,loot,5);b.baseConstructor(-6,1,5);b.upgradeToken(-6,1,5);b.loreSign(-7,1,-7,"constructor_project","PROJECT: CONSTRUCTOR","PROTOTYPE DEPLOYMENT");b.loreSign(7,1,-7,"constructor_failures","ITERATION 09","THE SITE MUST BE ABANDONED");b.sign(0,1,7,"DO NOT ACTIVATE","INSIDE THE LAB","TAKE IT TO A SAFE SITE");}
             case EMPTY_SETTLEMENT->{b.room(-10,-4,-4,4,"OAK_PLANKS","OAK_LOG");b.room(4,10,-4,4,"SPRUCE_PLANKS","SPRUCE_LOG");b.room(-3,3,5,10,"BIRCH_PLANKS","BIRCH_LOG");b.put(-7,1,0,"RED_BED");b.put(7,1,0,"WHITE_BED");b.put(0,1,7,"FARMLAND");b.chest(-8,1,3,loot,4);b.sign(0,2,11,"POPULATION: 0","LAST SEEN:","YOU");b.loreSign(-9,2,-3,"population_ledger","FINAL CENSUS","NO MATCHING NAMES");b.loreSign(8,2,-3,"resident_file","RESIDENT FILE","PERSONAL COPY");}
             case UNDERGROUND_BUNKER->{b.room(-6,6,-5,5,"DEEPSLATE_BRICKS","IRON_BLOCK");b.put(0,1,0,"IRON_DOOR");b.put(-3,1,-2,"LANTERN");b.put(3,1,-2,"LANTERN");b.chest(0,1,3,loot,5);b.sign(0,2,-5,"SHELTER SEALED","FROM THE INSIDE");}
@@ -210,7 +212,7 @@ public final class StructureManager implements Listener {
                 container.getPersistentDataContainer().set(marker,PersistentDataType.STRING,site);container.update(true,false);
             }
         }
-        void baseConstructor(int x,int y,int z){Location location=new Location(world,ox+x,oy+y,oz+z);Block block=location.getBlock();if(block.getState() instanceof Container container){ItemStack item=plugin.getBaseManager().constructorItem();if(!container.getInventory().containsAtLeast(item,1)){container.getInventory().addItem(item);container.update(true,false);}}}
+        void baseConstructor(int x,int y,int z){Location location=new Location(world,ox+x,oy+y,oz+z);Block block=location.getBlock();if(plugin.getBaseManager()!=null&&block.getState() instanceof Container container){ItemStack item=plugin.getBaseManager().constructorItem();if(!container.getInventory().containsAtLeast(item,1)){container.getInventory().addItem(item);container.update(true,false);}}}
          void upgradeToken(int x,int y,int z){
             Location location=new Location(world,ox+x,oy+y,oz+z);
             if(location.getBlock().getState() instanceof Container container&&plugin.getBaseManager()!=null){

@@ -91,7 +91,7 @@ public final class BaseManager implements Listener, CommandExecutor, TabComplete
         ItemStack item=new ItemStack(Material.NETHER_STAR);ItemMeta meta=item.getItemMeta();
         meta.setDisplayName(ChatColor.GOLD+"Upgrade Token");
         meta.setLore(List.of(ChatColor.GRAY+"A calibration key from the Base Constructor program.",
-            ChatColor.YELLOW+"Exclusive to Base Constructor Labs.",
+            ChatColor.YELLOW+"Guaranteed in Base Constructor Labs; exceptionally rare elsewhere.",
             ChatColor.DARK_GRAY+"Upgrades one base system by one level."));
         meta.getPersistentDataContainer().set(upgradeTokenKey,PersistentDataType.BYTE,(byte)1);item.setItemMeta(meta);return item;
     }

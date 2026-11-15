@@ -175,7 +175,13 @@ public final class SupplyDropManager {
                 }
             }
 
-            if(plugin.getBaseManager()!=null&&random.nextDouble()<plugin.getConfig().getDouble("horror.supply-drops.base-constructor-chance",0.025))inventory.addItem(plugin.getBaseManager().constructorItem());
+            if(plugin.getBaseManager()!=null){
+                if(random.nextDouble()<plugin.getConfig().getDouble("horror.supply-drops.base-constructor-chance",0.025))
+                    inventory.addItem(plugin.getBaseManager().constructorItem());
+                // Upgrade Tokens are an exceptional bonus, never part of ordinary crate loot.
+                if(random.nextDouble()<plugin.getConfig().getDouble("horror.supply-drops.upgrade-token-chance",0.001))
+                    inventory.addItem(plugin.getBaseManager().upgradeTokenItem());
+            }
 
             // Verify the placed inventory itself, not the pre-update state.
             org.bukkit.block.BlockState verifyState = block.getState();
