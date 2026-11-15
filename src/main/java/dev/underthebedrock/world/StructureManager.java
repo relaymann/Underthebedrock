@@ -46,7 +46,7 @@ public final class StructureManager implements Listener {
     private void tick(){
         if(!worlds.isActive())return;
         World world=worlds.getWorld(); if(world==null)return;
-        int cell=Math.max(512,plugin.getConfig().getInt("horror.structures.site-cell-size-blocks",1792));
+        int cell=Math.max(512,plugin.getConfig().getInt("horror.structures.site-cell-size-blocks",512));
         for(Player player:world.getPlayers()){
             int cx=Math.floorDiv(player.getLocation().getBlockX()-world.getSpawnLocation().getBlockX(),cell);
             int cz=Math.floorDiv(player.getLocation().getBlockZ()-world.getSpawnLocation().getBlockZ(),cell);
@@ -74,7 +74,7 @@ public final class StructureManager implements Listener {
             }
         }else{
             if(explorer==null||distanceFromSpawn(world,explorer.getLocation())<minimumSpawnDistance()
-                    ||random.nextDouble()>plugin.getConfig().getDouble("horror.structures.cell-generation-chance",.30))return;
+                    ||random.nextDouble()>plugin.getConfig().getDouble("horror.structures.cell-generation-chance",.12))return;
             int[] candidate=siteCandidate(world,explorer,random);x=candidate[0];z=candidate[1];
             double distance=Math.hypot(x-world.getSpawnLocation().getBlockX(),z-world.getSpawnLocation().getBlockZ());
             selected=StructureDefinition.select(distance,seed).orElse(null);
