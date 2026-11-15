@@ -138,7 +138,7 @@ public final class StructureManager implements Listener {
     private String key(Location l){return l.getWorld().getName()+":"+l.getBlockX()+":"+l.getBlockY()+":"+l.getBlockZ();}
     @EventHandler(ignoreCancelled=true) public void onPlace(BlockPlaceEvent event){
         if(!worlds.isActive()||!event.getBlock().getWorld().equals(worlds.getWorld()))return;
-        Location l=event.getBlock().getLocation();int cell=Math.max(256,plugin.getConfig().getInt("horror.structures.site-cell-size-blocks",1024));
+        Location l=event.getBlock().getLocation();int cell=Math.max(256,plugin.getConfig().getInt("horror.structures.site-cell-size-blocks",512));
         int cx=Math.floorDiv(l.getBlockX()-worlds.getWorld().getSpawnLocation().getBlockX(),cell);
         int cz=Math.floorDiv(l.getBlockZ()-worlds.getWorld().getSpawnLocation().getBlockZ(),cell);
         for(int dx=-1;dx<=1;dx++)for(int dz=-1;dz<=1;dz++){
