@@ -16,7 +16,7 @@
   ],
   "resolution": {
     "width": 64,
-    "height": 16
+    "height": 64
   },
   "elements": [
     {
@@ -33,7 +33,7 @@
       ],
       "autouv": 0,
       "locked": false,
-      "uuid": "00000000-0000-4000-8000-000000003020",
+      "uuid": "00000000-0000-4000-8000-000000010100",
       "origin": [
         0,
         16,
@@ -56,27 +56,27 @@
         },
         "south": {
           "uv": [
-            0,
-            0,
             16,
+            0,
+            32,
             16
           ],
           "texture": 0
         },
         "east": {
           "uv": [
+            32,
             0,
-            0,
-            16,
+            48,
             16
           ],
           "texture": 0
         },
         "west": {
           "uv": [
+            48,
             0,
-            0,
-            16,
+            64,
             16
           ],
           "texture": 0
@@ -84,18 +84,18 @@
         "up": {
           "uv": [
             0,
-            0,
             16,
-            16
+            16,
+            32
           ],
           "texture": 0
         },
         "down": {
           "uv": [
-            0,
-            0,
             16,
-            16
+            16,
+            32,
+            32
           ],
           "texture": 0
         }
@@ -115,7 +115,7 @@
       ],
       "autouv": 0,
       "locked": false,
-      "uuid": "00000000-0000-4000-8000-000000003021",
+      "uuid": "00000000-0000-4000-8000-000000010101",
       "origin": [
         0,
         16,
@@ -129,9 +129,9 @@
       "faces": {
         "north": {
           "uv": [
-            16,
             0,
-            32,
+            0,
+            16,
             16
           ],
           "texture": 0
@@ -147,37 +147,37 @@
         },
         "east": {
           "uv": [
-            16,
-            0,
             32,
+            0,
+            48,
             16
           ],
           "texture": 0
         },
         "west": {
           "uv": [
-            16,
+            48,
             0,
-            32,
+            64,
             16
           ],
           "texture": 0
         },
         "up": {
           "uv": [
-            16,
             0,
-            32,
-            16
+            16,
+            16,
+            32
           ],
           "texture": 0
         },
         "down": {
           "uv": [
             16,
-            0,
+            16,
             32,
-            16
+            32
           ],
           "texture": 0
         }
@@ -197,7 +197,7 @@
       ],
       "autouv": 0,
       "locked": false,
-      "uuid": "00000000-0000-4000-8000-000000003022",
+      "uuid": "00000000-0000-4000-8000-000000010102",
       "origin": [
         0,
         16,
@@ -211,18 +211,18 @@
       "faces": {
         "north": {
           "uv": [
-            32,
             0,
-            48,
+            0,
+            16,
             16
           ],
           "texture": 0
         },
         "south": {
           "uv": [
-            32,
+            16,
             0,
-            48,
+            32,
             16
           ],
           "texture": 0
@@ -238,28 +238,28 @@
         },
         "west": {
           "uv": [
-            32,
-            0,
             48,
+            0,
+            64,
             16
           ],
           "texture": 0
         },
         "up": {
           "uv": [
-            32,
             0,
-            48,
-            16
+            16,
+            16,
+            32
           ],
           "texture": 0
         },
         "down": {
           "uv": [
+            16,
+            16,
             32,
-            0,
-            48,
-            16
+            32
           ],
           "texture": 0
         }
@@ -279,7 +279,7 @@
       ],
       "autouv": 0,
       "locked": false,
-      "uuid": "00000000-0000-4000-8000-000000003023",
+      "uuid": "00000000-0000-4000-8000-000000010103",
       "origin": [
         0,
         16,
@@ -293,18 +293,18 @@
       "faces": {
         "north": {
           "uv": [
-            32,
             0,
-            48,
+            0,
+            16,
             16
           ],
           "texture": 0
         },
         "south": {
           "uv": [
-            32,
+            16,
             0,
-            48,
+            32,
             16
           ],
           "texture": 0
@@ -320,28 +320,28 @@
         },
         "west": {
           "uv": [
-            32,
-            0,
             48,
+            0,
+            64,
             16
           ],
           "texture": 0
         },
         "up": {
           "uv": [
-            32,
             0,
-            48,
-            16
+            16,
+            16,
+            32
           ],
           "texture": 0
         },
         "down": {
           "uv": [
+            16,
+            16,
             32,
-            0,
-            48,
-            16
+            32
           ],
           "texture": 0
         }
@@ -361,7 +361,7 @@
       ],
       "autouv": 0,
       "locked": false,
-      "uuid": "00000000-0000-4000-8000-000000003024",
+      "uuid": "00000000-0000-4000-8000-000000010104",
       "origin": [
         0,
         16,
@@ -375,18 +375,18 @@
       "faces": {
         "north": {
           "uv": [
-            32,
             0,
-            48,
+            0,
+            16,
             16
           ],
           "texture": 0
         },
         "south": {
           "uv": [
-            32,
+            16,
             0,
-            48,
+            32,
             16
           ],
           "texture": 0
@@ -402,28 +402,28 @@
         },
         "west": {
           "uv": [
-            32,
-            0,
             48,
+            0,
+            64,
             16
           ],
           "texture": 0
         },
         "up": {
           "uv": [
-            32,
             0,
-            48,
-            16
+            16,
+            16,
+            32
           ],
           "texture": 0
         },
         "down": {
           "uv": [
+            16,
+            16,
             32,
-            0,
-            48,
-            16
+            32
           ],
           "texture": 0
         }
@@ -443,7 +443,7 @@
       ],
       "autouv": 0,
       "locked": false,
-      "uuid": "00000000-0000-4000-8000-000000003025",
+      "uuid": "00000000-0000-4000-8000-000000010105",
       "origin": [
         0,
         16,
@@ -457,18 +457,18 @@
       "faces": {
         "north": {
           "uv": [
-            32,
             0,
-            48,
+            0,
+            16,
             16
           ],
           "texture": 0
         },
         "south": {
           "uv": [
-            32,
+            16,
             0,
-            48,
+            32,
             16
           ],
           "texture": 0
@@ -484,23 +484,78 @@
         },
         "west": {
           "uv": [
-            32,
-            0,
             48,
+            0,
+            64,
             16
           ],
           "texture": 0
         },
         "up": {
           "uv": [
-            32,
             0,
-            48,
-            16
+            16,
+            16,
+            32
           ],
           "texture": 0
         },
         "down": {
+          "uv": [
+            16,
+            16,
+            32,
+            32
+          ],
+          "texture": 0
+        }
+      }
+    },
+    {
+      "name": "collar_l",
+      "from": [
+        -5,
+        22,
+        -4
+      ],
+      "to": [
+        -2,
+        27,
+        0
+      ],
+      "autouv": 0,
+      "locked": false,
+      "uuid": "00000000-0000-4000-8000-000000010106",
+      "origin": [
+        0,
+        16,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": 0
+        },
+        "south": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": 0
+        },
+        "east": {
           "uv": [
             32,
             0,
@@ -508,24 +563,51 @@
             16
           ],
           "texture": 0
+        },
+        "west": {
+          "uv": [
+            48,
+            0,
+            64,
+            16
+          ],
+          "texture": 0
+        },
+        "up": {
+          "uv": [
+            0,
+            16,
+            16,
+            32
+          ],
+          "texture": 0
+        },
+        "down": {
+          "uv": [
+            16,
+            16,
+            32,
+            32
+          ],
+          "texture": 0
         }
       }
     },
     {
-      "name": "hood",
+      "name": "collar_r",
       "from": [
-        -5,
-        29,
-        -5
+        2,
+        22,
+        -4
       ],
       "to": [
         5,
-        34,
-        4
+        27,
+        0
       ],
       "autouv": 0,
       "locked": false,
-      "uuid": "00000000-0000-4000-8000-000000003026",
+      "uuid": "00000000-0000-4000-8000-000000010107",
       "origin": [
         0,
         16,
@@ -539,27 +621,27 @@
       "faces": {
         "north": {
           "uv": [
-            48,
             0,
-            64,
+            0,
+            16,
             16
           ],
           "texture": 0
         },
         "south": {
           "uv": [
-            48,
+            16,
             0,
-            64,
+            32,
             16
           ],
           "texture": 0
         },
         "east": {
           "uv": [
-            48,
+            32,
             0,
-            64,
+            48,
             16
           ],
           "texture": 0
@@ -575,39 +657,39 @@
         },
         "up": {
           "uv": [
-            48,
             0,
-            64,
-            16
+            16,
+            16,
+            32
           ],
           "texture": 0
         },
         "down": {
           "uv": [
-            48,
-            0,
-            64,
-            16
+            16,
+            16,
+            32,
+            32
           ],
           "texture": 0
         }
       }
     },
     {
-      "name": "hunched_back",
+      "name": "coat_panel",
       "from": [
         -4,
-        16,
-        2
+        8,
+        -4
       ],
       "to": [
         4,
-        25,
-        5
+        19,
+        -3
       ],
       "autouv": 0,
       "locked": false,
-      "uuid": "00000000-0000-4000-8000-000000003027",
+      "uuid": "00000000-0000-4000-8000-000000010108",
       "origin": [
         0,
         16,
@@ -621,27 +703,27 @@
       "faces": {
         "north": {
           "uv": [
-            48,
             0,
-            64,
+            0,
+            16,
             16
           ],
           "texture": 0
         },
         "south": {
           "uv": [
-            48,
+            16,
             0,
-            64,
+            32,
             16
           ],
           "texture": 0
         },
         "east": {
           "uv": [
-            48,
+            32,
             0,
-            64,
+            48,
             16
           ],
           "texture": 0
@@ -657,6 +739,79 @@
         },
         "up": {
           "uv": [
+            0,
+            16,
+            16,
+            32
+          ],
+          "texture": 0
+        },
+        "down": {
+          "uv": [
+            16,
+            16,
+            32,
+            32
+          ],
+          "texture": 0
+        }
+      }
+    },
+    {
+      "name": "button_1",
+      "from": [
+        -1,
+        19,
+        -4
+      ],
+      "to": [
+        0,
+        20,
+        -3
+      ],
+      "autouv": 0,
+      "locked": false,
+      "uuid": "00000000-0000-4000-8000-000000010109",
+      "origin": [
+        0,
+        16,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": 0
+        },
+        "south": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": 0
+        },
+        "east": {
+          "uv": [
+            32,
+            0,
+            48,
+            16
+          ],
+          "texture": 0
+        },
+        "west": {
+          "uv": [
             48,
             0,
             64,
@@ -664,12 +819,431 @@
           ],
           "texture": 0
         },
+        "up": {
+          "uv": [
+            0,
+            16,
+            16,
+            32
+          ],
+          "texture": 0
+        },
         "down": {
+          "uv": [
+            16,
+            16,
+            32,
+            32
+          ],
+          "texture": 0
+        }
+      }
+    },
+    {
+      "name": "button_2",
+      "from": [
+        -1,
+        15,
+        -4
+      ],
+      "to": [
+        0,
+        16,
+        -3
+      ],
+      "autouv": 0,
+      "locked": false,
+      "uuid": "00000000-0000-4000-8000-000000010110",
+      "origin": [
+        0,
+        16,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": 0
+        },
+        "south": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": 0
+        },
+        "east": {
+          "uv": [
+            32,
+            0,
+            48,
+            16
+          ],
+          "texture": 0
+        },
+        "west": {
           "uv": [
             48,
             0,
             64,
             16
+          ],
+          "texture": 0
+        },
+        "up": {
+          "uv": [
+            0,
+            16,
+            16,
+            32
+          ],
+          "texture": 0
+        },
+        "down": {
+          "uv": [
+            16,
+            16,
+            32,
+            32
+          ],
+          "texture": 0
+        }
+      }
+    },
+    {
+      "name": "rag_l",
+      "from": [
+        -7,
+        2,
+        -1
+      ],
+      "to": [
+        -5,
+        10,
+        2
+      ],
+      "autouv": 0,
+      "locked": false,
+      "uuid": "00000000-0000-4000-8000-000000010111",
+      "origin": [
+        0,
+        16,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": 0
+        },
+        "south": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": 0
+        },
+        "east": {
+          "uv": [
+            32,
+            0,
+            48,
+            16
+          ],
+          "texture": 0
+        },
+        "west": {
+          "uv": [
+            48,
+            0,
+            64,
+            16
+          ],
+          "texture": 0
+        },
+        "up": {
+          "uv": [
+            0,
+            16,
+            16,
+            32
+          ],
+          "texture": 0
+        },
+        "down": {
+          "uv": [
+            16,
+            16,
+            32,
+            32
+          ],
+          "texture": 0
+        }
+      }
+    },
+    {
+      "name": "rag_r",
+      "from": [
+        5,
+        4,
+        -1
+      ],
+      "to": [
+        7,
+        12,
+        2
+      ],
+      "autouv": 0,
+      "locked": false,
+      "uuid": "00000000-0000-4000-8000-000000010112",
+      "origin": [
+        0,
+        16,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": 0
+        },
+        "south": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": 0
+        },
+        "east": {
+          "uv": [
+            32,
+            0,
+            48,
+            16
+          ],
+          "texture": 0
+        },
+        "west": {
+          "uv": [
+            48,
+            0,
+            64,
+            16
+          ],
+          "texture": 0
+        },
+        "up": {
+          "uv": [
+            0,
+            16,
+            16,
+            32
+          ],
+          "texture": 0
+        },
+        "down": {
+          "uv": [
+            16,
+            16,
+            32,
+            32
+          ],
+          "texture": 0
+        }
+      }
+    },
+    {
+      "name": "hollow_eye_l",
+      "from": [
+        -3,
+        28,
+        -5
+      ],
+      "to": [
+        -2,
+        29,
+        -4
+      ],
+      "autouv": 0,
+      "locked": false,
+      "uuid": "00000000-0000-4000-8000-000000010113",
+      "origin": [
+        0,
+        16,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": 0
+        },
+        "south": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": 0
+        },
+        "east": {
+          "uv": [
+            32,
+            0,
+            48,
+            16
+          ],
+          "texture": 0
+        },
+        "west": {
+          "uv": [
+            48,
+            0,
+            64,
+            16
+          ],
+          "texture": 0
+        },
+        "up": {
+          "uv": [
+            0,
+            16,
+            16,
+            32
+          ],
+          "texture": 0
+        },
+        "down": {
+          "uv": [
+            16,
+            16,
+            32,
+            32
+          ],
+          "texture": 0
+        }
+      }
+    },
+    {
+      "name": "hollow_eye_r",
+      "from": [
+        2,
+        28,
+        -5
+      ],
+      "to": [
+        3,
+        29,
+        -4
+      ],
+      "autouv": 0,
+      "locked": false,
+      "uuid": "00000000-0000-4000-8000-000000010114",
+      "origin": [
+        0,
+        16,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": 0
+        },
+        "south": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": 0
+        },
+        "east": {
+          "uv": [
+            32,
+            0,
+            48,
+            16
+          ],
+          "texture": 0
+        },
+        "west": {
+          "uv": [
+            48,
+            0,
+            64,
+            16
+          ],
+          "texture": 0
+        },
+        "up": {
+          "uv": [
+            0,
+            16,
+            16,
+            32
+          ],
+          "texture": 0
+        },
+        "down": {
+          "uv": [
+            16,
+            16,
+            32,
+            32
           ],
           "texture": 0
         }
@@ -684,16 +1258,23 @@
         0,
         0
       ],
-      "uuid": "00000000-0000-4000-8000-000000009001",
+      "uuid": "00000000-0000-4000-8000-000000012001",
       "children": [
-        "00000000-0000-4000-8000-000000003020",
-        "00000000-0000-4000-8000-000000003021",
-        "00000000-0000-4000-8000-000000003022",
-        "00000000-0000-4000-8000-000000003023",
-        "00000000-0000-4000-8000-000000003024",
-        "00000000-0000-4000-8000-000000003025",
-        "00000000-0000-4000-8000-000000003026",
-        "00000000-0000-4000-8000-000000003027"
+        "00000000-0000-4000-8000-000000010100",
+        "00000000-0000-4000-8000-000000010101",
+        "00000000-0000-4000-8000-000000010102",
+        "00000000-0000-4000-8000-000000010103",
+        "00000000-0000-4000-8000-000000010104",
+        "00000000-0000-4000-8000-000000010105",
+        "00000000-0000-4000-8000-000000010106",
+        "00000000-0000-4000-8000-000000010107",
+        "00000000-0000-4000-8000-000000010108",
+        "00000000-0000-4000-8000-000000010109",
+        "00000000-0000-4000-8000-000000010110",
+        "00000000-0000-4000-8000-000000010111",
+        "00000000-0000-4000-8000-000000010112",
+        "00000000-0000-4000-8000-000000010113",
+        "00000000-0000-4000-8000-000000010114"
       ]
     }
   ],
@@ -701,20 +1282,19 @@
     {
       "name": "forgotten_resident.png",
       "id": "0",
-      "uuid": "00000000-0000-4000-8000-000000009501",
+      "uuid": "00000000-0000-4000-8000-000000013001",
       "particle": true,
       "render_mode": "normal",
       "visible": true,
       "mode": "bitmap",
       "saved": true,
-      "source": "data:image/png;base64,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",
+      "source": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAABAS0lEQVR4AQFAQL+/ADgwKP80LCT/MCgg/z01Lf85MSn/NS0l/0lBOf8tJR3/OjIq/zYuJv8yKiL/LiYe/ykhGf83Lyf/Mysj/y8nH/9rXkn/Z1pF/2NWQf9fUj3/bF9K/2hbRv98b1r/YFM+/1xPOv9pXEf/ZVhD/2FUP/9LPin/al1I/2ZZRP9iVUD/XlE8/2teSf9nWkX/Y1ZB/19SPf9sX0r/gHNe/2RXQv9gUz7/XE86/2lcR/9lWEP/T0It/11QO/9qXUj/ZllE/2JVQP9eUTz/a15J/2daRf9jVkH/X1I9/4R3Yv9oW0b/ZFdC/2BTPv9cTzr/aVxH/1NGMf9hVD//XVA7/2pdSP8ALiYe/0c/N/9DOzP/Pzcv/zszK/9IQDj/RDw0/0A4MP88NCz/SUE5/0U9Nf8vJx//PTUt/zkxKf9GPjb/Ni4m/2FUP/9pXEf/dmlU/3JlUP9uYUz/al1I/3dqVf9zZlH/b2JN/2teSf94a1b/YlVA/3BjTv9sX0r/aFtG/2lcR/9lWEP/bWBL/2lcR/92aVT/cmVQ/25hTP9qXUj/d2pV/3NmUf9vYk3/a15J/2ZZRP90Z1L/cGNO/2xfSv9cTzr/aVxH/3FkT/9tYEv/aVxH/3ZpVP9yZVD/bmFM/2pdSP93alX/c2ZR/29iTf9ZTDf/eGtW/3RnUv9wY07/YFM+/wA1LSX/PTUt/zkxKf9GPjb/Qjoy/z42Lv86Mir/Rz83/0M7M/9XT0f/KSEZ/0hAOP9EPDT/QDgw/zw0LP89NS3/aFtG/3BjTv9sX0r/aFtG/3VoU/9xZE//bWBL/2lcR/92aVT/in1o/1xPOv9qXUj/d2pV/3NmUf9vYk3/X1I9/2xfSv90Z1L/cGNO/2xfSv9oW0b/dWhT/3FkT/9tYEv/aVxH/46BbP9gUz7/bmFM/2pdSP93alX/c2ZR/2NWQf9fUj3/eGtW/3RnUv9wY07/bF9K/2hbRv91aFP/cWRP/21gS/+BdF//ZFdC/3JlUP9uYUz/al1I/3dqVf9nWkX/ADw0LP9cVEz/QDgw/zw0LP9JQTn/RT01/0E5Mf89NS3/OTEp/zQsJP9COjL/PjYu/zoyKv9HPzf/Qzsz/zMrI/9eUTz/j4Jt/3NmUf9vYk3/a15J/3hrVv90Z1L/cGNO/2xfSv9WSTT/dWhT/3FkT/9tYEv/aVxH/3ZpVP9mWUT/YlVA/4J1YP93alX/c2ZR/29iTf9rXkn/eGtW/3RnUv9wY07/Wk04/2hbRv91aFP/cWRP/21gS/9pXEf/al1I/2ZZRP+GeWT/al1I/3dqVf9zZlH/b2JN/2teSf94a1b/dGdS/15RPP9sX0r/aFtG/3VoU/9xZE//bWBL/11QO/8AMioi/zoyKv9HPzf/Qzsz/z83L/87Myv/SEA4/0Q8NP8uJh7/PDQs/0lBOf9FPTX/WVFJ/z01Lf85MSn/OjIq/2VYQ/9tYEv/aVxH/3ZpVP9yZVD/bmFM/2pdSP93alX/YVQ//29iTf9rXkn/eGtW/4x/av9wY07/bF9K/1xPOv9pXEf/cWRP/21gS/9pXEf/dmlU/3JlUP9uYUz/al1I/2VYQ/9zZlH/b2JN/2teSf+Qg27/dGdS/3BjTv9gUz7/XE86/3VoU/9xZE//bWBL/2lcR/92aVT/cmVQ/25hTP9YSzb/d2pV/3NmUf9vYk3/g3Zh/3hrVv90Z1L/ZFdC/wA5MSn/QTkx/z01Lf85MSn/XlZO/0I6Mv8+Ni7/KCAY/0c/N/9DOzP/Pzcv/zszK/9IQDj/RDw0/0A4MP8wKCD/bF9K/3RnUv9wY07/bF9K/4BzXv91aFP/cWRP/1tOOf9pXEf/dmlU/3JlUP9uYUz/al1I/3dqVf9zZlH/Y1ZB/19SPf94a1b/dGdS/3BjTv+Ed2L/aFtG/3VoU/9fUj3/bWBL/2lcR/92aVT/cmVQ/25hTP9qXUj/d2pV/2daRf9jVkH/a15J/3hrVv90Z1L/iHtm/2xfSv9oW0b/Y1ZB/3FkT/9tYEv/aVxH/3ZpVP9yZVD/bmFM/2pdSP9rXkn/AC8nH/9IQDj/RDw0/0A4MP88NCz/SUE5/zMrI/9BOTH/PTUt/zkxKf9GPjb/Qjoy/z42Lv86Mir/Rz83/09HP/9iVUD/al1I/3dqVf9zZlH/b2JN/2teSf9mWUT/dGdS/3BjTv9sX0r/aFtG/3VoU/9xZE//bWBL/2lcR/+CdWD/ZllE/25hTP9qXUj/d2pV/3NmUf9vYk3/WUw3/3hrVv90Z1L/cGNO/2xfSv9oW0b/dWhT/3FkT/9tYEv/dWhT/2pdSP9yZVD/bmFM/2pdSP93alX/c2ZR/11QO/9rXkn/eGtW/3RnUv9wY07/bF9K/2hbRv91aFP/cWRP/3lsV/8ANi4m/z42Lv86Mir/Rz83/0M7M/8tJR3/OzMr/2BYUP9EPDT/QDgw/zw0LP9JQTn/RT01/0E5Mf89NS3/LSUd/2lcR/9xZE//bWBL/2lcR/92aVT/YFM+/25hTP+CdWD/d2pV/3NmUf9vYk3/a15J/3hrVv90Z1L/cGNO/2BTPv9cTzr/dWhT/3FkT/9tYEv/aVxH/2RXQv9yZVD/hnlk/2pdSP93alX/c2ZR/29iTf9rXkn/eGtW/3RnUv9kV0L/YFM+/2hbRv91aFP/cWRP/21gS/9XSjX/dmlU/4p9aP9uYUz/al1I/3dqVf9zZlH/b2JN/2teSf94a1b/aFtG/wA9NS3/RT01/0E5Mf89NS3/Jx8X/0Y+Nv9COjL/PjYu/zoyKv9HPzf/Qzsz/z83L/87Myv/SEA4/0Q8NP80LCT/X1I9/3hrVv90Z1L/cGNO/1pNOP9oW0b/dWhT/3FkT/9tYEv/aVxH/3ZpVP9yZVD/bmFM/2pdSP93alX/Z1pF/2NWQf9rXkn/eGtW/3RnUv9eUTz/bF9K/2hbRv91aFP/cWRP/21gS/9pXEf/dmlU/3JlUP9uYUz/al1I/2teSf9nWkX/b2JN/2teSf94a1b/YlVA/3BjTv9sX0r/aFtG/3VoU/9xZE//bWBL/2lcR/92aVT/cmVQ/25hTP9eUTz/ADMrI/87Myv/SEA4/zIqIv9AODD/PDQs/0lBOf9FPTX/QTkx/z01Lf9RSUH/Rj42/0I6Mv8+Ni7/OjIq/zszK/9mWUT/bmFM/2pdSP9lWEP/c2ZR/29iTf9rXkn/eGtW/3RnUv9wY07/hHdi/2hbRv91aFP/cWRP/21gS/9dUDv/al1I/3JlUP9uYUz/WEs2/3dqVf9zZlH/b2JN/2teSf94a1b/dGdS/4h7Zv9sX0r/aFtG/3VoU/9xZE//YVQ//11QO/92aVT/cmVQ/1xPOv9qXUj/d2pV/3NmUf9vYk3/a15J/3hrVv+Mf2r/cGNO/2xfSv9oW0b/dWhT/2VYQ/8AOjIq/0I6Mv9EPDT/OjIq/0c/N/9DOzP/Pzcv/zszK/9IQDj/RDw0/0A4MP88NCz/SUE5/0U9Nf9BOTH/HxcP/1xPOv91aFP/d2pV/21gS/9pXEf/dmlU/3JlUP9uYUz/al1I/3dqVf9zZlH/b2JN/2teSf94a1b/dGdS/1JFMP9gUz7/aFtG/3tuWf9xZE//bWBL/2lcR/92aVT/cmVQ/25hTP9qXUj/d2pV/3NmUf9vYk3/a15J/3hrVv9WSTT/ZFdC/2xfSv9uYUz/dWhT/3FkT/9tYEv/aVxH/3ZpVP9yZVD/bmFM/2pdSP93alX/c2ZR/29iTf9rXkn/Wk04/wAwKCD/Ny8n/0U9Nf9BOTH/PTUt/zkxKf9GPjb/Qjoy/z42Lv86Mir/Rz83/0M7M/8/Ny//U0tD/zYuJv84MCj/Y1ZB/1lMN/94a1b/dGdS/3BjTv9sX0r/aFtG/3VoU/9xZE//bWBL/2lcR/92aVT/cmVQ/4Z5ZP9YSzb/a15J/2daRf9dUDv/a15J/3hrVv90Z1L/cGNO/2xfSv9oW0b/dWhT/3FkT/9tYEv/aVxH/3ZpVP+KfWj/XE86/15RPP9rXkn/YVQ//29iTf9rXkn/eGtW/3RnUv9wY07/bF9K/2hbRv91aFP/cWRP/21gS/9pXEf/joFs/2BTPv9iVUD/ACUdFf8/Ny//OzMr/0hAOP9EPDT/WFBI/zw0LP9JQTn/RT01/0E5Mf89NS3/OTEp/0Y+Nv8wKCD/PjYu/y4mHv9YSzb/cmVQ/25hTP9qXUj/d2pV/4t+af9vYk3/a15J/3hrVv90Z1L/cGNO/2xfSv9oW0b/Y1ZB/3FkT/9hVD//Sz4p/3ZpVP9yZVD/bmFM/2pdSP+Pgm3/c2ZR/29iTf9rXkn/eGtW/3RnUv9wY07/bF9K/1ZJNP91aFP/ZVhD/09CLf9pXEf/dmlU/3JlUP9uYUz/gnVg/3dqVf9zZlH/b2JN/2teSf94a1b/dGdS/3BjTv9aTTj/aFtG/2lcR/8ALSUd/0Y+Nv9COjL/PjYu/zoyKv9HPzf/Qzsz/z83L/87Myv/SEA4/0Q8NP9AODD/KiIa/0lBOf9FPTX/NS0l/2BTPv9oW0b/dWhT/3FkT/9tYEv/aVxH/3ZpVP9yZVD/bmFM/2pdSP93alX/c2ZR/11QO/9rXkn/eGtW/2hbRv9kV0L/bF9K/2hbRv91aFP/cWRP/21gS/9pXEf/dmlU/3JlUP9uYUz/al1I/3dqVf9hVD//b2JN/2teSf9sX0r/aFtG/3BjTv9sX0r/aFtG/3Vo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/4BzXv9kV0L/YFM+/1xPOv9pXEf/ZVhD/09CLf9dUDv/al1I/2ZZRP8AOzMr/0M7M/8/Ny//OzMr/0hAOP9EPDT/QDgw/zw0LP9JQTn/RT01/0E5Mf8rIxv/OTEp/0Y+Nv9COjL/Mioi/11QO/92aVT/cmVQ/25hTP9qXUj/d2pV/3NmUf9vYk3/a15J/3hrVv90Z1L/XlE8/2xfSv9oW0b/dWhT/2VYQ/9hVD//aVxH/3ZpVP9yZVD/bmFM/2pdSP93alX/c2ZR/29iTf9rXkn/eGtW/2JVQP9wY07/bF9K/2hbRv9pXEf/ZVhD/21gS/9pXEf/dmlU/3JlUP9uYUz/al1I/3dqVf9zZlH/b2JN/2teSf9mWUT/dGdS/3BjTv9sX0r/XE86/wAxKSH/OTEp/0Y+Nv9COjL/PjYu/zoyKv9HPzf/Qzsz/z83L/9TS0P/Ni4m/0Q8NP9AODD/PDQs/0lBOf85MSn/ZFdC/2xfSv9oW0b/dWhT/3FkT/9tYEv/aVxH/3ZpVP9yZVD/hnlk/1hLNv93alX/c2ZR/29iTf9rXkn/bF9K/2hbRv9wY07/bF9K/2hbRv91aFP/cWRP/21gS/9pXEf/dmlU/4p9aP9cTzr/al1I/3dqVf9zZlH/b2JN/19SPf9sX0r/dGdS/3BjTv9sX0r/aFtG/3VoU/9xZE//bWBL/2lcR/+OgWz/YFM+/25hTP9qXUj/d2pV/3NmUf9jVkH/ADgwKP9YUEj/PDQs/0lBOf9FPTX/QTkx/z01Lf85MSn/Rj42/zAoIP8+Ni7/OjIq/0c/N/9DOzP/Pzcv/y8nH/9rXkn/i35p/29iTf9rXkn/eGtW/3RnUv9wY07/bF9K/2hbRv9jVkH/cWRP/21gS/9pXEf/dmlU/3JlUP9iVUD/XlE8/4+Cbf9zZlH/b2JN/2teSf94a1b/dGdS/3BjTv9sX0r/Vkk0/3VoU/9xZE//bWBL/2lcR/92aVT/ZllE/2JVQP+CdWD/d2pV/3NmUf9vYk3/a15J/3hrVv90Z1L/cGNO/1pNOP9oW0b/dWhT/3FkT/9tYEv/aVxH/2pdSP8ALiYe/0c/N/9DOzP/Pzcv/zszK/9IQDj/RDw0/0A4MP8qIhr/SUE5/0U9Nf9BOTH/VU1F/zkxKf9GPjb/Ni4m/2FUP/9pXEf/dmlU/3JlUP9uYUz/al1I/3dqVf9zZlH/XVA7/2teSf94a1b/dGdS/4h7Zv9sX0r/aFtG/2lcR/9lWEP/bWBL/2lcR/92aVT/cmVQ/25hTP9qXUj/d2pV/2FUP/9vYk3/a15J/3hrVv+Mf2r/cGNO/2xfSv9cTzr/aVxH/3FkT/9tYEv/aVxH/3ZpVP9yZVD/bmFM/2pdSP9lWEP/c2ZR/29iTf9rXkn/kINu/3RnUv9wY07/YFM+/wA1LSX/PTUt/zkxKf9GPjb/WlJK/z42Lv86Mir/NS0l/0M7M/8/Ny//OzMr/0hAOP9EPDT/QDgw/zw0LP89NS3/aFtG/3BjTv9sX0r/aFtG/42Aa/9xZE//bWBL/1dKNf92aVT/cmVQ/25hTP9qXUj/d2pV/3NmUf9vYk3/X1I9/2xfSv90Z1L/cGNO/2xfSv+Ac17/dWhT/3FkT/9bTjn/aVxH/3ZpVP9yZVD/bmFM/2pdSP93alX/c2ZR/2NWQf9fUj3/eGtW/3RnUv9wY07/hHdi/2hbRv91aFP/X1I9/21gS/9pXEf/dmlU/3JlUP9uYUz/al1I/3dqVf9nWkX/ADw0LP9EPDT/QDgw/zw0LP9JQTn/RT01/y8nH/89NS3/OTEp/0Y+Nv9COjL/PjYu/zoyKv9HPzf/Qzsz/0tDO/9eUTz/d2pV/3NmUf9vYk3/a15J/3hrVv9iVUD/cGNO/2xfSv9oW0b/dWhT/3FkT/9tYEv/aVxH/3ZpVP9+cVz/YlVA/2pdSP93alX/c2ZR/29iTf9rXkn/ZllE/3RnUv9wY07/bF9K/2hbRv91aFP/cWRP/21gS/9pXEf/gnVg/2ZZRP9uYUz/al1I/3dqVf9zZlH/b2JN/1lMN/94a1b/dGdS/3BjTv9sX0r/aFtG/3VoU/9xZE//bWBL/3VoU/8AMioi/zoyKv9HPzf/Qzsz/z83L/8pIRn/SEA4/1xUTP9AODD/PDQs/0lBOf9FPTX/QTkx/z01Lf85MSn/OjIq/2VYQ/9tYEv/aVxH/3ZpVP9yZVD/XE86/2pdSP+Pgm3/c2ZR/29iTf9rXkn/eGtW/3RnUv9wY07/bF9K/1xPOv9pXEf/cWRP/21gS/9pXEf/dmlU/2BTPv9uYUz/gnVg/3dqVf9zZlH/b2JN/2teSf94a1b/dGdS/3BjTv9gUz7/XE86/3VoU/9xZE//bWBL/2lcR/9kV0L/cmVQ/4Z5ZP9qXUj/d2pV/3NmUf9vYk3/a15J/3hrVv90Z1L/ZFdC/wA5MSn/QTkx/z01Lf85MSn/NCwk/0I6Mv8+Ni7/OjIq/0c/N/9DOzP/Pzcv/zszK/9IQDj/RDw0/0A4MP8wKCD/bF9K/3RnUv9wY07/bF9K/1ZJNP91aFP/cWRP/21gS/9pXEf/dmlU/3JlUP9uYUz/al1I/3dqVf9zZlH/Y1ZB/19SPf94a1b/dGdS/3BjTv9aTTj/aFtG/3VoU/9xZE//bWBL/2lcR/92aVT/cmVQ/25hTP9qXUj/d2pV/2daRf9jVkH/a15J/3hrVv90Z1L/XlE8/2xfSv9oW0b/dWhT/3FkT/9tYEv/aVxH/3ZpVP9yZVD/bmFM/2pdSP9rXkn/AC8nH/9IQDj/RDw0/y4mHv88NCz/SUE5/0U9Nf9BOTH/PTUt/zkxKf9eVk7/Qjoy/z42Lv86Mir/Rz83/zcvJ/9iVUD/al1I/3dqVf9hVD//b2JN/2teSf94a1b/dGdS/3BjTv9sX0r/gHNe/3VoU/9xZE//bWBL/2lcR/9qXUj/ZllE/25hTP9qXUj/ZVhD/3NmUf9vYk3/a15J/3hrVv90Z1L/cGNO/4R3Yv9oW0b/dWhT/3FkT/9tYEv/XVA7/2pdSP9yZVD/bmFM/1hLNv93alX/c2ZR/29iTf9rXkn/eGtW/3RnUv+Ie2b/bF9K/2hbRv91aFP/cWRP/2FUP/8ANi4m/z42Lv9AODD/Rz83/0M7M/8/Ny//OzMr/0hAOP9EPDT/QDgw/zw0LP9JQTn/RT01/0E5Mf89NS3/GxML/2lcR/9xZE//c2ZR/2lcR/92aVT/cmVQ/25hTP9qXUj/d2pV/3NmUf9vYk3/a15J/3hrVv90Z1L/cGNO/05BLP9cTzr/dWhT/3dqVf9tYEv/aVxH/3ZpVP9yZVD/bmFM/2pdSP93alX/c2ZR/29iTf9rXkn/eGtW/3RnUv9SRTD/YFM+/2hbRv97bln/cWRP/21gS/9pXEf/dmlU/3JlUP9uYUz/al1I/3dqVf9zZlH/b2JN/2teSf94a1b/Vkk0/wA9NS3/Mysj/0E5Mf89NS3/OTEp/0Y+Nv9COjL/PjYu/zoyKv9HPzf/Qzsz/z83L/87Myv/YFhQ/zIqIv80LCT/X1I9/2ZZRP90Z1L/cGNO/2xfSv9oW0b/dWhT/3FkT/9tYEv/aVxH/3ZpVP9yZVD/bmFM/4J1YP9lWEP/Z1pF/2NWQf9ZTDf/eGtW/3RnUv9wY07/bF9K/2hbRv91aFP/cWRP/21gS/9pXEf/dmlU/3JlUP+GeWT/WEs2/2teSf9nWkX/XVA7/2teSf94a1b/dGdS/3BjTv9sX0r/aFtG/3VoU/9xZE//bWBL/2lcR/92aVT/in1o/1xPOv9eUTz/ACEZEf87Myv/SEA4/0Q8NP9AODD/VExE/0lBOf9FPTX/QTkx/z01Lf85MSn/Rj42/0I6Mv8sJBz/OjIq/zszK/9URzL/bmFM/2pdSP93alX/c2ZR/4d6Zf9rXkn/eGtW/3RnUv9wY07/bF9K/2hbRv91aFP/X1I9/21gS/9dUDv/WEs2/3JlUP9uYUz/al1I/3dqVf+Lfmn/b2JN/2teSf94a1b/dGdS/3BjTv9sX0r/aFtG/2NWQf9xZE//YVQ//0s+Kf92aVT/cmVQ/25hTP9qXUj/j4Jt/3NmUf9vYk3/a15J/3hrVv90Z1L/cGNO/2xfSv9WSTT/dWhT/2VYQ/8AOjIq/0I6Mv8+Ni7/OjIq/0c/N/9DOzP/Pzcv/zszK/9IQDj/RDw0/0A4MP88NCz/Ny8n/0U9Nf9BOTH/MSkh/1xPOv91aFP/cWRP/21gS/9pXEf/dmlU/3JlUP9uYUz/al1I/3dqVf9zZlH/b2JN/1lMN/94a1b/dGdS/2RXQv9gUz7/aFtG/3VoU/9xZE//bWBL/2lcR/92aVT/cmVQ/25hTP9qXUj/d2pV/3NmUf9dUDv/a15J/3hrVv9oW0b/ZFdC/2xfSv9oW0b/dWhT/3FkT/9tYEv/aVxH/3ZpVP9yZVD/bmFM/2pdSP93alX/YVQ//29iTf9rXkn/bF9K/wAwKCD/SUE5/0U9Nf9BOTH/PTUt/zkxKf9GPjb/Qjoy/1ZORv86Mir/Rz83/zEpIf8/Ny//OzMr/0hAOP84MCj/Y1ZB/2teSf94a1b/dGdS/3BjTv9sX0r/aFtG/3VoU/+JfGf/bWBL/2lcR/9kV0L/cmVQ/25hTP9qXUj/a15J/2daRf9vYk3/a15J/3hrVv90Z1L/cGNO/2xfSv9oW0b/jYBr/3FkT/9tYEv/V0o1/3ZpVP9yZVD/bmFM/15RPP9rXkn/c2ZR/29iTf9rXkn/eGtW/3RnUv9wY07/bF9K/4BzXv91aFP/cWRP/1tOOf9pXEf/dmlU/3JlUP9iVUD/AE9HP/8zKyP/Lycf/zw0LP84MCj/NCwk/zAoIP89NS3/OTEp/zUtJf8fFw//LSUd/zoyKv82Lib/Mioi/y4mHv+CdWD/ZllE/2JVQP9eUTz/a15J/2daRf9jVkH/X1I9/2xfSv9oW0b/UkUw/2BTPv9cTzr/aVxH/2VYQ/9hVD//dWhT/2pdSP9mWUT/YlVA/15RPP9rXkn/Z1pF/2NWQf9fUj3/bF9K/1ZJNP9kV0L/YFM+/1xPOv9pXEf/ZVhD/3lsV/9dUDv/al1I/2ZZRP9iVUD/XlE8/2teSf9nWkX/Y1ZB/19SPf9aTTj/aFtG/2RXQv9gUz7/XE86/2lcR//pdfWfl/2cIAAAAABJRU5ErkJggg==",
       "relative_path": "forgotten_resident.png",
       "width": 64,
-      "height": 16,
+      "height": 64,
       "uv_width": 64,
-      "uv_height": 16
+      "uv_height": 64
     }
   ],
-  "animations": [],
-  "groups": []
+  "animations": []
 }
