@@ -68,13 +68,32 @@ public final class TeamManager implements Listener, CommandExecutor, TabComplete
                 player.sendMessage(ChatColor.GREEN+"Invitation sent to "+target.getName()+".");
             }
             case "accept" -> {
-                String invited=data.getString("invites."+id);
+                String invitePath="invites."+id;
+                // Current invitations store leader and creation time in a section;
+                // accept the old scalar format as a one-time legacy fallback.
+                String invited=data.getString(invitePath+".leader");
+                if(invited==null)invited=data.getString(invitePath);
                 if(invited==null){player.sendMessage(ChatColor.RED+"You have no pending team invitation.");return true;}
-                UUID owner=UUID.fromString(invited);
-                if(!data.contains(teamPath(owner))){data.set("invites."+id,null);save();player.sendMessage(ChatColor.RED+"That team no longer exists.");return true;}
+                long createdAt=data.getLong(invitePath+".created-at",0L);
+                if(createdAt>0L&&System.currentTimeMillis()-createdAt>24L*60L*60L*1000L){
+                    data.set(invitePath,null);save();
+                    player.sendMessage(ChatColor.RED+"That team invitation has expired. Ask for a new invitation.");
+                    return true;
+                }
+                UUID owner;
+                try{owner=UUID.fromString(invited);}catch(IllegalArgumentException invalid){
+                    data.set(invitePath,null);save();
+                    player.sendMessage(ChatColor.RED+"That invitation is invalid. Ask for a new one.");
+                    return true;
+                }
+                if(!data.contains(teamPath(owner))){
+                    data.set(invitePath,null);save();
+                    player.sendMessage(ChatColor.RED+"That team no longer exists.");return true;
+                }
                 if(teamOf(id)!=null){player.sendMessage(ChatColor.RED+"Leave your current team first.");return true;}
-                List<String> members=new ArrayList<>(data.getStringList(teamPath(owner)+".members"));members.add(id.toString());
-                data.set(teamPath(owner)+".members",members);data.set("invites."+id,null);save();
+                List<String> members=new ArrayList<>(data.getStringList(teamPath(owner)+".members"));
+                if(!members.contains(id.toString()))members.add(id.toString());
+                data.set(teamPath(owner)+".members",members);data.set(invitePath,null);save();
                 player.sendMessage(ChatColor.GREEN+"You joined "+data.getString(teamPath(owner)+".name","the team")+".");
             }
             case "leave" -> {
