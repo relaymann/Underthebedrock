@@ -28,7 +28,7 @@ jobs:
         run: gradle clean test build
 
       - name: Prepare direct-download JAR
-        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        if: github.event_name != 'pull_request' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/feature/experience-takeover-expansion')
         shell: bash
         run: |
           set -euo pipefail
