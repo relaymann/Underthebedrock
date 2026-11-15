@@ -139,8 +139,8 @@ public final class CivilizationManager implements Listener {
 
     private int[] siteCandidate(World world, Player explorer, Random rng) {
         Location player = explorer.getLocation(), spawn = world.getSpawnLocation();
-        int minimum = Math.max(64, plugin.getConfig().getInt("horror.civilization.minimum-site-offset-blocks", 220));
-        int maximum = Math.max(minimum, plugin.getConfig().getInt("horror.civilization.maximum-site-offset-blocks", 360));
+        int minimum = Math.max(64, plugin.getConfig().getInt("horror.civilization.minimum-site-offset-blocks", 260));
+        int maximum = Math.max(minimum, plugin.getConfig().getInt("horror.civilization.maximum-site-offset-blocks", 420));
         int offset = minimum + rng.nextInt(maximum - minimum + 1);
         double angle = rng.nextDouble() * Math.PI * 2;
         int x = player.getBlockX() + (int) Math.round(Math.cos(angle) * offset);
