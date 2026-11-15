@@ -63,7 +63,7 @@ public final class EntityEncounterPolicy {
 
     private double adaptiveWeight(EntityArchetype type, PlayerHorrorMemory memory) {
         int sightings = memory == null ? 0 : memory.entityEncounters().getOrDefault(type, 0);
-        return type.selectionWeight() / (1.0 + Math.min(8, sightings) * 0.18);
+        return type.selectionWeight() * type.rarity().selectionMultiplier() / (1.0 + Math.min(8, sightings) * 0.18);
     }
 
     public double safeRadius() { return safeRadius; }

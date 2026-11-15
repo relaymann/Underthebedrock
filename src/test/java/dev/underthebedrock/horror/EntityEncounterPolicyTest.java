@@ -29,7 +29,23 @@ class EntityEncounterPolicyTest {
         assertTrue(policy.eligibleAt(3072).contains(EntityArchetype.PURSUER));
         assertFalse(policy.eligibleAt(12287).contains(EntityArchetype.ORIGINAL));
         assertTrue(policy.eligibleAt(12288).contains(EntityArchetype.ORIGINAL));
-        assertEquals(24, EntityArchetype.values().length);
+        assertEquals(27, EntityArchetype.values().length);
+    }
+
+    @Test void newEntitiesUnlockAtTheirIntendedDistancesAndUseUncommonRarity() {
+        assertFalse(policy.eligibleAt(1023).contains(EntityArchetype.WATCHER));
+        assertTrue(policy.eligibleAt(1024).contains(EntityArchetype.WATCHER));
+        assertFalse(policy.eligibleAt(1535).contains(EntityArchetype.DRIFTER));
+        assertTrue(policy.eligibleAt(1536).contains(EntityArchetype.DRIFTER));
+        assertFalse(policy.eligibleAt(2815).contains(EntityArchetype.CRAWLER));
+        assertTrue(policy.eligibleAt(2816).contains(EntityArchetype.CRAWLER));
+        assertEquals(EntityRarity.UNCOMMON, EntityArchetype.WATCHER.rarity());
+        assertEquals(EntityRarity.UNCOMMON, EntityArchetype.DRIFTER.rarity());
+        assertEquals(EntityRarity.UNCOMMON, EntityArchetype.CRAWLER.rarity());
+        assertEquals(EntityRarity.UNCOMMON, EntityArchetype.MIMIC.rarity());
+        assertEquals(1.25, EntityRarity.UNCOMMON.selectionMultiplier(), 0.000001);
+        assertEquals(1.0, EntityRarity.RARE.selectionMultiplier(), 0.000001);
+        assertEquals(0.35, EntityRarity.EXTREMELY_RARE.selectionMultiplier(), 0.000001);
     }
 
     @Test void dangerousArchetypesUnlockFartherOut() {

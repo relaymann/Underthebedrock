@@ -60,7 +60,7 @@ horror:
     safe-radius-blocks: 512
     full-threat-distance-blocks: 8192
     maximum-chance-per-check: 0.025
-    successful-encounter-cooldown-minutes: 8
+    successful-encounter-cooldown-minutes: 5
     active-encounters-per-player: 1
     max-encounter-duration-seconds: 180
     behavior:
@@ -71,6 +71,7 @@ horror:
       remember-last-known-position: true
       player-specific-visibility: true
       adaptive-selection: true
+      crawler-maximum-light-level: 7
     models:
       observer: watcher
       stalker: watcher
@@ -96,6 +97,9 @@ horror:
       excavator: watcher
       unperson: watcher
       original: watcher
+      watcher: watcher
+      drifter: watcher
+      crawler: watcher
   memory:
     file: player-horror-memory.yml
   civilization:

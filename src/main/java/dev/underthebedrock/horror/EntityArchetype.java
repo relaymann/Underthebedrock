@@ -8,7 +8,7 @@ public enum EntityArchetype {
     STALKER("Stalker", 0.15, 1024, 3.5, "Watches from a distance and relocates when observed."),
     AGGRESSOR("Aggressor", 0.95, 3072, 0.8, "Escalates after provocation and pursues without perfect tracking."),
     OBSERVER("Observer", 0.05, 768, 4.0, "Appears at the edge of sight and avoids direct contact."),
-    MIMIC("Mimic", 0.35, 2048, 1.8, "Copies familiar cues and deceptive movement."),
+    MIMIC("Mimic", 0.35, 2048, 1.8, "Copies player footsteps and environmental sounds from a misleading distance."),
     WANDERER("Wanderer", 0.25, 1536, 2.5, "Roams without a fixed target and leaves evidence."),
     DEEP_ENTITY("Deep Entity", 0.80, 6144, 0.12, "A rare presence that disturbs other encounters."),
     WITNESS("The Witness", 0.02, 768, 3.8, "Watches from far away; vanishes when deliberately approached."),
@@ -28,7 +28,10 @@ public enum EntityArchetype {
     ABSENCE("The Absence", 0.05, 4608, 0.8, "Suppresses the feeling of a living environment before it is seen."),
     EXCAVATOR("The Excavator", 0.88, 6144, 0.18, "An ancient presence associated with deep and damaged sites."),
     UNPERSON("The Unperson", 0.16, 7168, 0.22, "A person missing from every surviving identity record."),
-    ORIGINAL("The Original", 0.10, 12288, 0.015, "A boundary-layer presence that even other entities avoid.");
+    ORIGINAL("The Original", 0.10, 12288, 0.015, "A boundary-layer presence that even other entities avoid."),
+    WATCHER("The Watcher", 0.03, 1024, 2.6, "Silently observes from the edge of sight, then vanishes when approached."),
+    DRIFTER("The Drifter", 0.18, 1536, 2.1, "Wanders abandoned spaces and occasionally follows a player's trail."),
+    CRAWLER("The Crawler", 0.72, 2816, 0.72, "Moves through dark spaces and becomes dangerous when approached.");
 
     private final String displayName;
     private final double aggression;
@@ -50,16 +53,24 @@ public enum EntityArchetype {
     public double selectionWeight() { return selectionWeight; }
     public String behavior() { return behavior; }
 
+    public EntityRarity rarity() {
+        return switch (this) {
+            case WATCHER, DRIFTER, CRAWLER, MIMIC -> EntityRarity.UNCOMMON;
+            case DEEP_ENTITY, EXCAVATOR, UNPERSON, ORIGINAL -> EntityRarity.EXTREMELY_RARE;
+            default -> EntityRarity.RARE;
+        };
+    }
+
     public boolean isPassive() {
         return switch (this) {
-            case OBSERVER, WITNESS, PEEKER, FORGOTTEN_RESIDENT, SURVEYOR, ABSENCE, UNPERSON, ORIGINAL -> true;
+            case OBSERVER, WITNESS, PEEKER, FORGOTTEN_RESIDENT, SURVEYOR, ABSENCE, UNPERSON, ORIGINAL, WATCHER -> true;
             default -> false;
         };
     }
 
     public boolean isPursuer() {
         return switch (this) {
-            case AGGRESSOR, PURSUER, CRAWLING_ONE, HEAVY, EXCAVATOR -> true;
+            case AGGRESSOR, PURSUER, CRAWLING_ONE, HEAVY, EXCAVATOR, CRAWLER -> true;
             default -> false;
         };
     }
