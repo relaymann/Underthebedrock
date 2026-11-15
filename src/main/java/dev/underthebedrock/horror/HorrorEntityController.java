@@ -66,6 +66,7 @@ public final class HorrorEntityController implements Listener {
     private final Map<UUID, Encounter> active = new HashMap<>();
     private final Random random = new Random();
     private BukkitTask task;
+    private BukkitTask movementTask;
     private boolean warned;
 
     public HorrorEntityController(UnderTheBedrockPlugin plugin, VoidWorldManager worlds,
@@ -81,11 +82,14 @@ public final class HorrorEntityController implements Listener {
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
         long ticks = Math.max(1, plugin.getConfig().getLong("horror.director.check-interval-seconds", 12)) * 20L;
         task = plugin.getServer().getScheduler().runTaskTimer(plugin, this::tick, ticks, ticks);
+        movementTask = plugin.getServer().getScheduler().runTaskTimer(plugin, this::movementTick, 1L, 1L);
     }
 
     public void stop() {
         if (task != null) task.cancel();
+        if (movementTask != null) movementTask.cancel();
         task = null;
+        movementTask = null;
         clearAll();
     }
 
@@ -289,6 +293,13 @@ public final class HorrorEntityController implements Listener {
             }
             return;
         }
+        if (encounter.state == State.STALKING && encounter.type == EntityArchetype.DOORFRAME
+                && encounter.unseenChecks == 2) {
+            Location behind = player.getLocation().subtract(
+                    player.getLocation().getDirection().setY(0).normalize().multiply(12));
+            behind.setY(plugin.getConfig().getInt("world.floor-y", 64) + 1);
+            teleportIfLoaded(shell, behind);
+        }
         boolean oneShotPlaying = encounter.animationUntil > System.currentTimeMillis();
         if (!oneShotPlaying) {
             String desired;
@@ -307,56 +318,101 @@ public final class HorrorEntityController implements Listener {
             }
             setAnimation(encounter, desired);
         }
-        if (encounter.state == State.RETREATING) {
-            moveAway(shell, player.getLocation(), encounter.type == EntityArchetype.CEILING_CRAWLER ? 2.2 : 1.4);
-            if (distanceSquared > 10000) { remove(encounter); active.remove(player.getUniqueId()); }
-            return;
-        }
-        if (encounter.state == State.STALKING) {
-            if (encounter.type == EntityArchetype.DOORFRAME && encounter.unseenChecks == 2) {
-                Location behind = player.getLocation().subtract(player.getLocation().getDirection().setY(0).normalize().multiply(12));
-                behind.setY(plugin.getConfig().getInt("world.floor-y", 64) + 1);
-                teleportIfLoaded(shell, behind);
-            } else {
-                double step = encounter.type == EntityArchetype.CEILING_CRAWLER ? 1.1
-                    : encounter.type == EntityArchetype.CRAWLER ? 0.82
-                    : encounter.type == EntityArchetype.DRIFTER ? 0.42 : .55;
-            moveToward(shell, encounter.lastKnown, step);
+    }
+
+    /**
+     * Moves existing apparitions every server tick. Encounter discovery and state decisions stay
+     * on the slower director cadence, while bounded movement and attacks remain responsive.
+     */
+    private void movementTick() {
+        if (!worlds.isActive()) return;
+        World world = worlds.getWorld();
+        if (world == null) return;
+
+        var iterator = active.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Encounter encounter = iterator.next().getValue();
+            Player player = plugin.getServer().getPlayer(encounter.target);
+            ArmorStand shell = encounter.shell;
+            if (player == null || !player.getWorld().equals(world) || !shell.isValid()
+                    || !shell.getWorld().equals(world)) {
+                remove(encounter);
+                iterator.remove();
+                continue;
             }
-            return;
-        }
-        if (encounter.state == State.HUNTING) {
-            if (encounter.type == EntityArchetype.MIMIC && distanceSquared <= 4.0
-                    && System.currentTimeMillis() - encounter.mimicLastAttackAt >= 3000) {
-                encounter.mimicLastAttackAt = System.currentTimeMillis();
-                setAnimation(encounter, "attack");
-                player.damage(4.0, shell);
-                Vector knockback = player.getLocation().toVector().subtract(shell.getLocation().toVector());
-                if (knockback.lengthSquared() > .01) {
-                    knockback.normalize().multiply(.62).setY(.24);
-                    player.setVelocity(knockback);
+            if (encounter.state == State.DISAPPEARING) continue;
+
+            double speed = movementSpeed(encounter);
+            if (encounter.state == State.HUNTING) {
+                encounter.lastKnown = player.getLocation().clone();
+                double distanceSquared = shell.getLocation().distanceSquared(player.getLocation());
+                if (encounter.type == EntityArchetype.MIMIC && distanceSquared <= 4.0
+                        && encounter.animationUntil <= System.currentTimeMillis()
+                        && System.currentTimeMillis() - encounter.mimicLastAttackAt >= 3000L) {
+                    encounter.mimicLastAttackAt = System.currentTimeMillis();
+                    setAnimation(encounter, "attack");
+                    player.damage(4.0, shell);
+                    Vector knockback = player.getLocation().toVector().subtract(shell.getLocation().toVector());
+                    if (knockback.lengthSquared() > .01) {
+                        knockback.normalize().multiply(.62).setY(.24);
+                        player.setVelocity(knockback);
+                    }
+                    player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_HURT, .9f, .72f);
+                    player.playSound(shell.getLocation(), Sound.ENTITY_ZOMBIE_ATTACK_WOODEN_DOOR, .65f, .62f);
+                    continue;
                 }
-                player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_HURT, .9f, .72f);
-                player.playSound(shell.getLocation(), Sound.ENTITY_ZOMBIE_ATTACK_WOODEN_DOOR, .65f, .62f);
-                return;
+                moveToward(shell, player.getLocation(), speed);
+                continue;
             }
-            double speed = encounter.type == EntityArchetype.HEAVY ? .35
-                    : encounter.type == EntityArchetype.CRAWLING_ONE ? 1.8
-                    : encounter.type == EntityArchetype.CRAWLER ? 1.15
-                    : encounter.type == EntityArchetype.MIMIC ? 1.45 : 1.0;
-            moveToward(shell, encounter.lastKnown, speed);
-            return;
+            if (encounter.state == State.RETREATING) {
+                double retreatSpeed = speed * (encounter.type == EntityArchetype.CEILING_CRAWLER ? 1.8 : 1.5);
+                moveAway(shell, player.getLocation(), retreatSpeed);
+                if (shell.getLocation().distanceSquared(player.getLocation()) > 10000.0) {
+                    remove(encounter);
+                    iterator.remove();
+                }
+                continue;
+            }
+            if (encounter.state == State.STALKING) {
+                moveToward(shell, encounter.lastKnown, speed);
+                continue;
+            }
+            if (encounter.state == State.SEARCHING && !player.hasLineOfSight(shell)) {
+                moveToward(shell, encounter.lastKnown, speed * .72);
+                continue;
+            }
+
+            if (encounter.type == EntityArchetype.WANDERER || encounter.type == EntityArchetype.DRIFTER) {
+                double directorTicks = Math.max(1L,
+                        plugin.getConfig().getLong("horror.director.check-interval-seconds", 12)) * 20.0;
+                double chancePerTick = (encounter.type == EntityArchetype.DRIFTER ? .18 : .12) / directorTicks;
+                if (random.nextDouble() < chancePerTick) {
+                    Location roam = shell.getLocation().add(random.nextInt(9) - 4, 0, random.nextInt(9) - 4);
+                    roam.setY(plugin.getConfig().getInt("world.floor-y", 64) + 1);
+                    teleportIfLoaded(shell, roam);
+                }
+            }
         }
-        if (encounter.state == State.SEARCHING && !visible) {
-            moveToward(shell, encounter.lastKnown, encounter.type == EntityArchetype.DOUBLE ? .8 : .65);
-            return;
-        }
-        if ((encounter.type == EntityArchetype.WANDERER || encounter.type == EntityArchetype.DRIFTER)
-                && random.nextDouble() < (encounter.type == EntityArchetype.DRIFTER ? .18 : .12)) {
-            Location roam = shell.getLocation().add(random.nextInt(9) - 4, 0, random.nextInt(9) - 4);
-            roam.setY(plugin.getConfig().getInt("world.floor-y", 64) + 1);
-            teleportIfLoaded(shell, roam);
-        }
+    }
+
+    private double movementSpeed(Encounter encounter) {
+        double base = plugin.getConfig().getDouble(
+                "horror.entities.behavior.movement-speed-blocks-per-tick", .085);
+        base = Math.max(.01, Math.min(.20, base));
+        return switch (encounter.type) {
+            case HEAVY, DEEP_ENTITY -> base * .48;
+            case CRAWLING_ONE -> base * 1.65;
+            case CRAWLER -> base * 1.35;
+            case MIMIC -> base * 1.5;
+            case CEILING_CRAWLER -> base * 1.25;
+            case DRIFTER -> base * .55;
+            default -> base;
+        };
+    }
+
+    private float approachYaw(float current, float target) {
+        float difference = (target - current + 540.0f) % 360.0f - 180.0f;
+        return current + Math.max(-8.0f, Math.min(8.0f, difference));
     }
 
     private void revealMimic(Player player, Encounter encounter) {
@@ -439,8 +495,11 @@ public final class HorrorEntityController implements Listener {
         Vector direction = target.toVector().subtract(shell.getLocation().toVector());
         direction.setY(0);
         if (direction.lengthSquared() < 4) return;
+        float targetYaw = (float) Math.toDegrees(Math.atan2(-direction.getX(), direction.getZ()));
         direction.normalize().multiply(Math.min(maximumStep, Math.sqrt(direction.lengthSquared())));
-        Location next = shell.getLocation().add(direction);
+        Location current = shell.getLocation();
+        Location next = current.add(direction);
+        next.setYaw(approachYaw(current.getYaw(), targetYaw));
         next.setY(plugin.getConfig().getInt("world.floor-y", 64) + 1);
         teleportIfLoaded(shell, next);
     }
@@ -449,8 +508,11 @@ public final class HorrorEntityController implements Listener {
         Vector direction = shell.getLocation().toVector().subtract(target.toVector());
         direction.setY(0);
         if (direction.lengthSquared() < .01) direction = new Vector(1, 0, 0);
+        float targetYaw = (float) Math.toDegrees(Math.atan2(-direction.getX(), direction.getZ()));
         direction.normalize().multiply(step);
-        Location next = shell.getLocation().add(direction);
+        Location current = shell.getLocation();
+        Location next = current.add(direction);
+        next.setYaw(approachYaw(current.getYaw(), targetYaw));
         next.setY(plugin.getConfig().getInt("world.floor-y", 64) + 1);
         teleportIfLoaded(shell, next);
     }

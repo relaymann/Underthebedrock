@@ -4,7 +4,7 @@ main: dev.underthebedrock.UnderTheBedrockPlugin
 api-version: '26.1'
 description: Subtle psychological and analog ARG horror in a persistent void world.
 authors: [relaymann]
-depend: [Nova, BetterModel]
+depend: [BetterModel]
 commands:
   enter:
     description: Enter Under The Bedrock.

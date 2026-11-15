@@ -11,3 +11,6 @@ CivilizationManager generates deterministic abandoned districts in already-loade
 
 ## Persistence and performance
 Player horror memory, lore discoveries, structures, supply schedules, item cooldowns, portable storage, death echoes, Reconstructor anchors, and one-time legacy inventory isolation are persisted in YAML/PDC. Scheduled scans avoid force-loading chunks. Temporary world effects restore only expected states so player edits and other plugins are not overwritten.
+
+## Apparition visuals and movement
+BetterModel is the only required visual integration. HorrorEntityController separates encounter selection/state decisions from per-tick bounded movement, rotates apparitions toward their targets smoothly, and keeps each apparition private to its intended player. Model assets own their articulated rigs and authored animation clips; structural validation checks rig integrity, loop seams, one-shot return poses, meaningful disappearance motion, and controller/asset duration agreement.

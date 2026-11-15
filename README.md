@@ -5,7 +5,7 @@ Standalone Paper 26.1.2 psychological / analog ARG horror plugin with a persiste
 ## Target platform
 - Minecraft Java / Paper 26.1.2
 - Java 25 / Gradle 9.7.1
-- Nova 0.23.0 / BetterModel 3.5.1
+- BetterModel 3.5.1
 
 ## Commands
 - /underthebedrock start — create/activate the horror world.
@@ -38,13 +38,13 @@ The civilization layer adds six deterministic district types: residential blocks
 The station includes a traversable rail layout, minecart supplies, and occasional unmanned service-cart arrivals. A restrained environmental director escalates distant footsteps, doors that briefly open behind the player, redstone lights that flicker at later stages, signs that temporarily rewrite themselves, ash, smoke, and portal anomalies according to the player's discoveries rather than using constant jumpscares. Null reacts differently to resident evidence and the player's increasingly clear identity. All civilization sites persist in `civilization-sites.yml`; generation only touches already-loaded chunks near players. Discovering the Architect's Seal also stabilizes each Reconstructor for one additional activation; after Null recognizes the returning subject, activating one produces a warning that the anchor has been noticed.
 
 ## Build
-Use JDK 25 and Gradle 9.7.1: `gradle clean test build`. JAR output: `build/libs/`. Install matching Nova 0.23.0 and BetterModel 3.5.1 server plugins.
+Use JDK 25 and Gradle 9.7.1: `gradle clean test build`. JAR output: `build/libs/`. Install BetterModel 3.5.1.
 
 
 ## Entity ecosystem overhaul
 The encounter roster contains 27 behavioral archetypes: the original Observer, Stalker, Wanderer, Mimic, Aggressor, and Deep Entity plus the Witness, Peeker, Forgotten Resident, Surveyor, Lurker, Doorframe, Ceiling Crawler, Echo, Pursuer, Crawling One, Heavy, Imitator, Misprint, Double, Absence, Excavator, Unperson, Original, Watcher, Drifter, and Crawler. Each has an unlock distance, aggression profile, and weighted selection rarity. The Uncommon tier receives a 1.25x selection multiplier, Rare remains 1.0x, and Extremely Rare receives 0.35x; these multipliers only affect which entity is selected after the unchanged global encounter roll succeeds. The Watcher observes without chasing, the Drifter roams and occasionally follows, and the Crawler becomes dangerous only in sufficiently dark areas. The existing Mimic now echoes occasional player footsteps and environmental sounds when out of sight. Lore-critical and dangerous entities unlock farther from the entrance; repeated sightings are down-weighted so a player's encounter history gently favors unfamiliar presences.
 
-The encounter controller now tracks player-specific observation, stalking, searching, hunting, retreating, and disappearance states. Apparitions remember a player's last known location during an encounter, react differently when watched, and move in bounded steps only through already-loaded, passable space. The controller keeps each apparition hidden from other players, limits encounter duration, and cleans up shells when players leave or the world shuts down. All 27 model keys are independently configurable under `horror.entities.models`; they currently fall back to the registered `watcher` model until distinct BetterModel assets are supplied. The six occurrence severity tiers and six story chapters remain the pacing and progression layers; the expanded roster does not bypass them.
+The encounter controller now tracks player-specific observation, stalking, searching, hunting, retreating, and disappearance states. Apparitions remember a player's last known location during an encounter, react differently when watched, and move in bounded steps only through already-loaded, passable space. The controller keeps each apparition hidden from other players, limits encounter duration, and cleans up shells when players leave or the world shuts down. All 27 archetypes have dedicated BetterModel assets, with a separate revealed-form asset for the Mimic. Their model IDs are independently configurable under `horror.entities.models`. The six occurrence severity tiers and six story chapters remain the pacing and progression layers; the expanded roster does not bypass them.
 
 
 ## Experience takeover and multiplayer horror expansion
@@ -78,7 +78,7 @@ The Mimic now has two separate BetterModel assets:
 - `mimic.bbmodel`: a deliberately ordinary Steve-like player disguise (classic blue shirt, indigo trousers, brown hair, normal player proportions) with subtle facial asymmetry and an unsettlingly fixed expression.
 - `mimic_revealed.bbmodel`: a nonhuman predator form with a split skull/jaw, exposed neck, ribbed torso, elongated arms, claws, and protruding spines.
 
-The controller keeps the Steve disguise while the Mimic observes and imitates footsteps. It reveals the predator form once player provocation reaches 12, or when it has closed to within 10 blocks after remaining unseen for at least two director checks. The model is swapped on the same player-specific carrier, with smoke/critical-hit particles and a layered scream/warden roar, then the Mimic enters its hunting state and tracks the player's current position. At close range it performs a damaging strike (4 damage, with knockback) with a three-second minimum cooldown; the controller's configured check interval also caps how frequently it can act (12 seconds by default). The old BetterModel tracker is closed after the replacement is created to prevent tracker leaks.
+The controller keeps the Steve disguise while the Mimic observes and imitates footsteps. It reveals the predator form once player provocation reaches 12, or when it has closed to within 10 blocks after remaining unseen for at least two director checks. The model is swapped on the same player-specific carrier, with smoke/critical-hit particles and a layered scream/warden roar, then the Mimic enters its hunting state and tracks the player's current position. At close range it performs a damaging strike (4 damage, with knockback) no more than once every three seconds. Movement and close-range attack checks run every server tick, independently of the slower 12-second encounter-discovery cadence. The old BetterModel tracker is closed after the replacement is created to prevent tracker leaks.
 
 Install both files from `bettermodel/models/` into `plugins/BetterModel/models/`, reload BetterModel, and distribute the generated resource pack. The revealed form is a separate model asset; it must be registered as `mimic_revealed` for the transformation to occur.
 
@@ -92,12 +92,16 @@ The second batch completes dedicated Blockbench Generic-model assets for the rem
 
 Every apparition asset now contains a Blockbench Generic-model skeleton. Geometry is assigned to independently animated head, torso, arm, and leg/appendage bones, with pivots placed at joints rather than rotating the complete model as one rigid object. Each model includes looping `idle`, `walk`, and `crawl` clips plus one-shot `attack`, `reveal`, and `disappear` clips. The cycles use staggered limb motion, breathing/sway, anticipation, strike follow-through, and a staged collapse pose. BetterModel's standard `idle` and `walk` animation names are retained for compatibility with its built-in animation handling.
 
-The server controller starts the idle pose when an apparition spawns, changes to walking/crawling during movement, plays attack on the Mimic's strike, plays reveal after the disguise-to-predator model swap, and allows the disappearance animation to finish before removing the tracker and shell. Animation changes are state-driven and are not restarted every director tick. The encounter remains player-specific and retains its existing loaded-chunk movement limits.
+The server controller plays `emerge` when an apparition spawns, selects `idle`, `stalk`, `crawl`, or `run` loops from its behavioral state, and uses one-shot clips for attacks, reveals, listening, inspection, and disappearance. One-shots return to the appropriate loop after their authored duration. Movement and facing update every server tick in bounded steps through already-loaded, passable space, while encounter discovery and state decisions remain on the slower director cadence. Each apparition remains private to its intended player.
 
 ## BetterModel animation installation and testing
 
 Copy the complete `bettermodel/models/` directory to `plugins/BetterModel/models/`, run `/bettermodel reload`, then distribute the regenerated resource pack. Use BetterModel's `/bm test <model> <animation>` command to preview clips individually; start with `observer idle`, `crawler crawl`, `mimic walk`, and `mimic_revealed reveal`. The plugin's encounter controller triggers clips automatically once the models are loaded. Repository structural validation and CI do not replace an in-game visual test on the target Paper/BetterModel versions.
 
+
+## Smooth apparition movement and animation validation
+
+The encounter director separates its slower discovery/state cadence from a dedicated per-tick movement task. Apparitions move in small bounded steps, smoothly turn toward or away from their target, and only use already-loaded chunks and passable space. Heavy entities move deliberately, crawlers and the Mimic move faster, and the Mimic's three-second attack cooldown is no longer accidentally limited by the director's 12-second interval.
 
 ## BetterModel rig and animation validation
 

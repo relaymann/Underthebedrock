@@ -16,6 +16,12 @@ EXPECTED_ANIMATIONS = {
     "listen", "recoil", "turn",
 }
 UUID_RE = re.compile(r"^[0-9a-fA-F]{8}(?:-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}$")
+EXPECTED_DURATIONS = {
+    "idle": 3.2, "walk": 0.8, "run": 0.46, "stalk": 2.2, "crawl": 0.72,
+    "attack": 1.05, "lunge": 0.72, "twitch": 0.58, "reveal": 1.25,
+    "disappear": 1.2, "emerge": 1.65, "hurt": 0.62, "death": 1.8,
+    "roar": 1.35, "inspect": 1.55, "listen": 1.05, "recoil": 0.68, "turn": 1.0,
+}
 
 
 def fail(path: Path, message: str) -> None:
@@ -78,6 +84,9 @@ def validate(path: Path) -> tuple[int, int, int]:
         length = animation.get("length")
         if not isinstance(length, (int, float)) or not math.isfinite(length) or length <= 0:
             fail(path, f"invalid duration for {animation.get('name')}")
+        expected_length = EXPECTED_DURATIONS.get(animation.get("name"))
+        if expected_length is not None and abs(length - expected_length) > 0.001:
+            fail(path, f"{animation.get('name')}: duration does not match controller timing")
         animators = animation.get("animators") or {}
         if set(animators) != group_ids:
             fail(path, f"{animation.get('name')}: animator/bone UUID coverage mismatch")
@@ -100,6 +109,8 @@ def validate(path: Path) -> tuple[int, int, int]:
                 times.append(time)
                 if keyframe.get("channel") != "rotation":
                     fail(path, f"{animation.get('name')}: unsupported animation channel")
+                if animation.get("loop") == "loop" and keyframe.get("interpolation") != "catmullrom":
+                    fail(path, f"{animation.get('name')}: looping clips must use smooth Catmull-Rom interpolation")
                 points = keyframe.get("data_points") or []
                 if len(points) != 1:
                     fail(path, f"{animation.get('name')}: expected one rotation data point")
@@ -122,6 +133,30 @@ def validate(path: Path) -> tuple[int, int, int]:
                     end_tangent = last[axis] - penultimate[axis]
                     if abs(start_tangent - end_tangent) > 0.01:
                         fail(path, f"{animation.get('name')}: loop has a discontinuous tangent")
+            elif animation.get("name") not in {"death", "disappear", "emerge"}:
+                for animator in animators.values():
+                    keyframes = animator.get("keyframes") or []
+                    first = keyframes[0]["data_points"][0]
+                    last = keyframes[-1]["data_points"][0]
+                    if any(abs(last[axis] - first[axis]) > 0.05 for axis in ("x", "y", "z")):
+                        fail(path, f"{animation.get('name')}: one-shot does not return to its starting pose")
+            if animation.get("name") == "disappear":
+                peak_rotation = max(
+                    abs(point[axis])
+                    for animator in animators.values()
+                    for keyframe in (animator.get("keyframes") or [])
+                    for point in (keyframe.get("data_points") or [])
+                    for axis in ("x", "y", "z")
+                )
+                if peak_rotation < 10:
+                    fail(path, "disappear: clip contains no meaningful vanishing motion")
+                final_pose_peak = max(
+                    abs((animator.get("keyframes") or [])[-1]["data_points"][0][axis])
+                    for animator in animators.values()
+                    for axis in ("x", "y", "z")
+                )
+                if final_pose_peak < 10:
+                    fail(path, "disappear: clip must finish in a collapsed pose, not return to idle")
 
     for texture in textures:
         texture_uuid = texture.get("uuid")

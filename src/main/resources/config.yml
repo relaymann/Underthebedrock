@@ -67,7 +67,7 @@ horror:
       observation-range-blocks: 100
       despawn-range-blocks: 128
       passive-vanish-range-blocks: 60
-      movement-step-blocks: 0.55
+      movement-speed-blocks-per-tick: 0.085
       remember-last-known-position: true
       player-specific-visibility: true
       adaptive-selection: true
@@ -110,9 +110,6 @@ horror:
     ambient-effects-enabled: true
     resident-echoes-enabled: true
 integrations:
-  nova:
-    enabled: true
-    required: true
   bettermodel:
     enabled: true
     required: true
