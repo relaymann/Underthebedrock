@@ -38,7 +38,7 @@ public final class BaseManager implements Listener, CommandExecutor, TabComplete
     private static final String[] PERMS={"enter","storage","forge","build","security","research"};
     private static final String[] RECIPES={"null_fragment","resonance_core","charm_of_the_forgotten","null_ward","power_cell"};
     private static final String[] OUTPUTS={"resonance_core","charm_of_the_forgotten","null_ward","power_cell","reconstructor"};
-    private static final long[] HOURS={1,3,8,16,24};
+    private static final double[] HOURS={1.5,3,8,16,19};
     private final UnderTheBedrockPlugin plugin; private final VoidWorldManager worlds; private final TeamManager teams;
     private final File file,sitesFile; private final YamlConfiguration data,sites;
     private final NamespacedKey constructorKey,baseBlockKey;
