@@ -294,8 +294,10 @@ public final class HorrorEntityController implements Listener {
             String desired;
             if (encounter.state == State.HUNTING) {
                 desired = "run";
-            } else if (encounter.state == State.STALKING || encounter.state == State.RETREATING) {
+            } else if (encounter.state == State.STALKING) {
                 desired = locomotionAnimation(encounter);
+            } else if (encounter.state == State.RETREATING) {
+                desired = "run";
             } else if (encounter.state == State.SEARCHING) {
                 double cue = random.nextDouble();
                 desired = cue < .22 ? "listen" : cue < .40 ? "inspect" : locomotionAnimation(encounter);
