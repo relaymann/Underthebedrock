@@ -48,12 +48,13 @@ def validate(path: Path) -> tuple[int, int, int]:
     assignments: list[str] = []
     all_uuids: list[str] = element_ids[:]
 
-    def walk(node: dict) -> None:
+    def walk(node: dict, is_root: bool = False) -> None:
         group_id = node.get("uuid")
-        if not isinstance(group_id, str) or group_id in group_ids:
+        if not isinstance(group_id, str) or group_id in all_uuids:
             fail(path, "missing or duplicate bone UUID")
-        group_ids.add(group_id)
-        group_names[group_id] = node.get("name", "")
+        if not is_root:
+            group_ids.add(group_id)
+            group_names[group_id] = node.get("name", "")
         all_uuids.append(group_id)
         for child in node.get("children") or []:
             if isinstance(child, str):
@@ -64,7 +65,7 @@ def validate(path: Path) -> tuple[int, int, int]:
                 fail(path, "invalid outliner child")
 
     for root in roots:
-        walk(root)
+        walk(root, is_root=True)
 
     if sorted(assignments) != sorted(element_ids):
         fail(path, "geometry must be assigned to exactly one bone (missing, duplicate, or orphaned element)")
