@@ -66,6 +66,7 @@ public final class UnderTheBedrockPlugin extends JavaPlugin {
   getConfig().set("horror.director.maximum-adaptive-bonus",0.04);
   getConfig().set("horror.events.minimum-cooldown-seconds",300);
   getConfig().set("horror.events.maximum-cooldown-seconds",420);
+  getConfig().set("horror.events.minimum-gap-from-occurrence-seconds",90);
   getConfig().set("horror.structures.site-cell-size-blocks",2048);
   getConfig().set("horror.structures.cell-generation-chance",0.24);
   getConfig().set("horror.structures.minimum-distance-from-spawn-blocks",600);
@@ -76,9 +77,9 @@ public final class UnderTheBedrockPlugin extends JavaPlugin {
   getConfig().set("horror.civilization.scan-interval-ticks",120);
   getConfig().set("horror.civilization.site-cell-size-blocks",2048);
   getConfig().set("horror.civilization.cell-generation-chance",0.16);
-  getConfig().set("horror.civilization.minimum-distance-from-spawn-blocks",600);
-  getConfig().set("horror.civilization.minimum-site-offset-blocks",220);
-  getConfig().set("horror.civilization.maximum-site-offset-blocks",360);
+  getConfig().set("horror.civilization.minimum-distance-from-spawn-blocks",900);
+  getConfig().set("horror.civilization.minimum-site-offset-blocks",260);
+  getConfig().set("horror.civilization.maximum-site-offset-blocks",420);
   getConfig().set("horror.entities.safe-radius-blocks",350);
   getConfig().set("horror.entities.full-threat-distance-blocks",2800);
   getConfig().set("horror.entities.maximum-chance-per-check",0.12);
