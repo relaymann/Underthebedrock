@@ -42,6 +42,9 @@ public final class TeamManager implements Listener, CommandExecutor, TabComplete
         Player attacker=null; Entity damager=event.getDamager();
         if(damager instanceof Player p) attacker=p;
         else if(damager instanceof Projectile projectile && projectile.getShooter() instanceof Player p) attacker=p;
+        else if(damager instanceof AreaEffectCloud cloud && cloud.getSource() instanceof Player p) attacker=p;
+        else if(damager instanceof Tameable tameable && tameable.isTamed()
+                && tameable.getOwner() instanceof Player p) attacker=p;
         if(attacker!=null && sameTeam(attacker.getUniqueId(),victim.getUniqueId())) event.setCancelled(true);
     }
     @Override public boolean onCommand(CommandSender sender,Command command,String label,String[] args){
