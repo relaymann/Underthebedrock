@@ -56,7 +56,29 @@ public final class BaseManager implements Listener, CommandExecutor, TabComplete
     }
     public void start(){ConfigurationSection all=data.getConfigurationSection("bases");if(all!=null)for(String id:all.getKeys(false)){String path="bases."+id;if(data.getBoolean(path+".powered",false)&&!data.contains(path+".generator-until")){data.set(path+".generator-installed",true);data.set(path+".generator-until",System.currentTimeMillis()+capacityMillis());data.set(path+".powered",null);}}save();plugin.getServer().getPluginManager().registerEvents(this,plugin);securityTask=plugin.getServer().getScheduler().runTaskTimer(plugin,this::securityTick,100L,100L);}
     public void stop(){if(securityTask!=null)securityTask.cancel();securityTask=null;save();}
-    private void save(){try{data.save(file);}catch(IOException e){plugin.getLogger().severe("Could not save bases.yml: "+e.getMessage());}}
+    private boolean save(){
+        File temporary = new File(file.getParentFile(), file.getName() + ".tmp");
+        try {
+            File parent = file.getParentFile();
+            if (parent != null && !parent.exists() && !parent.mkdirs()) {
+                throw new IOException("Could not create plugin data directory");
+            }
+            data.save(temporary);
+            try {
+                java.nio.file.Files.move(temporary.toPath(), file.toPath(),
+                    java.nio.file.StandardCopyOption.ATOMIC_MOVE,
+                    java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+            } catch (java.nio.file.AtomicMoveNotSupportedException unsupported) {
+                java.nio.file.Files.move(temporary.toPath(), file.toPath(),
+                    java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+            }
+            return true;
+        } catch (IOException e) {
+            plugin.getLogger().severe("Could not save bases.yml: "+e.getMessage());
+            try { java.nio.file.Files.deleteIfExists(temporary.toPath()); } catch (IOException ignored) {}
+            return false;
+        }
+    }
     public ItemStack constructorItem(){
         ItemStack item=new ItemStack(Material.LODESTONE);ItemMeta meta=item.getItemMeta();
         meta.setDisplayName(ChatColor.GOLD+"Base Constructor");
@@ -143,10 +165,28 @@ public final class BaseManager implements Listener, CommandExecutor, TabComplete
         String id=UUID.randomUUID().toString();try{buildBlueprint(w,x,y,z,kind,id);}catch(RuntimeException failure){for(int dx=-9;dx<=14;dx++)for(int dz=-6;dz<=6;dz++)for(int dy=0;dy<=6;dy++)w.getBlockAt(x+dx,y+dy,z+dz).setType(Material.AIR,false);for(Entity entity:w.getNearbyEntities(new Location(w,x+13.5,y+2,z),2,2,3,e->e instanceof ItemFrame&&id.equals(e.getPersistentDataContainer().get(baseBlockKey,PersistentDataType.STRING))))entity.remove();plugin.getLogger().severe("Base construction rolled back at "+x+","+y+","+z+": "+failure.getMessage());p.sendMessage(ChatColor.RED+"Base construction failed safely. Your Base Constructor was not consumed.");return;}
         String path="bases."+id;data.set(path+".owner",p.getUniqueId().toString());data.set(path+".team",teams.teamOf(p.getUniqueId())==null?"":teams.teamOf(p.getUniqueId()).toString());
         data.set(path+".kind",kind.id);data.set(path+".world",w.getName());data.set(path+".x",x);data.set(path+".y",y);data.set(path+".z",z);
-        data.set(path+".created",System.currentTimeMillis());data.set(path+".site",site);save();
-        consumeConstructor(p);
+        data.set(path+".created",System.currentTimeMillis());data.set(path+".site",site);
+        if(!save()){
+            data.set(path,null);
+            rollbackBlueprint(w,x,y,z,id);
+            p.sendMessage(ChatColor.RED+"Your base could not be saved. The structure was rolled back and your Base Constructor was preserved.");
+            return;
+        }
+        if(!consumeConstructor(p)){
+            data.set(path,null);
+            save();
+            rollbackBlueprint(w,x,y,z,id);
+            p.sendMessage(ChatColor.RED+"Your Base Constructor could not be consumed. The structure was rolled back; please try again.");
+            return;
+        }
         p.sendTitle(ChatColor.GOLD+"BASE ESTABLISHED",ChatColor.GRAY+kind.name,10,60,15);
         p.sendMessage(ChatColor.GREEN+"Your "+kind.name+" is online. Use /base to manage it.");
+    }
+    private void rollbackBlueprint(World world,int x,int y,int z,String id){
+        for(int dx=-9;dx<=14;dx++)for(int dz=-6;dz<=6;dz++)for(int dy=0;dy<=6;dy++)
+            world.getBlockAt(x+dx,y+dy,z+dz).setType(Material.AIR,false);
+        for(Entity entity:world.getNearbyEntities(new Location(world,x+13.5,y+2,z),2,2,3,
+                e->e instanceof ItemFrame&&id.equals(e.getPersistentDataContainer().get(baseBlockKey,PersistentDataType.STRING)))) entity.remove();
     }
     private boolean siteClaimed(String site){ConfigurationSection all=data.getConfigurationSection("bases");if(all==null)return false;for(String id:all.getKeys(false))if(site.equals(data.getString("bases."+id+".site")))return true;return false;}
     private void buildBlueprint(World w,int x,int y,int z,Kind k,String id){
