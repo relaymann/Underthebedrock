@@ -29,7 +29,6 @@ import java.util.*;
  * It only generates in already-loaded chunks near players and never force-loads terrain.
  */
 public final class CivilizationManager implements Listener {
-    private static final int CELL = 512;
     private final UnderTheBedrockPlugin plugin;
     private final File file;
     private final YamlConfiguration data;
@@ -69,9 +68,10 @@ public final class CivilizationManager implements Listener {
         if (!plugin.getWorlds().isActive()) return;
         World world = plugin.getWorlds().getWorld();
         if (world == null) return;
+        int cell = Math.max(512, plugin.getConfig().getInt("horror.civilization.site-cell-size-blocks", 2048));
         for (Player player : world.getPlayers()) {
-            int cx = Math.floorDiv(player.getLocation().getBlockX() - world.getSpawnLocation().getBlockX(), CELL);
-            int cz = Math.floorDiv(player.getLocation().getBlockZ() - world.getSpawnLocation().getBlockZ(), CELL);
+            int cx = Math.floorDiv(player.getLocation().getBlockX() - world.getSpawnLocation().getBlockX(), cell);
+            int cz = Math.floorDiv(player.getLocation().getBlockZ() - world.getSpawnLocation().getBlockZ(), cell);
             for (int dx = -1; dx <= 1; dx++) for (int dz = -1; dz <= 1; dz++)
                 ensureSite(world, cx + dx, cz + dz, dx == 0 && dz == 0 ? player : null);
             purgeLegacyResidents(player);
@@ -86,11 +86,10 @@ public final class CivilizationManager implements Listener {
             ^ ((long) cz * 0xC2B2AE3D27D4EB4FL) ^ 0x6A09E667F3BCC909L;
         Random rng = new Random(seed);
         if (!data.contains(path + ".type")) {
-            if (explorer == null || rng.nextDouble() > plugin.getConfig().getDouble("horror.civilization.cell-generation-chance", 0.58)) return;
-            double angle = rng.nextDouble() * Math.PI * 2;
-            int offset = 56 + rng.nextInt(49);
-            int x = explorer.getLocation().getBlockX() + (int) Math.round(Math.cos(angle) * offset);
-            int z = explorer.getLocation().getBlockZ() + (int) Math.round(Math.sin(angle) * offset);
+            if (explorer == null || distanceFromSpawn(world, explorer.getLocation()) < minimumSpawnDistance()
+                    || rng.nextDouble() > plugin.getConfig().getDouble("horror.civilization.cell-generation-chance", 0.16)) return;
+            int[] candidate = siteCandidate(world, explorer, rng);
+            int x = candidate[0], z = candidate[1];
             Site type = Site.values()[rng.nextInt(Site.values().length)];
             if (!loaded(world, x, z, 18) || !clear(world, x, plugin.getConfig().getInt("world.floor-y", 64) + 1, z, 17)) return;
             data.set(path + ".type", type.name());
@@ -106,10 +105,9 @@ public final class CivilizationManager implements Listener {
         int y = plugin.getConfig().getInt("world.floor-y", 64) + 1;
         if (!data.getBoolean(path + ".built", false) && explorer != null
                 && explorer.getLocation().distanceSquared(new Location(world, x, y, z)) > 180 * 180) {
-            double angle = rng.nextDouble() * Math.PI * 2;
-            int offset = 56 + rng.nextInt(49);
-            x = explorer.getLocation().getBlockX() + (int) Math.round(Math.cos(angle) * offset);
-            z = explorer.getLocation().getBlockZ() + (int) Math.round(Math.sin(angle) * offset);
+            if (distanceFromSpawn(world, explorer.getLocation()) < minimumSpawnDistance()) return;
+            int[] candidate = siteCandidate(world, explorer, rng);
+            x = candidate[0]; z = candidate[1];
             if (!loaded(world, x, z, 18) || !clear(world, x, y, z, 17)) return;
             data.set(path + ".x", x);
             data.set(path + ".z", z);
@@ -125,6 +123,34 @@ public final class CivilizationManager implements Listener {
             save();
         }
         // These sites are archaeological remains. No resident NPCs or moving services survive.
+    }
+
+    private double minimumSpawnDistance() {
+        return Math.max(0, plugin.getConfig().getDouble("horror.civilization.minimum-distance-from-spawn-blocks", 600));
+    }
+
+    private double distanceFromSpawn(World world, Location location) {
+        Location spawn = world.getSpawnLocation();
+        return Math.hypot(location.getX() - spawn.getX(), location.getZ() - spawn.getZ());
+    }
+
+    private int[] siteCandidate(World world, Player explorer, Random rng) {
+        Location player = explorer.getLocation(), spawn = world.getSpawnLocation();
+        int minimum = Math.max(64, plugin.getConfig().getInt("horror.civilization.minimum-site-offset-blocks", 220));
+        int maximum = Math.max(minimum, plugin.getConfig().getInt("horror.civilization.maximum-site-offset-blocks", 360));
+        int offset = minimum + rng.nextInt(maximum - minimum + 1);
+        double angle = rng.nextDouble() * Math.PI * 2;
+        int x = player.getBlockX() + (int) Math.round(Math.cos(angle) * offset);
+        int z = player.getBlockZ() + (int) Math.round(Math.sin(angle) * offset);
+        if (Math.hypot(x - spawn.getX(), z - spawn.getZ()) < minimumSpawnDistance()) {
+            angle = Math.atan2(player.getZ() - spawn.getZ(), player.getX() - spawn.getX());
+            if (Math.abs(player.getX() - spawn.getX()) + Math.abs(player.getZ() - spawn.getZ()) < 1) {
+                angle = rng.nextDouble() * Math.PI * 2;
+            }
+            x = player.getBlockX() + (int) Math.round(Math.cos(angle) * offset);
+            z = player.getBlockZ() + (int) Math.round(Math.sin(angle) * offset);
+        }
+        return new int[]{x, z};
     }
 
     private boolean loaded(World world, int x, int z, int radius) {
