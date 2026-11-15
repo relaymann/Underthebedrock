@@ -21,3 +21,7 @@ FacilityManager owns persistent generator repairs, grid state, powered terminal 
 
 ## Behavior memory and multiplayer illusions
 PlayerHorrorMemory keeps validated behavior counters separate from clue, lore and recording milestones. OccurrenceDirector records player actions with per-action cooldowns and handles Paper AsyncChatEvent before performing Bukkit operations on the main thread. NullIntelligence can summarize actions and respond to behavior-specific questions. HorrorEventDirector varies its selection against each player's event history and uses recipient-only messages, player visibility changes and client-only block changes for illusions. HorrorEntityController separates frequent movement updates from slower encounter discovery, remembers last-known player positions, bounds movement to loaded chunks, and reapplies apparition privacy on world entry.
+
+ 
+## Uncommon entity roster
+The encounter roster includes four uncommon archetypes—The Watcher, The Drifter, The Crawler and The Mimic. Their weighted selection is modestly above low-weight sightings without changing the global encounter roll, five-minute per-player cooldown, one-active-encounter limit, or distance-based unlock gates. Their AI uses player-specific observation, retreat, last-known-position pursuit and loaded-chunk-only movement. BetterModel model keys are configurable; until dedicated models are registered, each safely falls back to the configured watcher model.

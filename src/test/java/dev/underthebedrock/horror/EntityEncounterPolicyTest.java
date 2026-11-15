@@ -30,7 +30,15 @@ class EntityEncounterPolicyTest {
         assertTrue(policy.eligibleAt(3072).contains(EntityArchetype.PURSUER));
         assertFalse(policy.eligibleAt(12287).contains(EntityArchetype.ORIGINAL));
         assertTrue(policy.eligibleAt(12288).contains(EntityArchetype.ORIGINAL));
-        assertEquals(24, EntityArchetype.values().length);
+        assertEquals(28, EntityArchetype.values().length);
+        assertTrue(policy.eligibleAt(1280).contains(EntityArchetype.THE_WATCHER));
+        assertFalse(policy.eligibleAt(1279).contains(EntityArchetype.THE_WATCHER));
+        assertTrue(policy.eligibleAt(1792).contains(EntityArchetype.THE_DRIFTER));
+        assertTrue(policy.eligibleAt(2048).contains(EntityArchetype.THE_MIMIC));
+        assertTrue(policy.eligibleAt(2560).contains(EntityArchetype.THE_CRAWLER));
+        assertFalse(policy.eligibleAt(2559).contains(EntityArchetype.THE_CRAWLER));
+        assertTrue(EntityArchetype.THE_WATCHER.selectionWeight() > EntityArchetype.OBSERVER.selectionWeight());
+        assertTrue(EntityArchetype.THE_WATCHER.selectionWeight() < EntityArchetype.STALKER.selectionWeight());
     }
 
     @Test void dangerousArchetypesUnlockFartherOut() {

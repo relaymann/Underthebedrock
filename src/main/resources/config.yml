@@ -122,6 +122,10 @@ horror:
       excavator: watcher
       unperson: watcher
       original: watcher
+      the_watcher: watcher
+      the_drifter: watcher
+      the_crawler: watcher
+      the_mimic: watcher
   memory:
     file: player-horror-memory.yml
   civilization:

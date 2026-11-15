@@ -28,7 +28,11 @@ public enum EntityArchetype {
     ABSENCE("The Absence", 0.05, 4608, 0.8, "Suppresses the feeling of a living environment before it is seen."),
     EXCAVATOR("The Excavator", 0.88, 6144, 0.18, "An ancient presence associated with deep and damaged sites."),
     UNPERSON("The Unperson", 0.16, 7168, 0.22, "A person missing from every surviving identity record."),
-    ORIGINAL("The Original", 0.10, 12288, 0.015, "A boundary-layer presence that even other entities avoid.");
+    ORIGINAL("The Original", 0.10, 12288, 0.015, "A boundary-layer presence that even other entities avoid."),
+    THE_WATCHER("The Watcher", 0.05, 1280, 0.55, "Remains motionless at a distance, watching until the player gets close."),
+    THE_DRIFTER("The Drifter", 0.18, 1792, 0.55, "Wanders abandoned places and occasionally follows a player's last known route."),
+    THE_CRAWLER("The Crawler", 0.62, 2560, 0.55, "Uses quick ground-level bursts, retreating when caught in direct view."),
+    THE_MIMIC("The Mimic", 0.30, 2048, 0.55, "Copies nearby movement sounds and searches toward the player after losing sight.");
 
     private final String displayName;
     private final double aggression;
@@ -52,14 +56,14 @@ public enum EntityArchetype {
 
     public boolean isPassive() {
         return switch (this) {
-            case OBSERVER, WITNESS, PEEKER, FORGOTTEN_RESIDENT, SURVEYOR, ABSENCE, UNPERSON, ORIGINAL -> true;
+            case OBSERVER, WITNESS, PEEKER, FORGOTTEN_RESIDENT, SURVEYOR, ABSENCE, UNPERSON, ORIGINAL, THE_WATCHER -> true;
             default -> false;
         };
     }
 
     public boolean isPursuer() {
         return switch (this) {
-            case AGGRESSOR, PURSUER, CRAWLING_ONE, HEAVY, EXCAVATOR -> true;
+            case AGGRESSOR, PURSUER, CRAWLING_ONE, HEAVY, EXCAVATOR, THE_CRAWLER -> true;
             default -> false;
         };
     }

@@ -218,6 +218,10 @@ public final class HorrorEntityController implements Listener {
             case WITNESS, OBSERVER, FORGOTTEN_RESIDENT, SURVEYOR, UNPERSON, ORIGINAL -> {
                 if (visible && distanceSquared < 3600) encounter.state = State.DISAPPEARING;
             }
+            case THE_WATCHER -> {
+                // Holds its position and only vanishes when the player closes in.
+                if (visible && distanceSquared < 2304) encounter.state = State.DISAPPEARING;
+            }
             case PEEKER, DOORFRAME, LURKER, CEILING_CRAWLER -> {
                 if (visible) encounter.state = State.RETREATING;
                 else if (encounter.unseenChecks >= 2) encounter.state = State.STALKING;
@@ -228,7 +232,21 @@ public final class HorrorEntityController implements Listener {
                     encounter.state = visible ? State.SEARCHING : State.HUNTING;
                 else if (visible) encounter.state = State.OBSERVING;
             }
+            case THE_CRAWLER -> {
+                double provocation = director.memory(player.getUniqueId()).provocation();
+                if (visible) encounter.state = State.RETREATING;
+                else if (provocation >= 6 || distanceSquared < 6400) encounter.state = State.HUNTING;
+                else if (encounter.unseenChecks >= 2) encounter.state = State.STALKING;
+            }
             case MIMIC, IMITATOR, DOUBLE -> {
+                if (visible) encounter.state = State.OBSERVING;
+                else if (encounter.unseenChecks >= 2) encounter.state = State.SEARCHING;
+            }
+            case THE_MIMIC -> {
+                if (!visible && encounter.unseenChecks > 0 && encounter.unseenChecks % 10 == 0) {
+                    player.playSound(player.getLocation(), Sound.BLOCK_STONE_STEP, .18f,
+                        .72f + random.nextFloat() * .28f);
+                }
                 if (visible) encounter.state = State.OBSERVING;
                 else if (encounter.unseenChecks >= 2) encounter.state = State.SEARCHING;
             }
@@ -242,6 +260,10 @@ public final class HorrorEntityController implements Listener {
             }
             case WANDERER, DEEP_ENTITY -> {
                 if (!visible && random.nextDouble() < .012) encounter.state = State.STALKING;
+            }
+            case THE_DRIFTER -> {
+                if (visible) encounter.state = State.OBSERVING;
+                else if (encounter.unseenChecks >= 3) encounter.state = State.STALKING;
             }
             case STALKER -> encounter.state = visible ? State.OBSERVING : State.STALKING;
         }
@@ -271,7 +293,8 @@ public final class HorrorEntityController implements Listener {
         }
         if (encounter.state == State.HUNTING) {
             double speed = encounter.type == EntityArchetype.HEAVY ? step * .8
-                : encounter.type == EntityArchetype.CRAWLING_ONE ? step * 2.5 : step * 1.9;
+                : encounter.type == EntityArchetype.CRAWLING_ONE ? step * 2.5
+                : encounter.type == EntityArchetype.THE_CRAWLER ? step * 1.45 : step * 1.9;
             moveToward(shell, encounter.lastKnown, speed);
             return;
         }
@@ -279,7 +302,8 @@ public final class HorrorEntityController implements Listener {
             moveToward(shell, encounter.lastKnown, step * 1.1);
             return;
         }
-        if (encounter.type == EntityArchetype.WANDERER && random.nextDouble() < .002) {
+        if ((encounter.type == EntityArchetype.WANDERER || encounter.type == EntityArchetype.THE_DRIFTER)
+                && random.nextDouble() < (encounter.type == EntityArchetype.THE_DRIFTER ? .003 : .002)) {
             Location roam = shell.getLocation().add(random.nextInt(9) - 4, 0, random.nextInt(9) - 4);
             roam.setY(plugin.getConfig().getInt("world.floor-y", 64) + 1);
             teleportIfLoaded(shell, roam);
