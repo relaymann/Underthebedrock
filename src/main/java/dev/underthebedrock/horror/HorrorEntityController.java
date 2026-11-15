@@ -152,7 +152,7 @@ public final class HorrorEntityController implements Listener {
         }
         Encounter encounter = new Encounter(player.getUniqueId(), type, shell, player.getLocation(), tracker.get());
         active.put(player.getUniqueId(), encounter);
-        setAnimation(encounter, "idle");
+        setAnimation(encounter, "emerge");
         director.recordEntityEncounter(player, type);
         player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_STARE, .12f, .55f);
     }
@@ -177,6 +177,7 @@ public final class HorrorEntityController implements Listener {
     }
 
     private void update(Player player, Encounter encounter) {
+        State previousState = encounter.state;
         ArmorStand shell = encounter.shell;
         if (!shell.isValid() || !shell.getWorld().equals(player.getWorld())) {
             remove(encounter);
@@ -266,6 +267,16 @@ public final class HorrorEntityController implements Listener {
             case STALKER -> encounter.state = visible ? State.OBSERVING : State.STALKING;
         }
 
+        if (encounter.state == State.HUNTING && previousState != State.HUNTING) {
+            if (encounter.type == EntityArchetype.HEAVY || encounter.type == EntityArchetype.DEEP_ENTITY
+                    || encounter.type == EntityArchetype.AGGRESSOR || encounter.type == EntityArchetype.EXCAVATOR) {
+                setAnimation(encounter, "roar");
+            } else if (encounter.type == EntityArchetype.CRAWLER || encounter.type == EntityArchetype.CRAWLING_ONE
+                    || encounter.type == EntityArchetype.PURSUER) {
+                setAnimation(encounter, "lunge");
+            }
+        }
+
         if (encounter.state == State.DISAPPEARING) {
             if (!encounter.disappearanceStarted) {
                 encounter.disappearanceStarted = true;
@@ -274,17 +285,25 @@ public final class HorrorEntityController implements Listener {
                 plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
                     remove(encounter);
                     active.remove(encounter.target, encounter);
-                }, 22L);
+                }, 25L);
             }
             return;
         }
-        boolean oneShotPlaying = (encounter.activeAnimation.equals("reveal") || encounter.activeAnimation.equals("attack"))
-                && System.currentTimeMillis() < encounter.animationUntil;
+        boolean oneShotPlaying = encounter.animationUntil > System.currentTimeMillis();
         if (!oneShotPlaying) {
-            if (encounter.state == State.HUNTING) setAnimation(encounter, "walk");
-            else if (encounter.state == State.STALKING || encounter.state == State.SEARCHING || encounter.state == State.RETREATING)
-                setAnimation(encounter, encounter.type == EntityArchetype.CRAWLER || encounter.type == EntityArchetype.CRAWLING_ONE || encounter.type == EntityArchetype.CEILING_CRAWLER ? "crawl" : "walk");
-            else setAnimation(encounter, "idle");
+            String desired;
+            if (encounter.state == State.HUNTING) {
+                desired = "run";
+            } else if (encounter.state == State.STALKING || encounter.state == State.RETREATING) {
+                desired = locomotionAnimation(encounter);
+            } else if (encounter.state == State.SEARCHING) {
+                double cue = random.nextDouble();
+                desired = cue < .22 ? "listen" : cue < .40 ? "inspect" : locomotionAnimation(encounter);
+            } else {
+                double cue = random.nextDouble();
+                desired = cue < .08 ? "twitch" : cue < .18 ? "listen" : cue < .24 ? "inspect" : "idle";
+            }
+            setAnimation(encounter, desired);
         }
         if (encounter.state == State.RETREATING) {
             moveAway(shell, player.getLocation(), encounter.type == EntityArchetype.CEILING_CRAWLER ? 2.2 : 1.4);
@@ -370,17 +389,26 @@ public final class HorrorEntityController implements Listener {
 
         encounter.activeAnimation = animation;
         long duration = switch (animation) {
-            case "attack" -> 900L;
-            case "reveal" -> 750L;
-            case "disappear" -> 1100L;
+            case "attack" -> 1050L;
+            case "lunge" -> 720L;
+            case "twitch" -> 580L;
+            case "reveal" -> 1250L;
+            case "disappear" -> 1200L;
+            case "emerge" -> 1650L;
+            case "hurt" -> 620L;
+            case "death" -> 1800L;
+            case "roar" -> 1350L;
+            case "inspect" -> 1550L;
+            case "listen" -> 1050L;
+            case "recoil" -> 680L;
+            case "turn" -> 1000L;
             default -> 0L;
         };
         encounter.animationUntil = duration == 0L ? 0L : now + duration;
 
-        // One-shot clips must hand control back to the current locomotion/idle pose.
-        // The director's decision loop is intentionally slow; without this callback an
-        // apparition can remain frozen in the final attack/reveal keyframe for many seconds.
-        if (duration > 0L && !animation.equals("disappear")) {
+        // One-shot clips hand control back to the current locomotion pose on their exact clip duration.
+        // The callback is encounter-guarded so stale clips cannot override a newer state or tracker.
+        if (duration > 0L && !animation.equals("disappear") && !animation.equals("death")) {
             plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
                 if (!encounter.shell.isValid()
                         || active.get(encounter.target) != encounter
@@ -393,14 +421,15 @@ public final class HorrorEntityController implements Listener {
     }
 
     private String loopAnimation(Encounter encounter) {
-        if (encounter.state == State.HUNTING) return "walk";
-        if (encounter.state == State.STALKING || encounter.state == State.SEARCHING
-                || encounter.state == State.RETREATING) {
-            return encounter.type == EntityArchetype.CRAWLER
-                    || encounter.type == EntityArchetype.CRAWLING_ONE
-                    || encounter.type == EntityArchetype.CEILING_CRAWLER ? "crawl" : "walk";
-        }
+        if (encounter.state == State.HUNTING || encounter.state == State.RETREATING) return "run";
+        if (encounter.state == State.STALKING || encounter.state == State.SEARCHING) return locomotionAnimation(encounter);
         return "idle";
+    }
+
+    private String locomotionAnimation(Encounter encounter) {
+        return encounter.type == EntityArchetype.CRAWLER
+                || encounter.type == EntityArchetype.CRAWLING_ONE
+                || encounter.type == EntityArchetype.CEILING_CRAWLER ? "crawl" : "stalk";
     }
 
     private void moveToward(ArmorStand shell, Location target, double maximumStep) {
