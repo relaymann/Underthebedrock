@@ -175,6 +175,8 @@ public final class SupplyDropManager {
                 }
             }
 
+            if(plugin.getBaseManager()!=null&&random.nextDouble()<plugin.getConfig().getDouble("horror.supply-drops.base-constructor-chance",0.025))inventory.addItem(plugin.getBaseManager().constructorItem());
+
             // Verify the placed inventory itself, not the pre-update state.
             org.bukkit.block.BlockState verifyState = block.getState();
             if (!(verifyState instanceof org.bukkit.block.Chest verifyChest)) return false;

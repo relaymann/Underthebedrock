@@ -70,6 +70,7 @@ public final class CustomItemManager implements Listener {
  public List<Type> allItems(){return List.of(Type.values());}
  public ItemStack createItem(Type type){ItemStack s=new ItemStack(type.material);ItemMeta m=s.getItemMeta();m.setDisplayName(ChatColor.GOLD+type.title);m.setLore(List.of(ChatColor.GRAY+type.lore,ChatColor.DARK_GRAY+"Under The Bedrock equipment",ChatColor.DARK_GRAY+"Right-click to use"));m.getPersistentDataContainer().set(itemKey,PersistentDataType.STRING,type.id);s.setItemMeta(m);return s;}
  public boolean isCustomItem(ItemStack s){return s!=null&&s.hasItemMeta()&&s.getItemMeta().getPersistentDataContainer().has(itemKey,PersistentDataType.STRING);}
+ public String getItemId(ItemStack s){return isCustomItem(s)?s.getItemMeta().getPersistentDataContainer().get(itemKey,PersistentDataType.STRING):"";}
  @EventHandler(ignoreCancelled=true) public void use(PlayerInteractEvent e){
   if(e.getHand()!=EquipmentSlot.HAND)return;
   if(e.getAction()!=Action.RIGHT_CLICK_AIR&&e.getAction()!=Action.RIGHT_CLICK_BLOCK)return;ItemStack stack=e.getItem();if(!isCustomItem(stack))return;

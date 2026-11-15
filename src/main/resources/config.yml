@@ -51,6 +51,7 @@ horror:
     retry-seconds: 60
     minimum-radius-blocks: 16
     maximum-radius-blocks: 40
+    base-constructor-chance: 0.025
   items:
     enabled: true
     cooldowns:

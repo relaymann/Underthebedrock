@@ -21,3 +21,8 @@ The systems should coordinate through player memory and exploration context, avo
 ## Full reset
 
 /underthebedrock reset explains the consequences. /underthebedrock reset confirm schedules a graceful server shutdown. On the next startup, before managers load, the plugin backs up the world and plugin data to plugins/UnderTheBedrock/backups/reset-<UTC timestamp>/, unloads and removes the generated world, clears progression and generated-site state, and preserves config.yml plus the legacy inventory recovery files. The world is then regenerated from a clean state. The backup is not automatically deleted.
+
+
+## Player bases and teams
+
+Player-built bases are infrastructure established by real connected players, not a return of the erased population. The Base Constructor converts a registered abandoned site into one of four handcrafted base layouts. Teams are real-player groups; friendly fire is disabled between teammates. Team access to a base is permission-scoped, and no resident NPCs, recruits, or simulated inhabitants are created. Base data and forge jobs persist across restarts and are included in the existing full-reset backup/clear lifecycle.
