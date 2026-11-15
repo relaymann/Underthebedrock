@@ -2,7 +2,7 @@
 
 ## Teams
 - `/team create <name>` creates a persistent team.
-- `/team invite <player>`, `/team accept`, `/team kick <player>`, and `/team leave` manage membership.
+- `/team invite <player>`, `/team accept`, `/team kick <player>`, and `/team leave` manage membership. Invitations expire after 24 hours.
 - Direct player and player-fired projectile damage is cancelled between teammates.
 - Teams contain real players only. No resident NPCs or simulated populations are introduced.
 

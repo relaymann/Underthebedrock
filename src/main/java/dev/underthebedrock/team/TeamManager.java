@@ -63,7 +63,7 @@ public final class TeamManager implements Listener, CommandExecutor, TabComplete
                 Player target=Bukkit.getPlayerExact(args[1]);
                 if(target==null||target.equals(player)){player.sendMessage(ChatColor.RED+"That player must be online and cannot be you.");return true;}
                 if(teamOf(target.getUniqueId())!=null){player.sendMessage(ChatColor.RED+"That player is already in a team.");return true;}
-                data.set("invites."+target.getUniqueId(),id.toString());save();
+                data.set("invites."+target.getUniqueId(),null);data.set("invites."+target.getUniqueId()+".leader",id.toString());data.set("invites."+target.getUniqueId()+".created-at",System.currentTimeMillis());save();
                 target.sendMessage(ChatColor.GOLD+player.getName()+" invited you to team "+ChatColor.WHITE+data.getString(teamPath(id)+".name",player.getName())+ChatColor.GOLD+". Use /team accept.");
                 player.sendMessage(ChatColor.GREEN+"Invitation sent to "+target.getName()+".");
             }
