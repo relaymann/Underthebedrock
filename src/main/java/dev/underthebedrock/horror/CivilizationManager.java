@@ -68,7 +68,7 @@ public final class CivilizationManager implements Listener {
         if (!plugin.getWorlds().isActive()) return;
         World world = plugin.getWorlds().getWorld();
         if (world == null) return;
-        int cell = Math.max(512, plugin.getConfig().getInt("horror.civilization.site-cell-size-blocks", 1792));
+        int cell = Math.max(512, plugin.getConfig().getInt("horror.civilization.site-cell-size-blocks", 512));
         for (Player player : world.getPlayers()) {
             int cx = Math.floorDiv(player.getLocation().getBlockX() - world.getSpawnLocation().getBlockX(), cell);
             int cz = Math.floorDiv(player.getLocation().getBlockZ() - world.getSpawnLocation().getBlockZ(), cell);
@@ -87,7 +87,7 @@ public final class CivilizationManager implements Listener {
         Random rng = new Random(seed);
         if (!data.contains(path + ".type")) {
             if (explorer == null || distanceFromSpawn(world, explorer.getLocation()) < minimumSpawnDistance()
-                    || rng.nextDouble() > plugin.getConfig().getDouble("horror.civilization.cell-generation-chance", 0.18)) return;
+                    || rng.nextDouble() > plugin.getConfig().getDouble("horror.civilization.cell-generation-chance", 0.06)) return;
             int[] candidate = siteCandidate(world, explorer, rng);
             int x = candidate[0], z = candidate[1];
             Site type = Site.values()[rng.nextInt(Site.values().length)];
