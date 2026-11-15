@@ -79,28 +79,28 @@ horror:
       mimic: mimic
       mimic-revealed: mimic_revealed
       aggressor: aggressor
-      deep_entity: watcher
+      deep_entity: deep_entity
       witness: witness
       peeker: peeker
-      forgotten_resident: watcher
-      surveyor: watcher
+      forgotten_resident: forgotten_resident
+      surveyor: surveyor
       lurker: lurker
       doorframe: doorframe
       ceiling_crawler: ceiling_crawler
-      echo: watcher
+      echo: echo
       pursuer: pursuer
       crawling_one: crawling_one
       heavy: heavy
-      imitator: watcher
-      misprint: watcher
-      double: watcher
-      absence: watcher
-      excavator: watcher
-      unperson: watcher
-      original: watcher
+      imitator: imitator
+      misprint: misprint
+      double: double
+      absence: absence
+      excavator: excavator
+      unperson: unperson
+      original: original
       watcher: watcher
-      drifter: watcher
-      crawler: watcher
+      drifter: drifter
+      crawler: crawler
   memory:
     file: player-horror-memory.yml
   civilization:
