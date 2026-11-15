@@ -16,10 +16,10 @@ horror:
     minimum-distance-blocks: 1000
   director:
     enabled: true
-    check-interval-seconds: 12
-    minimum-occurrence-gap-seconds: 42
-    severe-occurrence-cooldown-minutes: 8
-    base-roll-chance: 0.22
+    check-interval-seconds: 6
+    minimum-occurrence-gap-seconds: 18
+    severe-occurrence-cooldown-minutes: 3
+    base-roll-chance: 0.48
   events:
     enabled: true
     minimum-cooldown-seconds: 150
@@ -28,16 +28,16 @@ horror:
   clues:
     enabled: true
     scan-interval-ticks: 100
-    site-cell-size-blocks: 1024
+    site-cell-size-blocks: 512
     minimum-distance-blocks: 768
     evidence-file: player-horror-memory.yml
   structures:
     enabled: true
     scan-interval-ticks: 100
     site-cell-size-blocks: 1024
-    cell-generation-chance: 0.32
+    cell-generation-chance: 0.82
     regeneration-hours: 1
-    spawn-check-radius-blocks: 96
+    spawn-check-radius-blocks: 160
     ancient-factions-enabled: true
     memory-shard-chance: 1.0
     rare-artifact-chance: 0.04
@@ -60,10 +60,10 @@ horror:
       last_resort_device: 90
   entities:
     enabled: true
-    safe-radius-blocks: 512
-    full-threat-distance-blocks: 8192
-    maximum-chance-per-check: 0.025
-    successful-encounter-cooldown-minutes: 8
+    safe-radius-blocks: 256
+    full-threat-distance-blocks: 4096
+    maximum-chance-per-check: 0.12
+    successful-encounter-cooldown-minutes: 2
     active-encounters-per-player: 1
     max-encounter-duration-seconds: 180
     behavior:
@@ -71,7 +71,7 @@ horror:
       despawn-range-blocks: 128
       passive-vanish-range-blocks: 60
       movement-tick-interval: 2
-      encounter-check-interval-ticks: 100
+      encounter-check-interval-ticks: 40
       minimum-spawn-distance-blocks: 26
       maximum-spawn-distance-blocks: 64
       movement-step-blocks: 0.16
@@ -108,7 +108,7 @@ horror:
   civilization:
     enabled: true
     scan-interval-ticks: 100
-    cell-generation-chance: 0.20
+    cell-generation-chance: 0.58
     ambient-effects-enabled: true
     resident-echoes-enabled: true
   facilities:

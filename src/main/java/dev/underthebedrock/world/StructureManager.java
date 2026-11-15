@@ -44,55 +44,51 @@ public final class StructureManager implements Listener {
     public void stop(){if(task!=null)task.cancel();task=null;save();}
 
     private void tick(){
-        if(!worlds.isActive())return; World world=worlds.getWorld(); if(world==null)return;
-        int cell=Math.max(256,plugin.getConfig().getInt("horror.structures.site-cell-size-blocks",1024));
+        if(!worlds.isActive())return;
+        World world=worlds.getWorld(); if(world==null)return;
+        int cell=Math.max(256,plugin.getConfig().getInt("horror.structures.site-cell-size-blocks",512));
         for(Player player:world.getPlayers()){
             int cx=Math.floorDiv(player.getLocation().getBlockX()-world.getSpawnLocation().getBlockX(),cell);
             int cz=Math.floorDiv(player.getLocation().getBlockZ()-world.getSpawnLocation().getBlockZ(),cell);
-            for(int dx=-1;dx<=1;dx++)for(int dz=-1;dz<=1;dz++)ensureSite(world,cx+dx,cz+dz,cell);
+            for(int dx=-1;dx<=1;dx++)for(int dz=-1;dz<=1;dz++)
+                ensureSite(world,cx+dx,cz+dz,cell,dx==0&&dz==0?player:null);
         }
     }
-    private void ensureSite(World world,int cellX,int cellZ,int cell){
+    private void ensureSite(World world,int cellX,int cellZ,int cell,Player explorer){
         long seed=world.getSeed()^((long)cellX*0x9E3779B97F4A7C15L)^((long)cellZ*0xC2B2AE3D27D4EB4FL);
         Random random=new Random(seed);
-        if(random.nextDouble()>plugin.getConfig().getDouble("horror.structures.cell-generation-chance",.32))return;
-        int ox=cellX*cell+cell/2+random.nextInt(Math.max(1,cell/2))-cell/4;
-        int oz=cellZ*cell+cell/2+random.nextInt(Math.max(1,cell/2))-cell/4;
-        StructureDefinition selected=StructureDefinition.select(Math.hypot(ox,oz),seed).orElse(null);
-        if(selected==null)return;
         String key=cellX+"_"+cellZ,path="sites."+key;
-        int x=world.getSpawnLocation().getBlockX()+ox,z=world.getSpawnLocation().getBlockZ()+oz;
-        StructureDefinition type=selected;
+        StructureDefinition selected;
+        int x,z;
         if(data.contains(path+".type")){
-            type=StructureDefinition.byId(data.getString(path+".type","")).orElse(selected);
-            x=data.getInt(path+".x",x);z=data.getInt(path+".z",z);
+            selected=StructureDefinition.byId(data.getString(path+".type","")).orElse(null);
+            if(selected==null)return;
+            x=data.getInt(path+".x");z=data.getInt(path+".z");
         }else{
-            if(!chunksLoaded(world,x,z,radius(type))||!areaClear(world,x,z,radius(type)))return;
-            data.set(path+".type",type.id());data.set(path+".x",x);data.set(path+".z",z);
+            if(explorer==null||random.nextDouble()>plugin.getConfig().getDouble("horror.structures.cell-generation-chance",.82))return;
+            double angle=random.nextDouble()*Math.PI*2;
+            int offset=56+random.nextInt(49);
+            x=explorer.getLocation().getBlockX()+(int)Math.round(Math.cos(angle)*offset);
+            z=explorer.getLocation().getBlockZ()+(int)Math.round(Math.sin(angle)*offset);
+            double distance=Math.hypot(x-world.getSpawnLocation().getBlockX(),z-world.getSpawnLocation().getBlockZ());
+            selected=StructureDefinition.select(distance,seed).orElse(null);
+            if(selected==null||!chunksLoaded(world,x,z,radius(selected))||!areaClear(world,x,z,radius(selected)))return;
+            data.set(path+".type",selected.id());data.set(path+".x",x);data.set(path+".z",z);
             data.set(path+".last-reset",System.currentTimeMillis());data.set(path+".built",false);save();
         }
-        // Wait until a player is close enough that the site's footprint should already be naturally loaded.
-        // This prevents distant cell scans from silently skipping structures before exploration reaches them.
-        double spawnRadius=Math.max(32,plugin.getConfig().getInt("horror.structures.spawn-check-radius-blocks",96));
+        double spawnRadius=Math.max(96,plugin.getConfig().getInt("horror.structures.spawn-check-radius-blocks",160));
         Location siteCenter=new Location(world,x,plugin.getConfig().getInt("world.floor-y",64)+1,z);
         boolean playerNearby=false;
-        for(Player player:world.getPlayers()){
-            if(player.getLocation().distanceSquared(siteCenter)<=spawnRadius*spawnRadius){playerNearby=true;break;}
-        }
-        if(!playerNearby||!chunksLoaded(world,x,z,radius(type)))return;
+        for(Player player:world.getPlayers())if(player.getLocation().distanceSquared(siteCenter)<=spawnRadius*spawnRadius){playerNearby=true;break;}
+        if(!playerNearby||!chunksLoaded(world,x,z,radius(selected)))return;
         long now=System.currentTimeMillis(),last=data.getLong(path+".last-reset",now);
         boolean first=!data.getBoolean(path+".built",false);
         long period=Math.max(1,plugin.getConfig().getLong("horror.structures.regeneration-hours",1))*HOUR;
         if(first||now-last>=period){
-            if(!first){
-                Location center=new Location(world,x,plugin.getConfig().getInt("world.floor-y",64)+1,z);
-                double safeDistance=Math.pow(radius(type)+4,2);
-                for(Player nearby:world.getPlayers())if(nearby.getLocation().distanceSquared(center)<=safeDistance)return;
-            }
+            if(!first){double safeDistance=Math.pow(radius(selected)+4,2);for(Player nearby:world.getPlayers())if(nearby.getLocation().distanceSquared(siteCenter)<=safeDistance)return;}
             int cycle=data.getInt(path+".cycle",0)+(first?0:1);
-            build(world,x,z,plugin.getConfig().getInt("world.floor-y",64)+1,type,seed,key,cycle);
-            data.set(path+".built",true);data.set(path+".last-reset",now);
-            data.set(path+".cycle",cycle);save();
+            build(world,x,z,plugin.getConfig().getInt("world.floor-y",64)+1,selected,seed,key,cycle);
+            data.set(path+".built",true);data.set(path+".last-reset",now);data.set(path+".cycle",cycle);save();
         }
     }
     private int radius(StructureDefinition type){

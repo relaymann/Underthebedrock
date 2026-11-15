@@ -31,7 +31,7 @@ import java.util.*;
  * It only generates in already-loaded chunks near players and never force-loads terrain.
  */
 public final class CivilizationManager implements Listener {
-    private static final int CELL = 1024;
+    private static final int CELL = 512;
     private final UnderTheBedrockPlugin plugin;
     private final File file;
     private final YamlConfiguration data;
@@ -97,21 +97,26 @@ public final class CivilizationManager implements Listener {
         for (Player player : world.getPlayers()) {
             int cx = Math.floorDiv(player.getLocation().getBlockX() - world.getSpawnLocation().getBlockX(), CELL);
             int cz = Math.floorDiv(player.getLocation().getBlockZ() - world.getSpawnLocation().getBlockZ(), CELL);
-            for (int dx = -1; dx <= 1; dx++) for (int dz = -1; dz <= 1; dz++) ensureSite(world, cx + dx, cz + dz);
+            for (int dx = -1; dx <= 1; dx++) for (int dz = -1; dz <= 1; dz++)
+                ensureSite(world, cx + dx, cz + dz, dx == 0 && dz == 0 ? player : null);
             ambient(player);
         }
     }
 
-    private void ensureSite(World world, int cx, int cz) {
+    private void ensureSite(World world, int cx, int cz, Player explorer) {
         String key = cx + "_" + cz;
         String path = "sites." + key;
-        long seed = world.getSeed() ^ ((long) cx * 0x9E3779B97F4A7C15L) ^ ((long) cz * 0xC2B2AE3D27D4EB4FL) ^ 0x6A09E667F3BCC909L;
+        long seed = world.getSeed() ^ ((long) cx * 0x9E3779B97F4A7C15L)
+            ^ ((long) cz * 0xC2B2AE3D27D4EB4FL) ^ 0x6A09E667F3BCC909L;
         Random rng = new Random(seed);
         if (!data.contains(path + ".type")) {
-            if (rng.nextDouble() > plugin.getConfig().getDouble("horror.civilization.cell-generation-chance", 0.20)) return;
-            int x = world.getSpawnLocation().getBlockX() + cx * CELL + CELL / 2 + (rng.nextBoolean() ? 1 : -1) * (320 + rng.nextInt(120));
-            int z = world.getSpawnLocation().getBlockZ() + cz * CELL + CELL / 2 + (rng.nextBoolean() ? 1 : -1) * (320 + rng.nextInt(120));
+            if (explorer == null || rng.nextDouble() > plugin.getConfig().getDouble("horror.civilization.cell-generation-chance", 0.58)) return;
+            double angle = rng.nextDouble() * Math.PI * 2;
+            int offset = 56 + rng.nextInt(49);
+            int x = explorer.getLocation().getBlockX() + (int) Math.round(Math.cos(angle) * offset);
+            int z = explorer.getLocation().getBlockZ() + (int) Math.round(Math.sin(angle) * offset);
             Site type = Site.values()[rng.nextInt(Site.values().length)];
+            if (!loaded(world, x, z, 18) || !clear(world, x, plugin.getConfig().getInt("world.floor-y", 64) + 1, z, 17)) return;
             data.set(path + ".type", type.name());
             data.set(path + ".x", x);
             data.set(path + ".z", z);
@@ -124,7 +129,7 @@ public final class CivilizationManager implements Listener {
         int x = data.getInt(path + ".x"), z = data.getInt(path + ".z");
         int y = plugin.getConfig().getInt("world.floor-y", 64) + 1;
         Location center = new Location(world, x + .5, y, z + .5);
-        boolean nearby = world.getPlayers().stream().anyMatch(p -> p.getLocation().distanceSquared(center) < 72 * 72);
+        boolean nearby = world.getPlayers().stream().anyMatch(p -> p.getLocation().distanceSquared(center) < 160 * 160);
         if (!nearby || !loaded(world, x, z, 18)) return;
         if (!data.getBoolean(path + ".built", false)) {
             if (!clear(world, x, y, z, 17)) return;
@@ -132,7 +137,8 @@ public final class CivilizationManager implements Listener {
             data.set(path + ".built", true);
             save();
         }
-        if (plugin.getConfig().getBoolean("horror.civilization.resident-echoes-enabled", true) && (type == Site.RESIDENTIAL || type == Site.STATION || type == Site.MEDICAL || type == Site.ARCHIVE || type == Site.POWER)) {
+        if (plugin.getConfig().getBoolean("horror.civilization.resident-echoes-enabled", true)
+                && (type == Site.RESIDENTIAL || type == Site.STATION || type == Site.MEDICAL || type == Site.ARCHIVE || type == Site.POWER)) {
             Resident resident = switch (type) {
                 case RESIDENTIAL, STATION -> RESIDENTS.get(0);
                 case ARCHIVE -> RESIDENTS.get(2);

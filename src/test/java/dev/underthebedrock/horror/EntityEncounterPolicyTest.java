@@ -5,21 +5,21 @@ import java.util.Random;
 import static org.junit.jupiter.api.Assertions.*;
 
 class EntityEncounterPolicyTest {
-    private final EntityEncounterPolicy policy = new EntityEncounterPolicy(512, 8192, 0.025);
+    private final EntityEncounterPolicy policy = new EntityEncounterPolicy(256, 4096, 0.12);
 
     @Test void startingAreaIsCompletelySafe() {
         assertEquals(0, policy.chanceAt(0));
-        assertEquals(0, policy.chanceAt(512));
+        assertEquals(0, policy.chanceAt(256));
         assertTrue(policy.eligibleAt(511).isEmpty());
-        assertTrue(policy.roll(512, new Random(1)).isEmpty());
+        assertTrue(policy.roll(256, new Random(1)).isEmpty());
     }
 
     @Test void chanceIncreasesWithDistanceAndHasACap() {
         assertTrue(policy.chanceAt(1024) > 0);
         assertTrue(policy.chanceAt(2048) > policy.chanceAt(1024));
         assertTrue(policy.chanceAt(4096) > policy.chanceAt(2048));
-        assertEquals(0.025, policy.chanceAt(8192), 0.000001);
-        assertEquals(0.025, policy.chanceAt(100000), 0.000001);
+        assertEquals(0.12, policy.chanceAt(4096), 0.000001);
+        assertEquals(0.12, policy.chanceAt(100000), 0.000001);
     }
 
     @Test void rosterUnlocksAtItsConfiguredDistance() {

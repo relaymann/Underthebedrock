@@ -21,7 +21,7 @@ public final class EntityEncounterPolicy {
     public double chanceAt(double distance) {
         if (!Double.isFinite(distance) || distance <= safeRadius) return 0;
         double progress = Math.min(1, (distance - safeRadius) / (fullThreatDistance - safeRadius));
-        return maximumChance * progress * progress;
+        return maximumChance * progress;
     }
 
     public List<EntityArchetype> eligibleAt(double distance) {

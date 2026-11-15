@@ -99,7 +99,7 @@ public final class HorrorEntityController implements Listener {
             if (encounter == null) {
                 long due = nextAttemptTick.getOrDefault(player.getUniqueId(), tickCounter);
                 if (tickCounter >= due) {
-                    long attemptInterval = Math.max(20, plugin.getConfig().getLong("horror.entities.behavior.encounter-check-interval-ticks", 100));
+                    long attemptInterval = Math.max(20, plugin.getConfig().getLong("horror.entities.behavior.encounter-check-interval-ticks", 40));
                     nextAttemptTick.put(player.getUniqueId(), tickCounter + attemptInterval);
                     attempt(player);
                 }
