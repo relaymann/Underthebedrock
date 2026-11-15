@@ -1,7 +1,7 @@
 name: Build
 on:
   push:
-    branches: [main]
+    branches: [main, feature/experience-takeover-expansion]
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -28,7 +28,7 @@ jobs:
         run: gradle clean test build
 
       - name: Prepare direct-download JAR
-        if: github.event_name != 'pull_request'
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
         shell: bash
         run: |
           set -euo pipefail
@@ -41,11 +41,27 @@ jobs:
           test -s build/UnderTheBedrock.jar
 
       - name: Publish installable JAR download
-        if: github.event_name != 'pull_request'
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: latest
           name: Latest Under The Bedrock build
+          prerelease: true
+          make_latest: false
+          target_commitish: ${{ github.sha }}
+          overwrite_files: true
+          fail_on_unmatched_files: true
+          files: build/UnderTheBedrock.jar
+
+      - name: Publish takeover expansion preview
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/feature/experience-takeover-expansion'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: takeover-expansion
+          name: Under The Bedrock — Takeover Expansion Preview
+          body: |
+            Experimental feature-branch build. This is not the stable main release.
+            Built from the experience-takeover-expansion branch after the Gradle test/build job succeeds.
           prerelease: true
           make_latest: false
           target_commitish: ${{ github.sha }}

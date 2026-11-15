@@ -21,11 +21,14 @@ public final class UnderTheBedrockCommand implements CommandExecutor, TabComplet
         switch (args[0].toLowerCase()) {
             case "start" -> {
                 if (worlds.start()) {
+                    worldEntry.enableLockdown();
                     worldEntry.routeOnlinePlayers();
                     sender.sendMessage("§aUnder The Bedrock has taken over. Online players are being transferred; future joins and deaths are routed automatically.");
                 } else sender.sendMessage("§cWorld initialization failed; check console.");
             }
-            case "stop" -> sender.sendMessage(worlds.stop() ? "§eStopped. Generated chunks were preserved." : "§cPlayers are still inside. The experience cannot stop while occupied.");
+            case "stop" -> sender.sendMessage(worldEntry.stopExperienceForAdmin()
+                ? "§eStopped. Players were evacuated by the administrator; generated chunks and progression were preserved."
+                : "§cCould not safely stop the experience. Check that another world is available for administrative evacuation.");
             case "status" -> {
                 sender.sendMessage("§8[Under The Bedrock]");
                 sender.sendMessage("§7Active: " + (worlds.isActive() ? "§aYes" : "§cNo"));

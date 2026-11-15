@@ -5,10 +5,12 @@ world:
   auto-join-on-connect: true
   auto-respawn: true
   lock-to-experience: true
+  admin-stop-evacuation: true
   floor-y: 64
   spawn-x: 0
   spawn-z: 0
   time: 18000
+  position-save-interval-ticks: 100
 horror:
   null:
     minimum-distance-blocks: 1000
@@ -22,6 +24,7 @@ horror:
     enabled: true
     minimum-cooldown-seconds: 150
     maximum-cooldown-seconds: 360
+    event-variation-memory: true
   clues:
     enabled: true
     scan-interval-ticks: 100
@@ -67,7 +70,11 @@ horror:
       observation-range-blocks: 100
       despawn-range-blocks: 128
       passive-vanish-range-blocks: 60
-      movement-step-blocks: 0.55
+      movement-tick-interval: 2
+      encounter-check-interval-ticks: 100
+      minimum-spawn-distance-blocks: 26
+      maximum-spawn-distance-blocks: 64
+      movement-step-blocks: 0.16
       remember-last-known-position: true
       player-specific-visibility: true
       adaptive-selection: true
@@ -104,6 +111,15 @@ horror:
     cell-generation-chance: 0.20
     ambient-effects-enabled: true
     resident-echoes-enabled: true
+  facilities:
+    enabled: true
+    maximum-safe-room-level: 3
+    safe-room-base-radius-blocks: 24
+    safe-room-upgrade-radius-blocks: 18
+    generator-illumination-radius-blocks: 28
+    generator-requires-insulated-wire: 2
+    generator-requires-fuses: 2
+    generator-requires-power-cells: 1
 integrations:
   nova:
     enabled: true

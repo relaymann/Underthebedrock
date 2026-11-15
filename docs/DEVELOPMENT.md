@@ -10,3 +10,12 @@
 - Keep horror events per-player and cooldown-governed; avoid global spam, forced chunk loads, or repeated jumpscares.
 - After each feature batch, run a full build and both code and behavior/performance audits.
 - Group changes into coherent commits. Never claim a build or in-game test passed unless it actually ran.
+
+
+- Keep the experience-position, isolation, legacy-backup and facility-state YAML formats backward-compatible. Never overwrite an original legacy backup with an empty inventory.
+- Save player positions at a measured cadence and on disconnect/shutdown; admin-start routing may place online players at the entrance, while reconnects should resume the saved location.
+- Fake block changes must remain client-only; never mutate shared world blocks to create one player's hallucination.
+- Persist facility state before consuming a player's resources. Keep generator repairs and safe-room upgrades atomic from the player's perspective.
+- Keep behavior counters separate from clue/lore progression so routine player actions cannot bypass the ARG ending.
+- Run entity discovery less frequently than movement. Keep movement bounded, loaded-chunk-only, configurable, and private to the intended player.
+- Validate the feature branch through CI. Publish the installable `latest` release only from `main`.

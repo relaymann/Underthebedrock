@@ -9,14 +9,16 @@ Standalone Paper 26.1.2 psychological / analog ARG horror plugin with a persiste
 
 ## Commands
 - /underthebedrock start — create/activate the horror world.
-- Players are automatically placed at the horror-world entrance when they join while the world is active.
+- The experience auto-starts by default. Active lockdown routes joins and deaths into the horror world; reconnecting players resume their last saved experience location.
+- `/underthebedrock stop` is an administrator-only shutdown that temporarily lifts lockdown, evacuates current occupants to another loaded world, then unloads the horror world. Players do not receive a return command.
+- A one-time legacy-state backup records inventory, armor, offhand, ender chest, experience, game mode, flight, health, hunger, saturation, and potion effects before isolating the player.
 - Deaths return players to the horror world; Reconstructors provide personal respawn anchors.
 - /enter — manually return to the horror-world entrance if needed. There is no player-facing command to return to the old world.
 - /evidence — inspect your personal evidence journal.
 - /underthebedrock status — inspect world and integration status.
 
 ## Custom equipment
-All 27 custom equipment items have persistent item identities, custom names/lore, cooldowns, and right-click abilities. They are distributed through procedural structure chests and supply drops.
+All 30 custom equipment items have persistent item identities, custom names/lore, cooldowns, and right-click abilities. They are distributed through procedural structure chests and supply drops.
 
 - Exploration: Distorted Compass, Signal Spyglass, Emergency Lantern, Broken Chronometer.
 - Detection/defense: Motion Detector, Resonance Horn, Emergency Barrier, Null Ward.
@@ -24,6 +26,7 @@ All 27 custom equipment items have persistent item identities, custom names/lore
 - Investigation: Investigation Journal, Evidence Scanner, Echo Recorder, Anomaly Map.
 - Utility: Portable Storage Device (persistent 27 slots), Signal Beacon, Tripwire Alarm, Emergency Flare.
 - Late-game: Resonance Core, Death Echo, Null Fragment, Last Resort Device, Reconstructor.
+- Facility resources: Insulated Wire, Ceramic Fuse, and Resonance Power Cell.
 
 Abilities include entity scans, temporary night vision and barriers, one-hit ward protection, healing/status recovery, evidence and structure detection, persistent portable storage, proximity alarms, death-location recall, a one-use return device, and an 18-second Speed II burst. The very rare Charm of the Forgotten grants Speed III while held, while Mining Fatigue II and Weakness II linger for 30 seconds after unequipping in either hand. Horn and Null Fragment increase Null's attention; the compass can mislead. The Reconstructor is crafted from five common custom supplies: Distorted Compass, Emergency Lantern, Stabilizer Injection, Field Medkit, and Signal Beacon. It binds the exact location where it is activated as your persistent personal respawn point, then destroys itself. On death in Under The Bedrock, you respawn at that saved point; until you craft one, the world entrance is the default. Reconstructors are craft-only and are never rolled directly in supply drops. Cooldowns persist in item-cooldowns.yml, portable storage, death echoes, and Reconstructor respawn points persist separately. The previous-world return-location system and `/leave` command have been removed; Under The Bedrock is the intended play space.
 
@@ -52,4 +55,15 @@ The experience now auto-starts by default. When an administrator starts it, onli
 
 A new adaptive event director adds cooldown-governed, player-specific disturbances that escalate with exploration: remote footsteps, false local signals, archive notices, distant doors, identity mismatches, and late-stage whispers that can use the name of a nearby teammate while remaining visible only to the target player. Null's chat responses now react to grief, apologies, accusations, offers of help, fear, and recognition as well as clue keywords. These remain deterministic, evidence-gated responses; no external AI service or network call is required.
 
-Investigation equipment now has crafting progression: Evidence Scanner, Motion Detector, Echo Recorder, and Anomaly Map each have dedicated recipes. Recipe registrations are removed cleanly when the plugin disables. The existing civilization districts, resident relationships, environmental distortions, and personalized apparition visibility provide the foundation for deeper group activities and larger world events.
+Investigation equipment now has crafting progression: Evidence Scanner, Motion Detector, Echo Recorder, and Anomaly Map each have dedicated recipes. Facility resources add another progression tier: Insulated Wire and Ceramic Fuses are craftable, Resonance Power Cells combine rare signal-reactive materials, and Resonance Cores can be assembled from investigation equipment and a Power Cell. Facility components can also appear in exploration loot. All recipes are removed cleanly when the plugin disables.
+
+## Takeover, facilities and individual intelligence
+Each player's last Under The Bedrock location is saved in `player-experience-positions.yml` on a rolling interval, on quit, and during shutdown. Inventory migration uses a durable `prepared` / `complete` marker in `player-isolation.yml`: the original backup is atomically written first and is never replaced by a later empty inventory. If the process stops partway through migration, the original backup remains intact and clearing can safely resume.
+
+The six civilization districts now expose interactive systems. The Power Substation accepts crafted components to restore the shared grid. Powered archive terminals reveal an additional protection-loop transmission. The Medical Wing contains claimable and upgradeable safe rooms with three reinforcement levels; their protection radius grows with investment, and apparition encounters and special disturbances are suppressed while players are inside. Central Station retains its rail network and service-cart arrivals and now has a working two-level service lift. Terminals, lifts, generator controls, and safe-room controls are persistent sign interactions. Facility state is saved atomically in `facility-state.yml`.
+
+Null's persistent player memory now tracks behavior separately from clue/lore progression: investigating evidence, breaking ancient sites, taking artifacts, helping residents, researching equipment, restoring power, building shelters, and encountering multiplayer distortions. Null can later summarize or react to those actions, and behavior counters survive reconnects without accidentally advancing the main ARG clue chain.
+
+The event director varies its selection against each player's event history. Later-stage events include recipient-only false join/leave messages, fake teammate warnings, temporary teammate disappearances, client-only blackouts and room distortions, and emergency broadcasts. Visual illusions use per-player block changes and never alter shared world blocks. Apparition discovery runs on a slower cadence than movement; movement uses configurable frequent ticks, bounded steps, last-known player positions, loaded-chunk checks, and per-player visibility that is reapplied when somebody enters the horror world. Claimed safe rooms suppress nearby apparition encounters and special disturbances.
+
+Memory Shards already produce personal versions of recordings based on each player's discoveries, so two players can receive different information from the same recording. Clue and resident discoveries remain personal while physical civilization facilities remain shared. Null's reactions and the deterministic horror systems do not require an external AI service.

@@ -181,6 +181,8 @@ public final class CivilizationManager implements Listener {
                 b.put(-2, 1, -7, Material.POWERED_RAIL); b.put(2, 1, 7, Material.POWERED_RAIL); b.put(-3, 1, -7, Material.REDSTONE_TORCH); b.put(3, 1, 7, Material.REDSTONE_TORCH);
                 b.put(-7, 1, 0, Material.SOUL_LANTERN); b.put(7, 1, 0, Material.SOUL_LANTERN);
                 b.sign(0, 2, -8, "CENTRAL STATION", "PLATFORM 02", "ARRIVALS: 1", "DEPARTURES: 0");
+                b.sign(0, 2, 8, "[TERMINAL]", "SERVICE ARCHIVE", "RIGHT-CLICK TO READ");
+                b.elevator(6, 0, 0);
                 b.loreSign(8, 2, 7, "last_day", "FINAL SERVICE LOG", "NO DEPARTURES");
                 b.chest(5, 1, 5, rng, true); b.memoryShard(5, 1, 5, "final_hour");
             }
@@ -190,6 +192,7 @@ public final class CivilizationManager implements Listener {
                 b.put(5, 1, -3, Material.WHITE_BED); b.put(0, 1, 2, Material.BREWING_STAND);
                 b.put(-5, 1, 3, Material.CAULDRON); b.put(5, 1, 3, Material.LECTERN);
                 b.sign(0, 2, -7, "MEDICAL WING", "PATIENTS: 12", "DISCHARGED: 0", "MISSING: 12");
+                b.sign(0, 2, 8, "[SAFE ROOM]", "SHELTER UNCLAIMED", "RIGHT-CLICK TO REINFORCE");
                 b.loreSign(-7, 2, 6, "last_day", "PATIENT REPORT", "NAMES REMOVED");
                 b.chest(6, 1, 5, rng, false); b.memoryShard(6, 1, 5, "protection_loop");
             }
@@ -212,6 +215,10 @@ public final class CivilizationManager implements Listener {
                 }
                 b.put(0, 1, 0, Material.LECTERN); b.put(-3, 1, 0, Material.CHEST); b.put(3, 1, 0, Material.CHEST);
                 b.sign(0, 2, -8, "CIVILIAN ARCHIVE", "PERSONNEL INDEX", "THE INDEX DENIES", "ITS OWN EXISTENCE");
+                b.put(0, 1, 1, Material.BLACK_CONCRETE);
+                b.put(-1, 1, 1, Material.IRON_BLOCK); b.put(1, 1, 1, Material.IRON_BLOCK);
+                b.put(0, 2, 1, Material.LIGHT_BLUE_STAINED_GLASS_PANE);
+                b.sign(0, 2, 8, "[TERMINAL]", "PERSONNEL DATABASE", "RIGHT-CLICK TO ACCESS");
                 b.loreSign(-8, 2, 7, "resident_file", "PERSONAL RECORD", "RETURNING SUBJECT");
                 b.loreSign(8, 2, 7, "decades_silence", "ARCHIVE MAINTENANCE", "LAST CYCLE: YEARS AGO");
                 b.chest(-7, 1, 7, rng, true); b.memoryShard(-7, 1, 7, "identity_fragment");
@@ -223,6 +230,7 @@ public final class CivilizationManager implements Listener {
                 }
                 b.put(0, 1, 0, Material.REDSTONE_LAMP); b.put(0, 1, 2, Material.LEVER);
                 b.sign(0, 2, -7, "POWER SUBSTATION", "GRID: OFFLINE", "AUXILIARY: RUNNING", "OPERATOR: UNKNOWN");
+                b.sign(0, 2, 4, "[GENERATOR]", "GRID OFFLINE", "RIGHT-CLICK TO RESTORE");
                 b.loreSign(6, 2, 6, "protection_system", "EMERGENCY POWER", "ANCHOR CIRCUIT ACTIVE");
                 b.chest(-5, 1, 5, rng, false); b.memoryShard(-5, 1, 5, "protection_loop");
             }
@@ -284,6 +292,7 @@ public final class CivilizationManager implements Listener {
         for (String part : wrap(line.replace("[player]", player.getName()), 66))
             player.sendMessage(ChatColor.GRAY + "§o" + part);
         if (first) {
+            plugin.getOccurrenceDirector().recordBehavior(player, "helped_resident");
             memory.addTension(4.5);
             plugin.getOccurrenceDirector().saveMemory(player.getUniqueId());
             player.playSound(player.getLocation(), Sound.BLOCK_AMETHYST_BLOCK_CHIME, .55f, .65f);
@@ -451,6 +460,16 @@ public final class CivilizationManager implements Listener {
                 plugin.getLoreManager().tagDocument(sign, id);
                 sign.update(true, false);
             }
+        }
+        void elevator(int x, int y, int z) {
+            for (int height = 1; height <= 12; height++) {
+                put(x - 1, height, z - 1, Material.GLASS);
+                put(x + 1, height, z - 1, Material.GLASS);
+                put(x - 1, height, z + 1, Material.GLASS);
+                put(x + 1, height, z + 1, Material.GLASS);
+            }
+            for (int dx = -2; dx <= 2; dx++) for (int dz = -2; dz <= 2; dz++) put(x + dx, 12, z + dz, Material.IRON_BLOCK);
+            sign(x + 2, 2, z, "[ELEVATOR]", "SERVICE LIFT", "RIGHT-CLICK TO RIDE");
         }
         void memoryShard(int x, int y, int z, String recording) {
             Block block = world.getBlockAt(ox + x, oy + y, oz + z);

@@ -1,15 +1,14 @@
 package dev.underthebedrock.command;
 
-import dev.underthebedrock.world.VoidWorldManager;
-import org.bukkit.World;
+import dev.underthebedrock.WorldEntryListener;
 import org.bukkit.command.*;
 import org.bukkit.entity.Player;
 
 public final class EnterCommand implements CommandExecutor {
-    private final VoidWorldManager worlds;
+    private final WorldEntryListener worldEntry;
 
-    public EnterCommand(VoidWorldManager worlds) {
-        this.worlds = worlds;
+    public EnterCommand(WorldEntryListener worldEntry) {
+        this.worldEntry = worldEntry;
     }
 
     @Override
@@ -18,24 +17,10 @@ public final class EnterCommand implements CommandExecutor {
             sender.sendMessage("Only players can use this command.");
             return true;
         }
-        if (!worlds.isActive()) {
-            player.sendMessage("§7There is nowhere to enter yet.");
-            return true;
-        }
-        World world = worlds.ensureWorld();
-        if (world == null) {
-            player.sendMessage("§cThe horror world could not be loaded.");
-            return true;
-        }
-        if (player.getWorld().equals(world)) {
-            player.sendMessage("§7You are already there.");
-            return true;
-        }
-
-        if (player.teleport(worlds.getEntranceLocation())) {
-            player.sendMessage("§8You step into the empty world.");
+        if (!worldEntry.enterExperience(player)) {
+            player.sendMessage("§cUnder The Bedrock could not safely admit you. Check that the experience is active and your legacy inventory can be backed up.");
         } else {
-            player.sendMessage("§cTeleport failed. Try again in a moment.");
+            player.sendMessage("§8Your entry request is being processed.");
         }
         return true;
     }

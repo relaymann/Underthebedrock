@@ -3,6 +3,26 @@ import org.bukkit.entity.Player;import java.util.Locale;import java.util.Optiona
 /** Contextual private-to-player Null reactions grounded in saved evidence, player behavior, and story progress. */
 public final class NullIntelligence {
  public Optional<String> respond(Player player,String message,PlayerHorrorMemory m){String t=message.toLowerCase(Locale.ROOT);StoryChapter c=StoryChapter.forPlayer(m);
+  if(has(t,"what do you remember about me","what do you know about me","what have i done")) {
+   if(m.hasBehavior("destroyed_ancient_site"))return Optional.of("§8You break the places that kept their names. You call it searching when you do not like the word destroying.");
+   if(m.hasBehavior("helped_resident"))return Optional.of("§8You listened to them. They have mistaken that for kindness. I have not.");
+   if(m.hasBehavior("stole_artifact")||m.hasBehavior("recovered_artifact"))return Optional.of("§8You carry things that were not left for you. The archive has already recorded the weight.");
+   if(m.hasBehavior("restored_power"))return Optional.of("§8You restored the lights. You did not restore the people who needed them.");
+   if(m.hasBehavior("claimed_safe_room"))return Optional.of("§8You have drawn a boundary and called it safety. I remember who drew the first one.");
+   if(m.hasBehavior("researched_equipment"))return Optional.of("§8You are learning to use the remains. The remains are learning you, too.");
+   if(m.hasBehavior("saw_teammate_disappear"))return Optional.of("§8You saw someone leave. You did not check whether they were ever standing there.");
+   return Optional.of("§8You have given me a number of actions. You have not yet given me a reason.");
+  }
+  if(m.hasBehavior("destroyed_ancient_site")&&has(t,"why are you angry","what did i break","the ruins","the building"))return Optional.of("§8Those rooms were not yours to dismantle. You have made the silence easier to maintain.");
+  if(m.hasBehavior("helped_resident")&&has(t,"mara","elias","june","tomas","the residents","the people"))return Optional.of("§8You keep returning to them. They remember the person you were. I remember the record that replaced you.");
+  if(m.hasBehavior("restored_power")&&has(t,"the lights","power","generator","electricity"))return Optional.of("§8The circuit is working. The protection system is still unfinished. You repaired the wrong part first.");
+  if(m.hasBehavior("claimed_safe_room")&&has(t,"safe","shelter","hide","sanctuary"))return Optional.of("§8You made a room that answers to you. Do not confuse a locked door with a boundary I cannot cross.");
+  if(m.hasBehavior("stole_artifact")&&has(t,"artifact","chest","what did i take","the things i found"))return Optional.of("§8You opened their last containers and called the contents yours. I know what you removed.");
+  if(m.hasBehavior("null_escalated_event")&&has(t,"what changed","why now","what are you looking for"))return Optional.of("§8You made yourself easier to recognize. I have stopped searching the rooms and started searching the gaps between your memories.");
+  if(m.hasBehavior("saw_teammate_disappear")&&has(t,"where is","teammate","friend","did they leave"))return Optional.of("§8You watched them disappear and waited for them to return. You did not ask why everyone else remembers them differently.");
+  if(m.hasBehavior("saw_false_player_presence")&&has(t,"joined","left","player","server message"))return Optional.of("§8The server reported a presence. You trusted the message more than the people standing beside you.");
+  if(m.hasBehavior("offered_help")&&has(t,"help","trust","fix this"))return Optional.of("§8You offer help when you want something to answer. The residents learned to tell the difference.");
+  if(m.hasBehavior("researched_equipment")&&has(t,"terminal","computer","research","equipment"))return Optional.of("§8You keep reading the instructions. They were written for the people who built the system, not the ones it kept.");
   if(m.hasLore("recognition_event")&&has(t,"you remember me","i came back","i was here","you erased me","why am i alive","you know who i am"))return Optional.of("§8I remember an absence. You were removed. I confirmed it. The record says you are not here. Why are you still here?");
   if(m.hasLore("orphaned_identity")&&has(t,"why did you erase","why me","what did you do","you failed","you made a mistake"))return Optional.of("§8Your removal was complete in every record that mattered. The anchor was not supposed to survive. I have checked it every day.");
   if(has(t,"i miss them","i miss everyone","they were my friends")&&m.loreCount()>0)return Optional.of("§8You remember them as people. The archive remembers them as missing entries. I can show you which version lasts longer.");
