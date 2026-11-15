@@ -45,6 +45,12 @@ horror:
     ancient-factions-enabled: true
     memory-shard-chance: 1.0
     rare-artifact-chance: 0.04
+  base:
+    generator:
+      capacity-hours: 96
+      artifact-fuel-hours: 24
+      vanilla-fuel-hours: 4
+    ambient-disturbances: true
   supply-drops:
     enabled: true
     interval-minutes: 30

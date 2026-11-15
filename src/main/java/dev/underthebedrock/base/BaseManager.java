@@ -46,22 +46,26 @@ public final class BaseManager implements Listener, CommandExecutor, TabComplete
     private final Map<UUID,Inventory> menus=new HashMap<>();
     private final Map<UUID,String> forgeBase=new HashMap<>();
     private final Map<String,Long> lastSecurityAlert=new HashMap<>();
+    private final Map<String,Long> lastAmbientDisturbance=new HashMap<>();
+    private final Random random=new Random();
     private BukkitTask securityTask;
     public BaseManager(UnderTheBedrockPlugin p,VoidWorldManager w,TeamManager t){
         plugin=p;worlds=w;teams=t;file=new File(p.getDataFolder(),"bases.yml");sitesFile=new File(p.getDataFolder(),"structures.yml");
         data=YamlConfiguration.loadConfiguration(file);sites=YamlConfiguration.loadConfiguration(sitesFile);
         constructorKey=new NamespacedKey(p,"base-constructor");baseBlockKey=new NamespacedKey(p,"player-base-block");
     }
-    public void start(){plugin.getServer().getPluginManager().registerEvents(this,plugin);securityTask=plugin.getServer().getScheduler().runTaskTimer(plugin,this::securityTick,100L,100L);}
+    public void start(){ConfigurationSection all=data.getConfigurationSection("bases");if(all!=null)for(String id:all.getKeys(false)){String path="bases."+id;if(data.getBoolean(path+".powered",false)&&!data.contains(path+".generator-until")){data.set(path+".generator-installed",true);data.set(path+".generator-until",System.currentTimeMillis()+capacityMillis());data.set(path+".powered",null);}}save();plugin.getServer().getPluginManager().registerEvents(this,plugin);securityTask=plugin.getServer().getScheduler().runTaskTimer(plugin,this::securityTick,100L,100L);}
     public void stop(){if(securityTask!=null)securityTask.cancel();securityTask=null;save();}
     private void save(){try{data.save(file);}catch(IOException e){plugin.getLogger().severe("Could not save bases.yml: "+e.getMessage());}}
     public ItemStack constructorItem(){
         ItemStack item=new ItemStack(Material.LODESTONE);ItemMeta meta=item.getItemMeta();
         meta.setDisplayName(ChatColor.GOLD+"Base Constructor");
-        meta.setLore(List.of(ChatColor.GRAY+"A sealed construction seed recovered from rare airdrops.",ChatColor.YELLOW+"Use or drop it inside an abandoned construction site.",ChatColor.DARK_GRAY+"Under The Bedrock"));
+        meta.setLore(List.of(ChatColor.GRAY+"A sealed construction seed from the old research program.",ChatColor.YELLOW+"Recover one from a Constructor Lab, research facility, or rare airdrop.",ChatColor.DARK_GRAY+"Use or drop it near an abandoned construction site."));
         meta.getPersistentDataContainer().set(constructorKey,PersistentDataType.BYTE,(byte)1);item.setItemMeta(meta);return item;
     }
     private boolean isConstructor(ItemStack i){return i!=null&&i.hasItemMeta()&&i.getItemMeta().getPersistentDataContainer().has(constructorKey,PersistentDataType.BYTE);}
+    private boolean hasConstructor(Player p){for(ItemStack item:p.getInventory().getContents())if(isConstructor(item))return true;return isConstructor(p.getInventory().getItemInOffHand());}
+    private boolean consumeConstructor(Player p){for(int slot=0;slot<p.getInventory().getSize();slot++){ItemStack item=p.getInventory().getItem(slot);if(!isConstructor(item))continue;if(item.getAmount()==1)p.getInventory().setItem(slot,null);else item.setAmount(item.getAmount()-1);return true;}ItemStack off=p.getInventory().getItemInOffHand();if(isConstructor(off)){if(off.getAmount()==1)p.getInventory().setItemInOffHand(null);else off.setAmount(off.getAmount()-1);return true;}return false;}
     @EventHandler(priority=EventPriority.HIGHEST,ignoreCancelled=true)
     public void interact(PlayerInteractEvent e){
         if(e.getHand()!=EquipmentSlot.HAND||!isConstructor(e.getItem()))return;
@@ -85,8 +89,9 @@ public final class BaseManager implements Listener, CommandExecutor, TabComplete
         ConfigurationSection all=current.getConfigurationSection("sites");if(all==null)return null;
         String best=null;double bestDistance=32*32;
         for(String key:all.getKeys(false)){
+            if(siteClaimed(key))continue;
             String type=current.getString("sites."+key+".type","");
-            if(!Set.of("empty_settlement","research_facility","underground_bunker","railway").contains(type))continue;
+            if(!Set.of("empty_settlement","research_facility","base_constructor_lab","underground_bunker","railway").contains(type))continue;
             int x=current.getInt("sites."+key+".x"),z=current.getInt("sites."+key+".z");
             double d=Math.pow(at.getX()-x,2)+Math.pow(at.getZ()-z,2);
             if(d<bestDistance){bestDistance=d;best=key;}
@@ -116,28 +121,31 @@ public final class BaseManager implements Listener, CommandExecutor, TabComplete
             return;
         }
         if("Artifact Forge".equals(title)){
-            e.setCancelled(true);String id=forgeBase.get(p.getUniqueId());if(id==null)return;
+            e.setCancelled(true);String id=forgeBase.get(p.getUniqueId());if(id==null||!allowed(p,id,"forge")){p.closeInventory();return;}
             int slot=e.getRawSlot();if(slot>=0&&slot<5)startRecipe(p,id,slot);
             if(slot==8)claim(p,id);
         }
     }
     private void construct(Player p,String site,Kind kind){
         if(baseOf(p.getUniqueId())!=null){p.sendMessage(ChatColor.RED+"You already own a base.");return;}
+        if(!hasConstructor(p)){p.sendMessage(ChatColor.RED+"You no longer have a Base Constructor. The site selection was cancelled.");return;}
         YamlConfiguration currentSites=YamlConfiguration.loadConfiguration(sitesFile);
         int sx=currentSites.getInt("sites."+site+".x"),sz=currentSites.getInt("sites."+site+".z");
         World w=worlds.getWorld();int x=sx+27,z=sz;
+        if(siteClaimed(site)){p.sendMessage(ChatColor.RED+"This abandoned site has already been converted into a player base.");return;}
         int y=plugin.getConfig().getInt("world.floor-y",64)+1;
-        for(int cx=Math.floorDiv(x-9,16);cx<=Math.floorDiv(x+9,16);cx++)for(int cz=Math.floorDiv(z-6,16);cz<=Math.floorDiv(z+6,16);cz++)if(!w.isChunkLoaded(cx,cz)){p.sendMessage(ChatColor.RED+"The construction area is not fully loaded yet. Walk around it and try again.");return;}
-        for(int dx=-9;dx<=9;dx++)for(int dz=-6;dz<=6;dz++)for(int dy=0;dy<=6;dy++)
+        for(int cx=Math.floorDiv(x-9,16);cx<=Math.floorDiv(x+14,16);cx++)for(int cz=Math.floorDiv(z-6,16);cz<=Math.floorDiv(z+6,16);cz++)if(!w.isChunkLoaded(cx,cz)){p.sendMessage(ChatColor.RED+"The construction area is not fully loaded yet. Walk around it and try again.");return;}
+        for(int dx=-9;dx<=14;dx++)for(int dz=-6;dz<=6;dz++)for(int dy=0;dy<=6;dy++)
             if(!w.getBlockAt(x+dx,y+dy,z+dz).getType().isAir()){p.sendMessage(ChatColor.RED+"The base footprint is obstructed. Clear the area first.");return;}
-        String id=UUID.randomUUID().toString();buildBlueprint(w,x,y,z,kind,id);
+        String id=UUID.randomUUID().toString();try{buildBlueprint(w,x,y,z,kind,id);}catch(RuntimeException failure){for(int dx=-9;dx<=14;dx++)for(int dz=-6;dz<=6;dz++)for(int dy=0;dy<=6;dy++)w.getBlockAt(x+dx,y+dy,z+dz).setType(Material.AIR,false);plugin.getLogger().severe("Base construction rolled back at "+x+","+y+","+z+": "+failure.getMessage());p.sendMessage(ChatColor.RED+"Base construction failed safely. Your Base Constructor was not consumed.");return;}
         String path="bases."+id;data.set(path+".owner",p.getUniqueId().toString());data.set(path+".team",teams.teamOf(p.getUniqueId())==null?"":teams.teamOf(p.getUniqueId()).toString());
         data.set(path+".kind",kind.id);data.set(path+".world",w.getName());data.set(path+".x",x);data.set(path+".y",y);data.set(path+".z",z);
         data.set(path+".created",System.currentTimeMillis());data.set(path+".site",site);save();
-        ItemStack held=p.getInventory().getItemInMainHand();if(isConstructor(held)){if(held.getAmount()==1)p.getInventory().setItemInMainHand(null);else held.setAmount(held.getAmount()-1);}
+        consumeConstructor(p);
         p.sendTitle(ChatColor.GOLD+"BASE ESTABLISHED",ChatColor.GRAY+kind.name,10,60,15);
         p.sendMessage(ChatColor.GREEN+"Your "+kind.name+" is online. Use /base to manage it.");
     }
+    private boolean siteClaimed(String site){ConfigurationSection all=data.getConfigurationSection("bases");if(all==null)return false;for(String id:all.getKeys(false))if(site.equals(data.getString("bases."+id+".site")))return true;return false;}
     private void buildBlueprint(World w,int x,int y,int z,Kind k,String id){
         Material wall=switch(k){case WORKSHOP->Material.DEEPSLATE_BRICKS;case RESEARCH->Material.POLISHED_ANDESITE;case BUNKER->Material.POLISHED_DEEPSLATE;case RAILWAY->Material.TUFF_BRICKS;};
         Material trim=switch(k){case WORKSHOP->Material.COPPER_BLOCK;case RESEARCH->Material.QUARTZ_BLOCK;case BUNKER->Material.IRON_BLOCK;case RAILWAY->Material.IRON_BLOCK;};
@@ -173,6 +181,10 @@ public final class BaseManager implements Listener, CommandExecutor, TabComplete
         w.getBlockAt(x+7,y+1,z-1).setType(Material.IRON_BARS,false);
         w.getBlockAt(x+7,y+2,z-1).setType(Material.LANTERN,false);
         for(int[] c:new int[][]{{-7,1,0},{7,1,0},{0,1,4}})w.getBlockAt(x+c[0],y+c[1],z+c[2]).setType(Material.COMPOSTER,false);
+        for(int dx=9;dx<=14;dx++)for(int dz=-3;dz<=3;dz++){w.getBlockAt(x+dx,y,z+dz).setType(Material.POLISHED_DEEPSLATE,false);w.getBlockAt(x+dx,y+4,z+dz).setType(Material.DEEPSLATE_TILES,false);for(int dy=1;dy<=3;dy++)if(dx==14||dz==-3||dz==3)w.getBlockAt(x+dx,y+dy,z+dz).setType(Material.DEEPSLATE_BRICKS,false);}
+        w.getBlockAt(x+8,y+1,z).setType(Material.BOOKSHELF,false);w.getBlockAt(x+8,y+2,z).setType(Material.BOOKSHELF,false);w.getBlockAt(x+9,y+1,z).setType(Material.AIR,false);w.getBlockAt(x+9,y+2,z).setType(Material.AIR,false);
+        w.getBlockAt(x+11,y+1,z-2).setType(Material.LECTERN,false);w.getBlockAt(x+12,y+1,z).setType(Material.CHISELED_BOOKSHELF,false);w.getBlockAt(x+13,y+1,z+2).setType(Material.AMETHYST_BLOCK,false);w.getBlockAt(x+13,y+1,z-2).setType(Material.CRYING_OBSIDIAN,false);w.getBlockAt(x+10,y+1,z+2).setType(Material.END_ROD,false);
+        for(int[] cam:new int[][]{{-7,1,-4},{7,1,-4},{-7,1,4},{7,1,4}})w.getBlockAt(x+cam[0],y+cam[1],z+cam[2]).setType(Material.OBSERVER,false);w.getBlockAt(x-2,y+1,z-2).setType(Material.CARTOGRAPHY_TABLE,false);
     }
     private void mark(Block b,String id){org.bukkit.block.BlockState s=b.getState();if(s instanceof TileState tile){tile.getPersistentDataContainer().set(baseBlockKey,PersistentDataType.STRING,id);tile.update(true,false);}}
     private String baseOf(UUID player){
@@ -182,9 +194,9 @@ public final class BaseManager implements Listener, CommandExecutor, TabComplete
     }
     private String baseAt(Location l){
         ConfigurationSection all=data.getConfigurationSection("bases");if(all==null)return null;
-        for(String id:all.getKeys(false)){String p="bases."+id;if(!data.getString(p+".world","").equals(l.getWorld().getName()))continue;
+        for(String id:all.getKeys(false)){String p="bases."+id;if(data.getBoolean(p+".abandoned",false)||!data.getString(p+".world","").equals(l.getWorld().getName()))continue;
             int x=data.getInt(p+".x"),y=data.getInt(p+".y"),z=data.getInt(p+".z");
-            if(Math.abs(l.getBlockX()-x)<=9&&Math.abs(l.getBlockY()-y)<=6&&Math.abs(l.getBlockZ()-z)<=6)return id;
+            if(l.getBlockX()>=x-9&&l.getBlockX()<=x+14&&Math.abs(l.getBlockY()-y)<=6&&Math.abs(l.getBlockZ()-z)<=6)return id;
         }return null;
     }
     private boolean allowed(Player p,String id,String permission){
@@ -201,11 +213,14 @@ public final class BaseManager implements Listener, CommandExecutor, TabComplete
         ConfigurationSection all=data.getConfigurationSection("bases");if(all==null)return;
         long now=System.currentTimeMillis();
         for(String id:all.getKeys(false)){
-            String path="bases."+id;World world=Bukkit.getWorld(data.getString(path+".world",""));
+            String path="bases."+id;if(data.getBoolean(path+".abandoned",false))continue;World world=Bukkit.getWorld(data.getString(path+".world",""));
             if(world==null||!world.equals(worlds.getWorld()))continue;
             int x=data.getInt(path+".x"),y=data.getInt(path+".y"),z=data.getInt(path+".z");Kind k=kind(id);
-            if(!data.getBoolean(path+".powered",false))continue;
-            double radius=10+k.security*7.5;Location center=new Location(world,x,y+1,z);
+            Location center=new Location(world,x,y+1,z);List<Player> occupants=world.getPlayers().stream().filter(p->id.equals(baseAt(p.getLocation()))).toList();long until=data.getLong(path+".generator-until",0L);boolean powered=data.getBoolean(path+".generator-installed",false)&&until>now;setLamp(world.getBlockAt(x-6,y+1,z-4),powered);
+            if(data.getBoolean(path+".generator-installed",false)&&!powered&&!data.getBoolean(path+".generator-expired-notified",false)){data.set(path+".generator-expired-notified",true);save();for(Player member:world.getPlayers())if(member.getUniqueId().equals(UUID.fromString(data.getString(path+".owner")))||allowed(member,id,"security"))member.sendMessage(ChatColor.RED+"[GENERATOR] Fuel depleted. Add fuel with /base fuel.");}
+            if(plugin.getConfig().getBoolean("horror.base.ambient-disturbances",true)&&!occupants.isEmpty()&&now-lastAmbientDisturbance.getOrDefault(id,0L)>180_000L&&random.nextDouble()<0.012){lastAmbientDisturbance.put(id,now);Player target=occupants.get(random.nextInt(occupants.size()));target.playSound(target.getLocation(),Sound.BLOCK_IRON_DOOR_CLOSE,0.45f,0.55f);target.sendMessage(ChatColor.DARK_GRAY+"A mechanism clicks somewhere behind the walls.");Block light=world.getBlockAt(x-6,y+1,z-4);setLamp(light,false);plugin.getServer().getScheduler().runTaskLater(plugin,()->setLamp(light,data.getLong(path+".generator-until",0L)>System.currentTimeMillis()),8L);}
+            if(!powered)continue;
+            double radius=10+k.security*7.5;
             boolean threat=!world.getNearbyEntities(center,radius,8,radius,e->e instanceof Monster).isEmpty();
             if(!threat||now-lastSecurityAlert.getOrDefault(id,0L)<30_000L)continue;
             lastSecurityAlert.put(id,now);UUID owner=UUID.fromString(data.getString(path+".owner"));
@@ -215,12 +230,14 @@ public final class BaseManager implements Listener, CommandExecutor, TabComplete
             }
         }
     }
+    private long capacityMillis(){return Math.max(1,plugin.getConfig().getLong("horror.base.generator.capacity-hours",96))*3_600_000L;}
+    private void setLamp(Block block,boolean lit){if(block.getBlockData() instanceof org.bukkit.block.data.Lightable lightable){lightable.setLit(lit);block.setBlockData(lightable,false);}}
     @EventHandler(priority=EventPriority.HIGHEST,ignoreCancelled=true)
     public void protect(BlockBreakEvent e){String id=baseAt(e.getBlock().getLocation());if(id==null)return;
         if(!allowed(e.getPlayer(),id,"enter")||!allowed(e.getPlayer(),id,"build")){e.setCancelled(true);e.getPlayer().sendMessage(ChatColor.RED+"You do not have base modification permission.");}}
     @EventHandler(priority=EventPriority.HIGHEST,ignoreCancelled=true)
     public void place(BlockPlaceEvent e){String id=baseAt(e.getBlock().getLocation());if(id==null)return;
-        if(!allowed(e.getPlayer(),id,"build")){e.setCancelled(true);e.getPlayer().sendMessage(ChatColor.RED+"You do not have base modification permission.");}}
+        if(!allowed(e.getPlayer(),id,"enter")||!allowed(e.getPlayer(),id,"build")){e.setCancelled(true);e.getPlayer().sendMessage(ChatColor.RED+"You do not have base modification permission.");}}
     @EventHandler(priority=EventPriority.HIGHEST,ignoreCancelled=true)
     public void useBlock(PlayerInteractEvent e){
         if(e.getHand()!=EquipmentSlot.HAND||e.getClickedBlock()==null)return;String id=baseAt(e.getClickedBlock().getLocation());if(id==null)return;
@@ -228,11 +245,27 @@ public final class BaseManager implements Listener, CommandExecutor, TabComplete
         Material type=e.getClickedBlock().getType();
         if(type==Material.CHEST||type==Material.BARREL){if(!allowed(e.getPlayer(),id,"enter")||!allowed(e.getPlayer(),id,"storage")){e.setCancelled(true);e.getPlayer().sendMessage(ChatColor.RED+"Storage access is disabled for you.");}}
         if(type==Material.SMITHING_TABLE){e.setCancelled(true);if(allowed(e.getPlayer(),id,"forge"))openForge(e.getPlayer(),id);else e.getPlayer().sendMessage(ChatColor.RED+"Forge access is disabled for you.");}
-        if(type==Material.LODESTONE){e.setCancelled(true);if(allowed(e.getPlayer(),id,"security"))e.getPlayer().sendMessage(ChatColor.AQUA+"Security tier "+kind(id).security+" / 4. Generator: "+(data.getBoolean("bases."+id+".powered",false)?"ONLINE":"OFFLINE")+".");else e.getPlayer().sendMessage(ChatColor.RED+"Security console access is disabled for you.");}
-        if(type==Material.REDSTONE_LAMP){e.setCancelled(true);if(allowed(e.getPlayer(),id,"security"))e.getPlayer().sendMessage(ChatColor.YELLOW+"Base generator: "+(data.getBoolean("bases."+id+".powered",false)?"ONLINE":"OFFLINE")+". Use /base power to restore power.");}
-        if(type==Material.LECTERN){e.setCancelled(true);if(allowed(e.getPlayer(),id,"research"))e.getPlayer().sendMessage(ChatColor.LIGHT_PURPLE+"Research terminal: artifact records and expedition logs are being indexed.");}
+        if(type==Material.LODESTONE){e.setCancelled(true);if(allowed(e.getPlayer(),id,"security")){String path="bases."+id;long remaining=Math.max(0,data.getLong(path+".generator-until",0L)-System.currentTimeMillis());e.getPlayer().sendMessage(ChatColor.AQUA+"Security tier "+kind(id).security+" / 4. Generator: "+(remaining>0?"ONLINE":"OFFLINE")+" ("+(remaining/3_600_000L)+"h fuel).");}else e.getPlayer().sendMessage(ChatColor.RED+"Security console access is disabled for you.");}
+        if(type==Material.REDSTONE_LAMP){e.setCancelled(true);if(allowed(e.getPlayer(),id,"security")){long remaining=Math.max(0,data.getLong("bases."+id+".generator-until",0L)-System.currentTimeMillis());e.getPlayer().sendMessage(ChatColor.YELLOW+"Base generator: "+(remaining>0?"ONLINE":"OFFLINE")+". "+(remaining/3_600_000L)+" hour(s) remaining. Use /base fuel while holding an item.");}}
+        if(type==Material.LECTERN){e.setCancelled(true);if(allowed(e.getPlayer(),id,"research"))researchTerminal(e.getPlayer(),id);}
+        if(type==Material.OBSERVER){e.setCancelled(true);if(allowed(e.getPlayer(),id,"security"))cameraFeed(e.getPlayer(),id);else e.getPlayer().sendMessage(ChatColor.RED+"Camera access is disabled for you.");}
+        if(type==Material.CARTOGRAPHY_TABLE){e.setCancelled(true);if(allowed(e.getPlayer(),id,"research"))showMap(e.getPlayer());}
+        if(type==Material.BOOKSHELF){int bx=data.getInt("bases."+id+".x"),bz=data.getInt("bases."+id+".z");if(e.getClickedBlock().getX()==bx+8&&e.getClickedBlock().getZ()==bz){e.setCancelled(true);if(allowed(e.getPlayer(),id,"research")){e.getClickedBlock().setType(Material.AIR,false);e.getClickedBlock().getRelative(0,1,0).setType(Material.AIR,false);e.getPlayer().sendMessage(ChatColor.LIGHT_PURPLE+"A concealed archive door slides open.");}}}
     }
     @EventHandler(priority=EventPriority.HIGHEST,ignoreCancelled=true) public void explode(EntityExplodeEvent e){e.blockList().removeIf(b->baseAt(b.getLocation())!=null);}
+    @EventHandler(priority=EventPriority.HIGHEST,ignoreCancelled=true) public void blockExplode(BlockExplodeEvent e){e.blockList().removeIf(b->baseAt(b.getLocation())!=null);}
+    @EventHandler(priority=EventPriority.HIGHEST,ignoreCancelled=true) public void burn(BlockBurnEvent e){if(baseAt(e.getBlock().getLocation())!=null)e.setCancelled(true);}
+    @EventHandler(priority=EventPriority.HIGHEST,ignoreCancelled=true) public void ignite(BlockIgniteEvent e){if(baseAt(e.getBlock().getLocation())!=null)e.setCancelled(true);}
+    @EventHandler(priority=EventPriority.HIGHEST,ignoreCancelled=true) public void spread(BlockSpreadEvent e){if(baseAt(e.getBlock().getLocation())!=null)e.setCancelled(true);}
+    @EventHandler(priority=EventPriority.HIGHEST,ignoreCancelled=true) public void mobGrief(org.bukkit.event.entity.EntityChangeBlockEvent e){if(baseAt(e.getBlock().getLocation())!=null)e.setCancelled(true);}
+    @EventHandler(priority=EventPriority.HIGHEST,ignoreCancelled=true) public void piston(BlockPistonExtendEvent e){if(e.getBlocks().stream().anyMatch(b->baseAt(b.getLocation())!=null))e.setCancelled(true);}
+    @EventHandler(priority=EventPriority.HIGHEST,ignoreCancelled=true) public void piston(BlockPistonRetractEvent e){if(e.getBlocks().stream().anyMatch(b->baseAt(b.getLocation())!=null))e.setCancelled(true);}
+    @EventHandler(priority=EventPriority.HIGHEST,ignoreCancelled=true) public void inventoryOpen(InventoryOpenEvent e){if(!(e.getPlayer() instanceof Player p))return;Location l=e.getInventory().getLocation();if(l==null)return;String id=baseAt(l);if(id!=null&&(!allowed(p,id,"enter")||!allowed(p,id,"storage")))e.setCancelled(true);}
+    @EventHandler(priority=EventPriority.HIGHEST,ignoreCancelled=true) public void hopperMove(InventoryMoveItemEvent e){Location a=e.getSource().getLocation(),b=e.getDestination().getLocation();if((a!=null&&baseAt(a)!=null)||(b!=null&&baseAt(b)!=null))e.setCancelled(true);}
+    @EventHandler public void closeMenu(InventoryCloseEvent e){if(!(e.getPlayer() instanceof Player p))return;String title=ChatColor.stripColor(e.getView().getTitle());if("Choose your base".equals(title))selection.remove(p.getUniqueId());if("Artifact Forge".equals(title))forgeBase.remove(p.getUniqueId());}
+    private void researchTerminal(Player p,String id){String output=data.getString("jobs."+p.getUniqueId()+".output");p.sendMessage(ChatColor.LIGHT_PURPLE+"RESEARCH ARCHIVE: "+ChatColor.WHITE+"Recovered artifacts, expedition records, and site telemetry.");if(output!=null)p.sendMessage(ChatColor.GRAY+"Your active forge output: "+output.replace('_',' ')+".");p.sendMessage(ChatColor.GRAY+"Base security tier: "+kind(id).security+"/4. Use the map table to locate nearby ruins.");}
+    private void cameraFeed(Player p,String id){int x=data.getInt("bases."+id+".x"),y=data.getInt("bases."+id+".y"),z=data.getInt("bases."+id+".z");World world=p.getWorld();double radius=10+kind(id).security*7.5;Entity threat=world.getNearbyEntities(new Location(world,x,y+1,z),radius,8,radius,e->e instanceof Monster).stream().findFirst().orElse(null);if(threat==null)p.sendMessage(ChatColor.GREEN+"CAMERA NETWORK: no hostile movement detected.");else p.sendMessage(ChatColor.RED+"CAMERA NETWORK: movement at X "+threat.getLocation().getBlockX()+", Z "+threat.getLocation().getBlockZ()+".");p.playSound(p.getLocation(),Sound.BLOCK_NOTE_BLOCK_BELL,.5f,1.4f);}
+    private void showMap(Player p){if(!worlds.isActive()||!p.getWorld().equals(worlds.getWorld())){p.sendMessage(ChatColor.RED+"The exploration map only works beneath the bedrock.");return;}YamlConfiguration current=YamlConfiguration.loadConfiguration(sitesFile);ConfigurationSection all=current.getConfigurationSection("sites");if(all==null){p.sendMessage(ChatColor.GRAY+"No sites have been recorded yet.");return;}Set<String> claimed=new HashSet<>();ConfigurationSection bases=data.getConfigurationSection("bases");if(bases!=null)for(String baseId:bases.getKeys(false))claimed.add(data.getString("bases."+baseId+".site",""));Location best=null;double distance=Double.MAX_VALUE;for(String key:all.getKeys(false)){if(claimed.contains(key))continue;Location candidate=new Location(p.getWorld(),current.getInt("sites."+key+".x"),plugin.getConfig().getInt("world.floor-y",64)+1,current.getInt("sites."+key+".z"));double d=candidate.distanceSquared(p.getLocation());if(d<distance){distance=d;best=candidate;}}if(best==null){p.sendMessage(ChatColor.GRAY+"No sites have been recorded yet.");return;}p.setCompassTarget(best);p.sendMessage(ChatColor.GOLD+"EXPLORATION MAP: "+ChatColor.WHITE+"Nearest recorded site at X "+best.getBlockX()+", Z "+best.getBlockZ()+" ("+(int)Math.sqrt(distance)+" blocks).");}
     private Kind kind(String id){String k=data.getString("bases."+id+".kind","");return Arrays.stream(Kind.values()).filter(v->v.id.equals(k)).findFirst().orElse(Kind.WORKSHOP);}
     private void openForge(Player p,String id){
         forgeBase.put(p.getUniqueId(),id);Inventory inv=Bukkit.createInventory(null,9,ChatColor.DARK_GRAY+"Artifact Forge");
@@ -260,12 +293,17 @@ public final class BaseManager implements Listener, CommandExecutor, TabComplete
         if(!leftovers.isEmpty()){p.sendMessage(ChatColor.RED+"Make room in your inventory before claiming.");return;}
         data.set(path,null);save();p.sendMessage(ChatColor.GREEN+"Artifact recovered: "+type.title);
     }
+    private void consumeMaterial(Player p,Material material,int amount){for(int slot=0;slot<p.getInventory().getSize()&&amount>0;slot++){ItemStack stack=p.getInventory().getItem(slot);if(stack==null||stack.getType()!=material)continue;int take=Math.min(amount,stack.getAmount());if(take==stack.getAmount())p.getInventory().setItem(slot,null);else stack.setAmount(stack.getAmount()-take);amount-=take;}}
     private boolean hasCustom(Player p,String itemId,int amount){int count=0;for(ItemStack stack:p.getInventory().getContents())if(plugin.getCustomItems().isCustomItem(stack)&&plugin.getCustomItems().getItemId(stack).equals(itemId))count+=stack.getAmount();return count>=amount;}
     private boolean consumeCustom(Player p,String itemId,int amount){int count=0;for(ItemStack stack:p.getInventory().getContents())if(plugin.getCustomItems().isCustomItem(stack)&&plugin.getCustomItems().getItemId(stack).equals(itemId))count+=stack.getAmount();if(count<amount)return false;int left=amount;for(int i=0;i<p.getInventory().getSize()&&left>0;i++){ItemStack stack=p.getInventory().getItem(i);if(!plugin.getCustomItems().isCustomItem(stack)||!plugin.getCustomItems().getItemId(stack).equals(itemId))continue;int take=Math.min(left,stack.getAmount());if(take==stack.getAmount())p.getInventory().setItem(i,null);else stack.setAmount(stack.getAmount()-take);left-=take;}return true;}
     @Override public boolean onCommand(CommandSender sender,Command command,String label,String[] args){
         if(!(sender instanceof Player p)){sender.sendMessage("Players only.");return true;}
-        if(args.length==0||args[0].equalsIgnoreCase("info")){String id=baseOf(p.getUniqueId());if(id==null){p.sendMessage(ChatColor.GRAY+"You do not own a base.");return true;}Kind k=kind(id);p.sendMessage(ChatColor.GOLD+k.name+" §7| Storage: "+k.chests+" chests | Forge: "+k.forge+"x | Security: "+k.security+"/4");return true;}
-        if(args[0].equalsIgnoreCase("power")){String id=baseOf(p.getUniqueId());if(id==null){p.sendMessage(ChatColor.RED+"You do not own a base.");return true;}if(!data.getBoolean("bases."+id+".powered",false)){if(!hasCustom(p,"insulated_wire",2)||!hasCustom(p,"fuse",2)||!hasCustom(p,"power_cell",1)){p.sendMessage(ChatColor.RED+"Power restoration requires 2 Insulated Wire, 2 Ceramic Fuses and 1 Resonance Power Cell. Nothing was consumed.");return true;}consumeCustom(p,"insulated_wire",2);consumeCustom(p,"fuse",2);consumeCustom(p,"power_cell",1);data.set("bases."+id+".powered",true);save();p.sendMessage(ChatColor.GREEN+"Generator restored. Security perimeter and base systems are now powered.");}else p.sendMessage(ChatColor.GREEN+"Generator is already online.");return true;}
+        if(args.length==0||args[0].equalsIgnoreCase("info")){String id=baseOf(p.getUniqueId());if(id==null){p.sendMessage(ChatColor.GRAY+"You do not own a base.");return true;}Kind k=kind(id);long remaining=Math.max(0,data.getLong("bases."+id+".generator-until",0L)-System.currentTimeMillis());p.sendMessage(ChatColor.GOLD+k.name+" §7| Storage: "+k.chests+" chests | Forge: "+k.forge+"x | Security: "+k.security+"/4 | Upgrade: "+data.getInt("bases."+id+".upgrade-level",0)+"/3");p.sendMessage(ChatColor.GRAY+"Generator: "+(data.getBoolean("bases."+id+".generator-installed",false)?(remaining/3_600_000L)+"h fuel remaining":"not installed"));return true;}
+        if(args[0].equalsIgnoreCase("power")){String id=baseOf(p.getUniqueId());if(id==null){p.sendMessage(ChatColor.RED+"You do not own a base.");return true;}String path="bases."+id;if(data.getBoolean(path+".generator-installed",false)){p.sendMessage(ChatColor.YELLOW+"Generator installed. Remaining fuel: "+Math.max(0,(data.getLong(path+".generator-until",0L)-System.currentTimeMillis())/3_600_000L)+" hour(s). Use /base fuel while holding an item to refuel.");return true;}if(!hasCustom(p,"insulated_wire",2)||!hasCustom(p,"fuse",2)||!hasCustom(p,"power_cell",1)){p.sendMessage(ChatColor.RED+"Installing the generator requires 2 Insulated Wire, 2 Ceramic Fuses and 1 Resonance Power Cell. Nothing was consumed.");return true;}consumeCustom(p,"insulated_wire",2);consumeCustom(p,"fuse",2);consumeCustom(p,"power_cell",1);data.set(path+".generator-installed",true);data.set(path+".generator-until",System.currentTimeMillis()+capacityMillis());data.set(path+".generator-expired-notified",false);save();p.sendMessage(ChatColor.GREEN+"Generator installed and fully fueled. It can run for up to four days before needing fuel.");return true;}
+        if(args[0].equalsIgnoreCase("fuel")){String id=baseOf(p.getUniqueId());if(id==null){p.sendMessage(ChatColor.RED+"You do not own a base.");return true;}String path="bases."+id;if(!data.getBoolean(path+".generator-installed",false)){p.sendMessage(ChatColor.RED+"Install your generator first with /base power.");return true;}ItemStack held=p.getInventory().getItemInMainHand();if(held.getType().isAir()||isConstructor(held)){p.sendMessage(ChatColor.YELLOW+"Hold a vanilla item or an artifact in your main hand, then use /base fuel.");return true;}long level=data.getInt(path+".upgrade-level",0);long hours=plugin.getCustomItems().isCustomItem(held)?plugin.getConfig().getLong("horror.base.generator.artifact-fuel-hours",24)+level*2:plugin.getConfig().getLong("horror.base.generator.vanilla-fuel-hours",4)+level;long now=System.currentTimeMillis(),remaining=Math.max(0,data.getLong(path+".generator-until",now)-now),capacity=capacityMillis(),added=Math.min(hours*3_600_000L,Math.max(0,capacity-remaining));if(added<=0){p.sendMessage(ChatColor.GREEN+"The generator fuel tank is already full (96 hours).");return true;}if(held.getAmount()==1)p.getInventory().setItemInMainHand(null);else held.setAmount(held.getAmount()-1);data.set(path+".generator-until",now+remaining+added);data.set(path+".generator-expired-notified",false);save();p.sendMessage(ChatColor.GREEN+"Generator refueled: +"+(added/3_600_000L)+" hour(s). Tank: "+Math.min(96,(remaining+added)/3_600_000L)+"/96 hours.");return true;}
+        if(args[0].equalsIgnoreCase("map")){showMap(p);return true;}
+        if(args[0].equalsIgnoreCase("abandon")){String id=baseOf(p.getUniqueId());if(id==null){p.sendMessage(ChatColor.RED+"You do not own an active base.");return true;}if(args.length!=2||!args[1].equalsIgnoreCase("confirm")){p.sendMessage(ChatColor.YELLOW+"This leaves your base behind as an abandoned structure and releases your ownership. It does not delete the building or its stored items. Use /base abandon confirm to proceed.");return true;}String path="bases."+id;data.set(path+".abandoned",true);data.set(path+".owner",null);data.set(path+".team",null);data.set(path+".permissions",null);data.set(path+".generator-installed",false);data.set(path+".generator-until",0L);save();p.sendMessage(ChatColor.YELLOW+"Base abandoned. The structure remains in the world; you may claim another unclaimed site with a new Base Constructor.");return true;}
+        if(args[0].equalsIgnoreCase("upgrade")){String id=baseOf(p.getUniqueId());if(id==null){p.sendMessage(ChatColor.RED+"You do not own a base.");return true;}String path="bases."+id;int level=data.getInt(path+".upgrade-level",0);if(level>=3){p.sendMessage(ChatColor.GREEN+"Your base systems are fully upgraded (Level III).");return true;}if(!hasCustom(p,"power_cell",1)||!p.getInventory().containsAtLeast(new ItemStack(Material.IRON_INGOT),4)){p.sendMessage(ChatColor.RED+"Upgrade requires 1 Resonance Power Cell and 4 Iron Ingots. Nothing was consumed.");return true;}consumeCustom(p,"power_cell",1);consumeMaterial(p,Material.IRON_INGOT,4);level++;data.set(path+".upgrade-level",level);save();p.sendMessage(ChatColor.GREEN+"Base systems upgraded to Level "+level+". Fuel value improved for every fuel type.");return true;}
         if(args[0].equalsIgnoreCase("permissions")&&args.length==4){
             String id=baseOf(p.getUniqueId());if(id==null){p.sendMessage(ChatColor.RED+"You do not own a base.");return true;}
             OfflinePlayer target=Bukkit.getOfflinePlayer(args[1]);UUID team=teams.teamOf(p.getUniqueId());
@@ -275,10 +313,10 @@ public final class BaseManager implements Listener, CommandExecutor, TabComplete
             data.set("bases."+id+".permissions."+target.getUniqueId()+"."+perm,args[3].equalsIgnoreCase("on"));save();
             p.sendMessage(ChatColor.GREEN+perm+" permission for "+target.getName()+" set to "+args[3]+".");return true;
         }
-        p.sendMessage(ChatColor.YELLOW+"/base [info|power] | /base permissions <teammate> <enter|storage|forge|build|security|research> <on|off>");return true;
+        p.sendMessage(ChatColor.YELLOW+"/base [info|power|fuel|map|upgrade|abandon] | /base permissions <teammate> <enter|storage|forge|build|security|research> <on|off>");return true;
     }
     @Override public List<String> onTabComplete(CommandSender s,Command c,String a,String[] args){
-        if(args.length==1)return List.of("info","power","permissions").stream().filter(v->v.startsWith(args[0].toLowerCase())).toList();
+        if(args.length==1)return List.of("info","power","fuel","map","upgrade","abandon","permissions").stream().filter(v->v.startsWith(args[0].toLowerCase())).toList();
         if(args.length==2&&args[0].equalsIgnoreCase("permissions"))return Bukkit.getOnlinePlayers().stream().map(Player::getName).toList();
         if(args.length==3&&args[0].equalsIgnoreCase("permissions"))return List.of(PERMS);
         if(args.length==4&&args[0].equalsIgnoreCase("permissions"))return List.of("on","off");

@@ -93,6 +93,7 @@ public final class StructureManager implements Listener {
         boolean first=!data.getBoolean(path+".built",false);
         long period=Math.max(1,plugin.getConfig().getLong("horror.structures.regeneration-hours",1))*HOUR;
         if(first||now-last>=period){
+            if(selected==StructureDefinition.BASE_CONSTRUCTOR_LAB&&!first)return;
             if(!first){double safeDistance=Math.pow(radius(selected)+4,2);for(Player nearby:world.getPlayers())if(nearby.getLocation().distanceSquared(siteCenter)<=safeDistance)return;}
             int cycle=data.getInt(path+".cycle",0)+(first?0:1);
             build(world,x,z,plugin.getConfig().getInt("world.floor-y",64)+1,selected,seed,key,cycle);
@@ -101,7 +102,7 @@ public final class StructureManager implements Listener {
     }
     private int radius(StructureDefinition type){
         return switch(type){
-            case EMPTY_SETTLEMENT,RESEARCH_FACILITY,CONTAINMENT_FACILITY,ARCHIVE_HALL->17;
+            case EMPTY_SETTLEMENT,RESEARCH_FACILITY,BASE_CONSTRUCTOR_LAB,CONTAINMENT_FACILITY,ARCHIVE_HALL->17;
             case MONOLITH,SEALED_GATEWAY,RAILWAY,IMPOSSIBLE_CORRIDOR,ERASURE_VAULT->15;
             case UNDERGROUND_BUNKER,FORGOTTEN_CHAPEL,KEEPER_SANCTUARY,WITNESS_REFUGE->13;
             default->10;
@@ -148,7 +149,8 @@ public final class StructureManager implements Listener {
             case SIGNAL_STATION->{b.platform(-5,5,-4,4,"DEEPSLATE_TILES");b.put(0,1,0,"LIGHTNING_ROD");b.put(0,2,0,"LIGHTNING_ROD");b.put(-2,1,1,"NOTE_BLOCK");b.put(2,1,1,"JUKEBOX");b.put(0,1,3,"REDSTONE_LAMP");b.chest(-3,1,-2,loot,4);b.sign(0,2,-4,"SIGNAL LOG 07","NO TRANSMITTER","WAS INSTALLED");}
             case OBSERVATION_TOWER->{b.tower(4);b.put(0,6,0,"SOUL_LANTERN");b.chest(1,4,1,loot,3);b.sign(0,5,2,"YOU ARE NOT","THE FIRST ONE","UP HERE");}
             case NULL_SHRINE->{b.platform(-4,4,-4,4,"POLISHED_BLACKSTONE_BRICKS");b.put(0,1,0,"CRYING_OBSIDIAN");b.put(0,2,0,"RESPAWN_ANCHOR");for(int i=-3;i<=3;i+=2){b.put(i,1,-3,"BLACKSTONE_WALL");b.put(i,1,3,"BLACKSTONE_WALL");}b.put(-3,1,0,"SOUL_LANTERN");b.put(3,1,0,"SOUL_LANTERN");b.sign(0,2,4,"IT KNEW","YOU WOULD","FIND THIS");}
-            case RESEARCH_FACILITY->{b.room(-7,7,-5,5,"POLISHED_ANDESITE","IRON_BLOCK");b.put(-4,1,-2,"IRON_BARS");b.put(-4,2,-2,"IRON_BARS");b.put(0,1,0,"BREWING_STAND");b.put(2,1,0,"LECTERN");b.put(4,1,2,"CAULDRON");b.chest(-5,1,3,loot,5);b.chest(5,1,-3,loot,5);b.sign(0,2,-5,"OBSERVATION 04","SUBJECT RESPONDS","TO CHAT");b.loreSign(-6,2,4,"protection_system","BOUNDARY SAFEGUARD","TEST: INCOMPLETE");b.memoryShard(-5,1,3,loot,"protection_loop");}
+            case RESEARCH_FACILITY->{b.room(-7,7,-5,5,"POLISHED_ANDESITE","IRON_BLOCK");b.put(-4,1,-2,"IRON_BARS");b.put(-4,2,-2,"IRON_BARS");b.put(0,1,0,"BREWING_STAND");b.put(2,1,0,"LECTERN");b.put(4,1,2,"CAULDRON");b.chest(-5,1,3,loot,5);b.chest(5,1,-3,loot,5);if(loot.nextDouble()<0.12)b.baseConstructor(-5,1,3);b.sign(0,2,-5,"OBSERVATION 04","SUBJECT RESPONDS","TO CHAT");b.loreSign(-6,2,4,"protection_system","BOUNDARY SAFEGUARD","TEST: INCOMPLETE");b.memoryShard(-5,1,3,loot,"protection_loop");}
+            case BASE_CONSTRUCTOR_LAB->{b.room(-8,8,-8,8,"POLISHED_DEEPSLATE","IRON_BLOCK");for(int i=-5;i<=5;i+=5){b.put(i,1,-4,"IRON_BARS");b.put(i,2,-4,"IRON_BARS");b.put(i,1,4,"IRON_BARS");b.put(i,2,4,"IRON_BARS");}b.put(-5,1,0,"BREWING_STAND");b.put(-5,1,1,"BLAST_FURNACE");b.put(5,1,0,"SMITHING_TABLE");b.put(5,1,1,"ANVIL");b.put(0,1,0,"RESPAWN_ANCHOR");b.put(0,2,0,"AMETHYST_BLOCK");b.put(-2,1,-2,"OBSERVER");b.put(2,1,-2,"OBSERVER");b.put(-2,1,2,"OBSERVER");b.put(2,1,2,"OBSERVER");b.chest(-6,1,5,loot,5);b.baseConstructor(-6,1,5);b.loreSign(-7,2,-7,"constructor_project","PROJECT: CONSTRUCTOR","PROTOTYPE DEPLOYMENT");b.loreSign(7,2,-7,"constructor_failures","ITERATION 09","THE SITE MUST BE ABANDONED");b.sign(0,2,7,"DO NOT ACTIVATE","INSIDE THE LAB","TAKE IT TO A SAFE SITE");}
             case EMPTY_SETTLEMENT->{b.room(-10,-4,-4,4,"OAK_PLANKS","OAK_LOG");b.room(4,10,-4,4,"SPRUCE_PLANKS","SPRUCE_LOG");b.room(-3,3,5,10,"BIRCH_PLANKS","BIRCH_LOG");b.put(-7,1,0,"RED_BED");b.put(7,1,0,"WHITE_BED");b.put(0,1,7,"FARMLAND");b.chest(-8,1,3,loot,4);b.sign(0,2,11,"POPULATION: 0","LAST SEEN:","YOU");b.loreSign(-9,2,-3,"population_ledger","FINAL CENSUS","NO MATCHING NAMES");b.loreSign(8,2,-3,"resident_file","RESIDENT FILE","PERSONAL COPY");}
             case UNDERGROUND_BUNKER->{b.room(-6,6,-5,5,"DEEPSLATE_BRICKS","IRON_BLOCK");b.put(0,1,0,"IRON_DOOR");b.put(-3,1,-2,"LANTERN");b.put(3,1,-2,"LANTERN");b.chest(0,1,3,loot,5);b.sign(0,2,-5,"SHELTER SEALED","FROM THE INSIDE");}
             case RAILWAY->{for(int i=-7;i<=7;i++){b.put(0,0,i,"RAIL");b.put(1,0,i,"DEEPSLATE_BRICKS");}b.put(2,0,6,"POWERED_RAIL");b.put(-3,1,0,"SOUL_LANTERN");b.chest(-3,1,5,loot,3);b.sign(3,1,0,"NEXT TRAIN:","NEVER");b.loreSign(3,2,5,"last_day","FINAL SERVICE LOG","NO DEPARTURES");b.memoryShard(-3,1,5,loot,"final_hour");}
@@ -189,15 +191,16 @@ public final class StructureManager implements Listener {
             if(protectedBlocks.contains(key(location)))return;
             put(x,y,z,"CHEST");Block block=location.getBlock();
             if(block.getState() instanceof Container container){
-                container.getInventory().clear();Material[] loot={Material.BREAD,Material.TORCH,Material.IRON_INGOT,Material.STRING,Material.PAPER,Material.COMPASS,Material.CLOCK,Material.GOLD_NUGGET,Material.ARROW};
+                if(container.getInventory().isEmpty()){Material[] loot={Material.BREAD,Material.TORCH,Material.IRON_INGOT,Material.STRING,Material.PAPER,Material.COMPASS,Material.CLOCK,Material.GOLD_NUGGET,Material.ARROW};
                 for(int i=0;i<rolls;i++)container.getInventory().addItem(new ItemStack(loot[random.nextInt(loot.length)],1+random.nextInt(4)));
-                if(plugin.getCustomItems()!=null){for(int n=0;n<1+random.nextInt(2);n++)container.getInventory().addItem(plugin.getCustomItems().randomLootItem(random));}
+                if(plugin.getCustomItems()!=null){for(int n=0;n<1+random.nextInt(2);n++)container.getInventory().addItem(plugin.getCustomItems().randomLootItem(random));}}
                 container.getPersistentDataContainer().set(marker,PersistentDataType.STRING,site);container.update(true,false);
             }
         }
-        void loreSign(int x,int y,int z,String id,String... lines){sign(x,y,z,lines);Block block=new Location(world,ox+x,oy+y,oz+z).getBlock();if(block.getState() instanceof Sign sign){plugin.getLoreManager().tagDocument(sign,id);sign.update(true,false);}}
-        void rareArtifact(int x,int y,int z,Random random){if(random.nextDouble()>plugin.getConfig().getDouble("horror.structures.rare-artifact-chance",.04))return;Location l=new Location(world,ox+x,oy+y,oz+z);if(l.getBlock().getState() instanceof Container c){c.getInventory().addItem(plugin.getLoreManager().createArchitectSeal());c.update(true,false);}}
-        void memoryShard(int x,int y,int z,Random random,String recording){if(!plugin.getConfig().getBoolean("horror.structures.ancient-factions-enabled",true))return;if(random.nextDouble()>plugin.getConfig().getDouble("horror.structures.memory-shard-chance",.7))return;Location l=new Location(world,ox+x,oy+y,oz+z);if(l.getBlock().getState() instanceof Container c){c.getInventory().addItem(plugin.getLoreManager().createMemoryShard(recording));c.update(true,false);}}
+        void baseConstructor(int x,int y,int z){Location location=new Location(world,ox+x,oy+y,oz+z);Block block=location.getBlock();if(block.getState() instanceof Container container){ItemStack item=plugin.getBaseManager().constructorItem();if(!container.getInventory().containsAtLeast(item,1)){container.getInventory().addItem(item);container.update(true,false);}}}
+         void loreSign(int x,int y,int z,String id,String... lines){sign(x,y,z,lines);Block block=new Location(world,ox+x,oy+y,oz+z).getBlock();if(block.getState() instanceof Sign sign){plugin.getLoreManager().tagDocument(sign,id);sign.update(true,false);}}
+        void rareArtifact(int x,int y,int z,Random random){if(random.nextDouble()>plugin.getConfig().getDouble("horror.structures.rare-artifact-chance",.04))return;Location l=new Location(world,ox+x,oy+y,oz+z);if(l.getBlock().getState() instanceof Container c){ItemStack seal=plugin.getLoreManager().createArchitectSeal();if(!c.getInventory().containsAtLeast(seal,1)){c.getInventory().addItem(seal);c.update(true,false);}}}
+        void memoryShard(int x,int y,int z,Random random,String recording){if(!plugin.getConfig().getBoolean("horror.structures.ancient-factions-enabled",true))return;if(random.nextDouble()>plugin.getConfig().getDouble("horror.structures.memory-shard-chance",.7))return;Location l=new Location(world,ox+x,oy+y,oz+z);if(l.getBlock().getState() instanceof Container c){ItemStack shard=plugin.getLoreManager().createMemoryShard(recording);if(!c.getInventory().containsAtLeast(shard,1)){c.getInventory().addItem(shard);c.update(true,false);}}}
         void sign(int x,int y,int z,String... lines){
             Location location=new Location(world,ox+x,oy+y,oz+z);
             if(protectedBlocks.contains(key(location)))return;
