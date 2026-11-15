@@ -1,0 +1,43 @@
+name: BetterModel asset and plugin validation
+
+on:
+  push:
+    branches:
+      - main
+      - feature/first-half-bettermodel-models
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "bettermodel/models/**"
+      - "scripts/validate_bettermodel_models.py"
+      - "src/main/java/dev/underthebedrock/horror/HorrorEntityController.java"
+      - "build.gradle.kts"
+      - "gradlew"
+      - "gradle/**"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - name: Validate all BetterModel rigs and animations
+        run: python scripts/validate_bettermodel_models.py
+      - name: Set up Java 25
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "25"
+          cache: gradle
+      - name: Build and test plugin
+        run: |
+          chmod +x gradlew
+          ./gradlew clean test build
