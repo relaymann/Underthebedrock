@@ -16,16 +16,16 @@ horror:
     minimum-distance-blocks: 1000
   director:
     enabled: true
-    check-interval-seconds: 20
-    minimum-occurrence-gap-seconds: 180
-    severe-occurrence-cooldown-minutes: 15
-    base-roll-chance: 0.10
+    check-interval-seconds: 30
+    minimum-occurrence-gap-seconds: 210
+    severe-occurrence-cooldown-minutes: 12
+    base-roll-chance: 0.07
     adaptive-pacing: true
-    maximum-adaptive-bonus: 0.05
+    maximum-adaptive-bonus: 0.04
   events:
     enabled: true
-    minimum-cooldown-seconds: 480
-    maximum-cooldown-seconds: 720
+    minimum-cooldown-seconds: 300
+    maximum-cooldown-seconds: 420
     event-variation-memory: true
   exploration-pacing-v2: true
   exploration-pacing-v3: true
@@ -38,10 +38,13 @@ horror:
   structures:
     enabled: true
     scan-interval-ticks: 100
-    site-cell-size-blocks: 1536
-    cell-generation-chance: 0.16
+    site-cell-size-blocks: 2048
+    cell-generation-chance: 0.24
+    minimum-distance-from-spawn-blocks: 600
+    minimum-site-offset-blocks: 200
+    maximum-site-offset-blocks: 340
     regeneration-hours: 1
-    spawn-check-radius-blocks: 48
+    spawn-check-radius-blocks: 72
     ancient-factions-enabled: true
     memory-shard-chance: 1.0
     rare-artifact-chance: 0.04
@@ -75,21 +78,21 @@ horror:
       last_resort_device: 90
   entities:
     enabled: true
-    safe-radius-blocks: 256
-    full-threat-distance-blocks: 3072
-    maximum-chance-per-check: 0.06
-    successful-encounter-cooldown-minutes: 8
+    safe-radius-blocks: 350
+    full-threat-distance-blocks: 2800
+    maximum-chance-per-check: 0.12
+    successful-encounter-cooldown-minutes: 5
     active-encounters-per-player: 1
     max-encounter-duration-seconds: 180
     behavior:
-      observation-range-blocks: 128
-      despawn-range-blocks: 176
+      observation-range-blocks: 144
+      despawn-range-blocks: 208
       passive-vanish-range-blocks: 60
       movement-tick-interval: 2
-      encounter-check-interval-ticks: 20
+      encounter-check-interval-ticks: 60
       minimum-spawn-distance-blocks: 64
-      maximum-spawn-distance-blocks: 128
-      movement-step-blocks: 0.16
+      maximum-spawn-distance-blocks: 112
+      movement-step-blocks: 0.20
       remember-last-known-position: true
       player-specific-visibility: true
       adaptive-selection: true
@@ -122,8 +125,12 @@ horror:
     file: player-horror-memory.yml
   civilization:
     enabled: true
-    scan-interval-ticks: 40
-    cell-generation-chance: 0.58
+    scan-interval-ticks: 120
+    site-cell-size-blocks: 2048
+    cell-generation-chance: 0.16
+    minimum-distance-from-spawn-blocks: 600
+    minimum-site-offset-blocks: 220
+    maximum-site-offset-blocks: 360
     ambient-effects-enabled: true
     abandoned-only: true
     resident-echoes-enabled: false
