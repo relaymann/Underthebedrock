@@ -46,7 +46,7 @@ public final class StructureManager implements Listener {
     private void tick(){
         if(!worlds.isActive())return;
         World world=worlds.getWorld(); if(world==null)return;
-        int cell=Math.max(256,plugin.getConfig().getInt("horror.structures.site-cell-size-blocks",512));
+        int cell=Math.max(512,plugin.getConfig().getInt("horror.structures.site-cell-size-blocks",2048));
         for(Player player:world.getPlayers()){
             int cx=Math.floorDiv(player.getLocation().getBlockX()-world.getSpawnLocation().getBlockX(),cell);
             int cz=Math.floorDiv(player.getLocation().getBlockZ()-world.getSpawnLocation().getBlockZ(),cell);
@@ -66,18 +66,15 @@ public final class StructureManager implements Listener {
             x=data.getInt(path+".x");z=data.getInt(path+".z");
             if(!data.getBoolean(path+".built",false)&&explorer!=null
                     &&explorer.getLocation().distanceSquared(new Location(world,x,plugin.getConfig().getInt("world.floor-y",64)+1,z))>180*180){
-                double angle=random.nextDouble()*Math.PI*2;int offset=56+random.nextInt(49);
-                x=explorer.getLocation().getBlockX()+(int)Math.round(Math.cos(angle)*offset);
-                z=explorer.getLocation().getBlockZ()+(int)Math.round(Math.sin(angle)*offset);
+                if(distanceFromSpawn(world,explorer.getLocation())<minimumSpawnDistance())return;
+                int[] candidate=siteCandidate(world,explorer,random);x=candidate[0];z=candidate[1];
                 if(!chunksLoaded(world,x,z,radius(selected))||!areaClear(world,x,z,radius(selected)))return;
                 data.set(path+".x",x);data.set(path+".z",z);save();
             }
         }else{
-            if(explorer==null||random.nextDouble()>plugin.getConfig().getDouble("horror.structures.cell-generation-chance",.82))return;
-            double angle=random.nextDouble()*Math.PI*2;
-            int offset=56+random.nextInt(49);
-            x=explorer.getLocation().getBlockX()+(int)Math.round(Math.cos(angle)*offset);
-            z=explorer.getLocation().getBlockZ()+(int)Math.round(Math.sin(angle)*offset);
+            if(explorer==null||distanceFromSpawn(world,explorer.getLocation())<minimumSpawnDistance()
+                    ||random.nextDouble()>plugin.getConfig().getDouble("horror.structures.cell-generation-chance",.24))return;
+            int[] candidate=siteCandidate(world,explorer,random);x=candidate[0];z=candidate[1];
             double distance=Math.hypot(x-world.getSpawnLocation().getBlockX(),z-world.getSpawnLocation().getBlockZ());
             selected=StructureDefinition.select(distance,seed).orElse(null);
             if(selected==null||!chunksLoaded(world,x,z,radius(selected))||!areaClear(world,x,z,radius(selected)))return;
@@ -114,6 +111,29 @@ public final class StructureManager implements Listener {
             if(selected==StructureDefinition.BASE_CONSTRUCTOR_LAB)data.set(path+".lab-rewards-issued",true);
             save();
         }
+    }
+    private double minimumSpawnDistance(){
+        return Math.max(0,plugin.getConfig().getDouble("horror.structures.minimum-distance-from-spawn-blocks",600));
+    }
+    private double distanceFromSpawn(World world,Location location){
+        Location spawn=world.getSpawnLocation();
+        return Math.hypot(location.getX()-spawn.getX(),location.getZ()-spawn.getZ());
+    }
+    private int[] siteCandidate(World world,Player explorer,Random random){
+        Location player=explorer.getLocation(),spawn=world.getSpawnLocation();
+        int minimum=Math.max(64,plugin.getConfig().getInt("horror.structures.minimum-site-offset-blocks",200));
+        int maximum=Math.max(minimum,plugin.getConfig().getInt("horror.structures.maximum-site-offset-blocks",340));
+        int offset=minimum+random.nextInt(maximum-minimum+1);
+        double angle=random.nextDouble()*Math.PI*2;
+        int x=player.getBlockX()+(int)Math.round(Math.cos(angle)*offset);
+        int z=player.getBlockZ()+(int)Math.round(Math.sin(angle)*offset);
+        if(Math.hypot(x-spawn.getX(),z-spawn.getZ())<minimumSpawnDistance()){
+            angle=Math.atan2(player.getZ()-spawn.getZ(),player.getX()-spawn.getX());
+            if(Math.abs(player.getX()-spawn.getX())+Math.abs(player.getZ()-spawn.getZ())<1)angle=random.nextDouble()*Math.PI*2;
+            x=player.getBlockX()+(int)Math.round(Math.cos(angle)*offset);
+            z=player.getBlockZ()+(int)Math.round(Math.sin(angle)*offset);
+        }
+        return new int[]{x,z};
     }
     private int radius(StructureDefinition type){
         return switch(type){
