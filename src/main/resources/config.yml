@@ -25,6 +25,7 @@ horror:
     minimum-cooldown-seconds: 150
     maximum-cooldown-seconds: 360
     event-variation-memory: true
+  exploration-pacing-v2: true
   clues:
     enabled: true
     scan-interval-ticks: 100
@@ -33,8 +34,8 @@ horror:
     evidence-file: player-horror-memory.yml
   structures:
     enabled: true
-    scan-interval-ticks: 100
-    site-cell-size-blocks: 1024
+    scan-interval-ticks: 40
+    site-cell-size-blocks: 512
     cell-generation-chance: 0.82
     regeneration-hours: 1
     spawn-check-radius-blocks: 160
@@ -107,7 +108,7 @@ horror:
     file: player-horror-memory.yml
   civilization:
     enabled: true
-    scan-interval-ticks: 100
+    scan-interval-ticks: 40
     cell-generation-chance: 0.58
     ambient-effects-enabled: true
     resident-echoes-enabled: true
