@@ -107,6 +107,20 @@ def validate(path: Path) -> tuple[int, int, int]:
                     fail(path, f"{animation.get('name')}: non-finite rotation value")
             if times != sorted(times) or times[0] < 0 or times[-1] > length:
                 fail(path, f"{animation.get('name')}: keyframes are unordered or outside clip duration")
+            if animation.get("loop") == "loop":
+                if len(keyframes) < 4:
+                    fail(path, f"{animation.get('name')}: looping clip needs enough keys for a smooth seam")
+                first = keyframes[0]["data_points"][0]
+                second = keyframes[1]["data_points"][0]
+                penultimate = keyframes[-2]["data_points"][0]
+                last = keyframes[-1]["data_points"][0]
+                for axis in ("x", "y", "z"):
+                    if abs(last[axis] - first[axis]) > 0.001:
+                        fail(path, f"{animation.get('name')}: loop does not return to its starting pose")
+                    start_tangent = second[axis] - first[axis]
+                    end_tangent = last[axis] - penultimate[axis]
+                    if abs(start_tangent - end_tangent) > 0.01:
+                        fail(path, f"{animation.get('name')}: loop has a discontinuous tangent")
 
     for texture in textures:
         texture_uuid = texture.get("uuid")
