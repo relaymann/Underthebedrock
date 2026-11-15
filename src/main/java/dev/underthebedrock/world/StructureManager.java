@@ -74,7 +74,7 @@ public final class StructureManager implements Listener {
             }
         }else{
             if(explorer==null||distanceFromSpawn(world,explorer.getLocation())<minimumSpawnDistance()
-                    ||random.nextDouble()>plugin.getConfig().getDouble("horror.structures.cell-generation-chance",.24))return;
+                    ||random.nextDouble()>plugin.getConfig().getDouble("horror.structures.cell-generation-chance",.30))return;
             int[] candidate=siteCandidate(world,explorer,random);x=candidate[0];z=candidate[1];
             double distance=Math.hypot(x-world.getSpawnLocation().getBlockX(),z-world.getSpawnLocation().getBlockZ());
             selected=StructureDefinition.select(distance,seed).orElse(null);
@@ -82,7 +82,7 @@ public final class StructureManager implements Listener {
             data.set(path+".type",selected.id());data.set(path+".x",x);data.set(path+".z",z);
             data.set(path+".last-reset",System.currentTimeMillis());data.set(path+".built",false);save();
         }
-        double spawnRadius=Math.max(96,plugin.getConfig().getInt("horror.structures.spawn-check-radius-blocks",160));
+        double spawnRadius=Math.max(64,plugin.getConfig().getInt("horror.structures.spawn-check-radius-blocks",72));
         Location siteCenter=new Location(world,x,plugin.getConfig().getInt("world.floor-y",64)+1,z);
         boolean playerNearby=false;
         for(Player player:world.getPlayers())if(player.getLocation().distanceSquared(siteCenter)<=spawnRadius*spawnRadius){playerNearby=true;break;}
