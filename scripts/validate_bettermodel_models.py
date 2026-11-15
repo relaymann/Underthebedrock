@@ -85,8 +85,9 @@ def validate(path: Path) -> tuple[int, int, int]:
             if animator.get("name") != group_names[bone_id] or animator.get("type") != "bone":
                 fail(path, f"{animation.get('name')}: invalid animator binding")
             keyframes = animator.get("keyframes") or []
-            if len(keyframes) < 2:
-                fail(path, f"{animation.get('name')}: insufficient keyframes")
+            expected_frames = 5 if animation.get("loop") == "loop" else 7
+            if len(keyframes) != expected_frames:
+                fail(path, f"{animation.get('name')}: expected {expected_frames} keyframes, found {len(keyframes)}")
             times = []
             for keyframe in keyframes:
                 frame_uuid = keyframe.get("uuid")
