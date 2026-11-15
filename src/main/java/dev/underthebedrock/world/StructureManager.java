@@ -64,6 +64,14 @@ public final class StructureManager implements Listener {
             selected=StructureDefinition.byId(data.getString(path+".type","")).orElse(null);
             if(selected==null)return;
             x=data.getInt(path+".x");z=data.getInt(path+".z");
+            if(!data.getBoolean(path+".built",false)&&explorer!=null
+                    &&explorer.getLocation().distanceSquared(new Location(world,x,plugin.getConfig().getInt("world.floor-y",64)+1,z))>180*180){
+                double angle=random.nextDouble()*Math.PI*2;int offset=56+random.nextInt(49);
+                x=explorer.getLocation().getBlockX()+(int)Math.round(Math.cos(angle)*offset);
+                z=explorer.getLocation().getBlockZ()+(int)Math.round(Math.sin(angle)*offset);
+                if(!chunksLoaded(world,x,z,radius(selected))||!areaClear(world,x,z,radius(selected)))return;
+                data.set(path+".x",x);data.set(path+".z",z);save();
+            }
         }else{
             if(explorer==null||random.nextDouble()>plugin.getConfig().getDouble("horror.structures.cell-generation-chance",.82))return;
             double angle=random.nextDouble()*Math.PI*2;

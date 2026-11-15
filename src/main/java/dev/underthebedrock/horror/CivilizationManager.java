@@ -128,6 +128,17 @@ public final class CivilizationManager implements Listener {
         catch (IllegalArgumentException ex) { return; }
         int x = data.getInt(path + ".x"), z = data.getInt(path + ".z");
         int y = plugin.getConfig().getInt("world.floor-y", 64) + 1;
+        if (!data.getBoolean(path + ".built", false) && explorer != null
+                && explorer.getLocation().distanceSquared(new Location(world, x, y, z)) > 180 * 180) {
+            double angle = rng.nextDouble() * Math.PI * 2;
+            int offset = 56 + rng.nextInt(49);
+            x = explorer.getLocation().getBlockX() + (int) Math.round(Math.cos(angle) * offset);
+            z = explorer.getLocation().getBlockZ() + (int) Math.round(Math.sin(angle) * offset);
+            if (!loaded(world, x, z, 18) || !clear(world, x, y, z, 17)) return;
+            data.set(path + ".x", x);
+            data.set(path + ".z", z);
+            save();
+        }
         Location center = new Location(world, x + .5, y, z + .5);
         boolean nearby = world.getPlayers().stream().anyMatch(p -> p.getLocation().distanceSquared(center) < 160 * 160);
         if (!nearby || !loaded(world, x, z, 18)) return;
