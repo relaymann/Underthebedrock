@@ -10,8 +10,11 @@ public final class UnderTheBedrockCommand implements CommandExecutor, TabComplet
     private final VoidWorldManager worlds;
     private final IntegrationManager integrations;
     private final WorldEntryListener worldEntry;
+
     public UnderTheBedrockCommand(VoidWorldManager worlds, IntegrationManager integrations, WorldEntryListener worldEntry) {
-        this.worlds = worlds; this.integrations = integrations; this.worldEntry = worldEntry;
+        this.worlds = worlds;
+        this.integrations = integrations;
+        this.worldEntry = worldEntry;
     }
 
     @Override
@@ -34,7 +37,6 @@ public final class UnderTheBedrockCommand implements CommandExecutor, TabComplet
                 sender.sendMessage("§7Active: " + (worlds.isActive() ? "§aYes" : "§cNo"));
                 sender.sendMessage("§7World loaded: " + (worlds.getWorld() != null ? "§aYes" : "§cNo"));
                 sender.sendMessage("§7World lockdown: " + (worlds.isActive() ? "§aEnabled" : "§cInactive"));
-                sender.sendMessage("§7Nova: " + integrations.nova().statusText());
                 sender.sendMessage("§7BetterModel: " + integrations.betterModel().statusText());
             }
             default -> sender.sendMessage("§7Usage: /underthebedrock <start|stop|status>");

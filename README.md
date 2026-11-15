@@ -5,7 +5,7 @@ Standalone Paper 26.1.2 psychological / analog ARG horror plugin with a persiste
 ## Target platform
 - Minecraft Java / Paper 26.1.2
 - Java 25 / Gradle 9.7.1
-- Nova 0.23.0 / BetterModel 3.5.1
+- BetterModel 3.5.1
 
 ## Commands
 - /underthebedrock start — create/activate the horror world.
@@ -15,7 +15,7 @@ Standalone Paper 26.1.2 psychological / analog ARG horror plugin with a persiste
 - Deaths return players to the horror world; Reconstructors provide personal respawn anchors.
 - /enter — manually return to the horror-world entrance if needed. There is no player-facing command to return to the old world.
 - /evidence — inspect your personal evidence journal.
-- /underthebedrock status — inspect world and integration status.
+- /underthebedrock status — inspect world and BetterModel integration status.
 
 ## Custom equipment
 All 30 custom equipment items have persistent item identities, custom names/lore, cooldowns, and right-click abilities. They are distributed through procedural structure chests and supply drops.
@@ -41,7 +41,7 @@ The civilization layer adds six deterministic district types: residential blocks
 The station includes a traversable rail layout, minecart supplies, and occasional unmanned service-cart arrivals. A restrained environmental director escalates distant footsteps, doors that briefly open behind the player, redstone lights that flicker at later stages, signs that temporarily rewrite themselves, ash, smoke, and portal anomalies according to the player's discoveries rather than using constant jumpscares. Null reacts differently to resident evidence and the player's increasingly clear identity. All civilization sites persist in `civilization-sites.yml`; generation only touches already-loaded chunks near players. Discovering the Architect's Seal also stabilizes each Reconstructor for one additional activation; after Null recognizes the returning subject, activating one produces a warning that the anchor has been noticed.
 
 ## Build
-Use JDK 25 and Gradle 9.7.1: `gradle clean test build`. JAR output: `build/libs/`. Install matching Nova 0.23.0 and BetterModel 3.5.1 server plugins.
+Use JDK 25 and Gradle 9.7.1: `gradle clean test build`. JAR output: `build/libs/`. Install BetterModel 3.5.1. Nova is not required and no Nova Java agent argument is needed.
 
 
 ## Entity ecosystem overhaul

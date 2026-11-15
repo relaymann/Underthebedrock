@@ -121,9 +121,6 @@ horror:
     generator-requires-fuses: 2
     generator-requires-power-cells: 1
 integrations:
-  nova:
-    enabled: true
-    required: true
   bettermodel:
     enabled: true
     required: true
