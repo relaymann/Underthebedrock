@@ -4,7 +4,7 @@
     "model_format": "free",
     "box_uv": false
   },
-  "name": "Mimic",
+  "name": "Mimic - Steve Disguise",
   "model_identifier": "mimic",
   "visible_box": [
     3,
@@ -16,7 +16,7 @@
   ],
   "resolution": {
     "width": 64,
-    "height": 16
+    "height": 64
   },
   "elements": [
     {
@@ -33,7 +33,7 @@
       ],
       "autouv": 0,
       "locked": false,
-      "uuid": "00000000-0000-4000-8000-000000000401",
+      "uuid": "00000000-0000-4000-8000-000000004101",
       "origin": [
         0,
         16,
@@ -95,6 +95,88 @@
             0,
             0,
             16,
+            16
+          ],
+          "texture": 0
+        }
+      }
+    },
+    {
+      "name": "hairline",
+      "from": [
+        -4,
+        30,
+        -4.2
+      ],
+      "to": [
+        4,
+        32,
+        4.2
+      ],
+      "autouv": 0,
+      "locked": false,
+      "uuid": "00000000-0000-4000-8000-000000004102",
+      "origin": [
+        0,
+        16,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": 0
+        },
+        "south": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": 0
+        },
+        "east": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": 0
+        },
+        "west": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": 0
+        },
+        "up": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": 0
+        },
+        "down": {
+          "uv": [
+            16,
+            0,
+            32,
             16
           ],
           "texture": 0
@@ -104,18 +186,18 @@
     {
       "name": "torso",
       "from": [
-        -3.6,
+        -4,
         12,
         -2
       ],
       "to": [
-        3.6,
+        4,
         24,
         2
       ],
       "autouv": 0,
       "locked": false,
-      "uuid": "00000000-0000-4000-8000-000000000402",
+      "uuid": "00000000-0000-4000-8000-000000004103",
       "origin": [
         0,
         16,
@@ -129,54 +211,54 @@
       "faces": {
         "north": {
           "uv": [
-            16,
-            0,
             32,
+            0,
+            48,
             16
           ],
           "texture": 0
         },
         "south": {
           "uv": [
-            16,
-            0,
             32,
+            0,
+            48,
             16
           ],
           "texture": 0
         },
         "east": {
           "uv": [
-            16,
-            0,
             32,
+            0,
+            48,
             16
           ],
           "texture": 0
         },
         "west": {
           "uv": [
-            16,
-            0,
             32,
+            0,
+            48,
             16
           ],
           "texture": 0
         },
         "up": {
           "uv": [
-            16,
-            0,
             32,
+            0,
+            48,
             16
           ],
           "texture": 0
         },
         "down": {
           "uv": [
-            16,
-            0,
             32,
+            0,
+            48,
             16
           ],
           "texture": 0
@@ -186,7 +268,7 @@
     {
       "name": "left_arm",
       "from": [
-        -7,
+        -8,
         12,
         -2
       ],
@@ -197,7 +279,7 @@
       ],
       "autouv": 0,
       "locked": false,
-      "uuid": "00000000-0000-4000-8000-000000000403",
+      "uuid": "00000000-0000-4000-8000-000000004104",
       "origin": [
         0,
         16,
@@ -211,55 +293,55 @@
       "faces": {
         "north": {
           "uv": [
-            32,
             0,
-            48,
-            16
+            16,
+            16,
+            32
           ],
           "texture": 0
         },
         "south": {
           "uv": [
-            32,
             0,
-            48,
-            16
+            16,
+            16,
+            32
           ],
           "texture": 0
         },
         "east": {
           "uv": [
-            32,
             0,
-            48,
-            16
+            16,
+            16,
+            32
           ],
           "texture": 0
         },
         "west": {
           "uv": [
-            32,
             0,
-            48,
-            16
+            16,
+            16,
+            32
           ],
           "texture": 0
         },
         "up": {
           "uv": [
-            32,
             0,
-            48,
-            16
+            16,
+            16,
+            32
           ],
           "texture": 0
         },
         "down": {
           "uv": [
-            32,
             0,
-            48,
-            16
+            16,
+            16,
+            32
           ],
           "texture": 0
         }
@@ -273,13 +355,13 @@
         -2
       ],
       "to": [
-        7,
+        8,
         24,
         2
       ],
       "autouv": 0,
       "locked": false,
-      "uuid": "00000000-0000-4000-8000-000000000404",
+      "uuid": "00000000-0000-4000-8000-000000004105",
       "origin": [
         0,
         16,
@@ -293,55 +375,55 @@
       "faces": {
         "north": {
           "uv": [
-            32,
             0,
-            48,
-            16
+            16,
+            16,
+            32
           ],
           "texture": 0
         },
         "south": {
           "uv": [
-            32,
             0,
-            48,
-            16
+            16,
+            16,
+            32
           ],
           "texture": 0
         },
         "east": {
           "uv": [
-            32,
             0,
-            48,
-            16
+            16,
+            16,
+            32
           ],
           "texture": 0
         },
         "west": {
           "uv": [
-            32,
             0,
-            48,
-            16
+            16,
+            16,
+            32
           ],
           "texture": 0
         },
         "up": {
           "uv": [
-            32,
             0,
-            48,
-            16
+            16,
+            16,
+            32
           ],
           "texture": 0
         },
         "down": {
           "uv": [
-            32,
             0,
-            48,
-            16
+            16,
+            16,
+            32
           ],
           "texture": 0
         }
@@ -361,7 +443,7 @@
       ],
       "autouv": 0,
       "locked": false,
-      "uuid": "00000000-0000-4000-8000-000000000405",
+      "uuid": "00000000-0000-4000-8000-000000004106",
       "origin": [
         0,
         16,
@@ -376,54 +458,54 @@
         "north": {
           "uv": [
             32,
-            0,
+            16,
             48,
-            16
+            32
           ],
           "texture": 0
         },
         "south": {
           "uv": [
             32,
-            0,
+            16,
             48,
-            16
+            32
           ],
           "texture": 0
         },
         "east": {
           "uv": [
             32,
-            0,
+            16,
             48,
-            16
+            32
           ],
           "texture": 0
         },
         "west": {
           "uv": [
             32,
-            0,
+            16,
             48,
-            16
+            32
           ],
           "texture": 0
         },
         "up": {
           "uv": [
             32,
-            0,
+            16,
             48,
-            16
+            32
           ],
           "texture": 0
         },
         "down": {
           "uv": [
             32,
-            0,
+            16,
             48,
-            16
+            32
           ],
           "texture": 0
         }
@@ -443,7 +525,7 @@
       ],
       "autouv": 0,
       "locked": false,
-      "uuid": "00000000-0000-4000-8000-000000000406",
+      "uuid": "00000000-0000-4000-8000-000000004107",
       "origin": [
         0,
         16,
@@ -458,218 +540,54 @@
         "north": {
           "uv": [
             32,
-            0,
+            16,
             48,
-            16
+            32
           ],
           "texture": 0
         },
         "south": {
           "uv": [
             32,
-            0,
+            16,
             48,
-            16
+            32
           ],
           "texture": 0
         },
         "east": {
           "uv": [
             32,
-            0,
+            16,
             48,
-            16
+            32
           ],
           "texture": 0
         },
         "west": {
           "uv": [
             32,
-            0,
+            16,
             48,
-            16
+            32
           ],
           "texture": 0
         },
         "up": {
           "uv": [
             32,
-            0,
+            16,
             48,
-            16
+            32
           ],
           "texture": 0
         },
         "down": {
           "uv": [
             32,
-            0,
+            16,
             48,
-            16
-          ],
-          "texture": 0
-        }
-      }
-    },
-    {
-      "name": "misaligned_shoulder",
-      "from": [
-        4,
-        20,
-        -3
-      ],
-      "to": [
-        8,
-        25,
-        3
-      ],
-      "autouv": 0,
-      "locked": false,
-      "uuid": "00000000-0000-4000-8000-000000000407",
-      "origin": [
-        0,
-        16,
-        0
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "faces": {
-        "north": {
-          "uv": [
-            48,
-            0,
-            64,
-            16
-          ],
-          "texture": 0
-        },
-        "south": {
-          "uv": [
-            48,
-            0,
-            64,
-            16
-          ],
-          "texture": 0
-        },
-        "east": {
-          "uv": [
-            48,
-            0,
-            64,
-            16
-          ],
-          "texture": 0
-        },
-        "west": {
-          "uv": [
-            48,
-            0,
-            64,
-            16
-          ],
-          "texture": 0
-        },
-        "up": {
-          "uv": [
-            48,
-            0,
-            64,
-            16
-          ],
-          "texture": 0
-        },
-        "down": {
-          "uv": [
-            48,
-            0,
-            64,
-            16
-          ],
-          "texture": 0
-        }
-      }
-    },
-    {
-      "name": "neck",
-      "from": [
-        -2,
-        22,
-        -2
-      ],
-      "to": [
-        2,
-        26,
-        2
-      ],
-      "autouv": 0,
-      "locked": false,
-      "uuid": "00000000-0000-4000-8000-000000000408",
-      "origin": [
-        0,
-        16,
-        0
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "faces": {
-        "north": {
-          "uv": [
-            48,
-            0,
-            64,
-            16
-          ],
-          "texture": 0
-        },
-        "south": {
-          "uv": [
-            48,
-            0,
-            64,
-            16
-          ],
-          "texture": 0
-        },
-        "east": {
-          "uv": [
-            48,
-            0,
-            64,
-            16
-          ],
-          "texture": 0
-        },
-        "west": {
-          "uv": [
-            48,
-            0,
-            64,
-            16
-          ],
-          "texture": 0
-        },
-        "up": {
-          "uv": [
-            48,
-            0,
-            64,
-            16
-          ],
-          "texture": 0
-        },
-        "down": {
-          "uv": [
-            48,
-            0,
-            64,
-            16
+            32
           ],
           "texture": 0
         }
@@ -684,16 +602,15 @@
         0,
         0
       ],
-      "uuid": "00000000-0000-4000-8000-000000000490",
+      "uuid": "00000000-0000-4000-8000-000000004190",
       "children": [
-        "00000000-0000-4000-8000-000000000401",
-        "00000000-0000-4000-8000-000000000402",
-        "00000000-0000-4000-8000-000000000403",
-        "00000000-0000-4000-8000-000000000404",
-        "00000000-0000-4000-8000-000000000405",
-        "00000000-0000-4000-8000-000000000406",
-        "00000000-0000-4000-8000-000000000407",
-        "00000000-0000-4000-8000-000000000408"
+        "00000000-0000-4000-8000-000000004101",
+        "00000000-0000-4000-8000-000000004102",
+        "00000000-0000-4000-8000-000000004103",
+        "00000000-0000-4000-8000-000000004104",
+        "00000000-0000-4000-8000-000000004105",
+        "00000000-0000-4000-8000-000000004106",
+        "00000000-0000-4000-8000-000000004107"
       ]
     }
   ],
@@ -701,18 +618,18 @@
     {
       "name": "mimic.png",
       "id": "0",
-      "uuid": "00000000-0000-4000-8000-000000000491",
+      "uuid": "00000000-0000-4000-8000-000000004191",
       "particle": true,
       "render_mode": "normal",
       "visible": true,
       "mode": "bitmap",
       "saved": true,
-      "source": "data:image/png;base64,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",
+      "source": "data:image/png;base64,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/xEREf8QEBD/Dw8P/w4ODv8NDQ3/DAwM/xISEv8RERH/EBAQ/w8PD/8AKmmw/ylor/8oZ67/J2at/y1ss/8sa7L/K2qx/yppsP8paK//KGeu/ydmrf8tbLP/LGuy/ytqsf8qabD/KWiv/ygvZv8nLmX/LTRr/ywzav8rMmn/KjFo/ykwZ/8oL2b/Jy5l/y00a/8sM2r/KzJp/yoxaP8pMGf/KC9m/ycuZf8fHh3/Hh0c/x0cG/8cGxr/GxoZ/xoZGP8ZGBf/Hx4d/x4dHP8dHBv/HBsa/xsaGf8aGRj/GRgX/x8eHf8eHRz/EBAQ/w8PD/8ODg7/DQ0N/wwMDP8SEhL/ERER/xAQEP8PDw//Dg4O/w0NDf8MDAz/EhIS/xEREf8QEBD/Dw8P/wAqabD/KWiv/yhnrv8nZq3/LWyz/yxrsv8rarH/Kmmw/ylor/8oZ67/J2at/y1ss/8sa7L/K2qx/yppsP8paK//KC9m/ycuZf8tNGv/LDNq/ysyaf8qMWj/KTBn/ygvZv8nLmX/LTRr/ywzav8rMmn/KjFo/ykwZ/8oL2b/Jy5l/x8eHf8eHRz/HRwb/xwbGv8bGhn/GhkY/xkYF/8fHh3/Hh0c/x0cG/8cGxr/GxoZ/xoZGP8ZGBf/Hx4d/x4dHP8QEBD/Dw8P/w4ODv8NDQ3/DAwM/xISEv8RERH/EBAQ/w8PD/8ODg7/DQ0N/wwMDP8SEhL/ERER/xAQEP8PDw//ACppsP8paK//KGeu/ydmrf8tbLP/LGuy/ytqsf8qabD/KWiv/yhnrv8nZq3/LWyz/yxrsv8rarH/Kmmw/ylor/8oL2b/Jy5l/y00a/8sM2r/KzJp/yoxaP8pMGf/KC9m/ycuZf8tNGv/LDNq/ysyaf8qMWj/KTBn/ygvZv8nLmX/Hx4d/x4dHP8dHBv/HBsa/xsaGf8aGRj/GRgX/x8eHf8eHRz/HRwb/xwbGv8bGhn/GhkY/xkYF/8fHh3/Hh0c/xAQEP8PDw//Dg4O/w0NDf8MDAz/EhIS/xEREf8QEBD/Dw8P/w4ODv8NDQ3/DAwM/xISEv8RERH/EBAQ/w8PD/8AKmmw/ylor/8oZ67/J2at/y1ss/8sa7L/K2qx/yppsP8paK//KGeu/ydmrf8tbLP/LGuy/ytqsf8qabD/KWiv/ygvZv8nLmX/LTRr/ywzav8rMmn/KjFo/ykwZ/8oL2b/Jy5l/y00a/8sM2r/KzJp/yoxaP8pMGf/KC9m/ycuZf8fHh3/Hh0c/x0cG/8cGxr/GxoZ/xoZGP8ZGBf/Hx4d/x4dHP8dHBv/HBsa/xsaGf8aGRj/GRgX/x8eHf8eHRz/EBAQ/w8PD/8ODg7/DQ0N/wwMDP8SEhL/ERER/xAQEP8PDw//Dg4O/w0NDf8MDAz/EhIS/xEREf8QEBD/Dw8P/wAqabD/KWiv/yhnrv8nZq3/LWyz/yxrsv8rarH/Kmmw/ylor/8oZ67/J2at/y1ss/8sa7L/K2qx/yppsP8paK//KC9m/ycuZf8tNGv/LDNq/ysyaf8qMWj/KTBn/ygvZv8nLmX/LTRr/ywzav8rMmn/KjFo/ykwZ/8oL2b/Jy5l/x8eHf8eHRz/HRwb/xwbGv8bGhn/GhkY/xkYF/8fHh3/Hh0c/x0cG/8cGxr/GxoZ/xoZGP8ZGBf/Hx4d/x4dHP8QEBD/Dw8P/w4ODv8NDQ3/DAwM/xISEv8RERH/EBAQ/w8PD/8ODg7/DQ0N/wwMDP8SEhL/ERER/xAQEP8PDw//ACppsP8paK//KGeu/ydmrf8tbLP/LGuy/ytqsf8qabD/KWiv/yhnrv8nZq3/LWyz/yxrsv8rarH/Kmmw/ylor/8oL2b/Jy5l/y00a/8sM2r/KzJp/yoxaP8pMGf/KC9m/ycuZf8tNGv/LDNq/ysyaf8qMWj/KTBn/ygvZv8nLmX/Hx4d/x4dHP8dHBv/HBsa/xsaGf8aGRj/GRgX/x8eHf8eHRz/HRwb/xwbGv8bGhn/GhkY/xkYF/8fHh3/Hh0c/xAQEP8PDw//Dg4O/w0NDf8MDAz/EhIS/xEREf8QEBD/Dw8P/w4ODv8NDQ3/DAwM/xISEv8RERH/EBAQ/w8PD/8AKmmw/ylor/8oZ67/J2at/y1ss/8sa7L/K2qx/yppsP8paK//KGeu/ydmrf8tbLP/LGuy/ytqsf8qabD/KWiv/ygvZv8nLmX/LTRr/ywzav8rMmn/KjFo/ykwZ/8oL2b/Jy5l/y00a/8sM2r/KzJp/yoxaP8pMGf/KC9m/ycuZf8fHh3/Hh0c/x0cG/8cGxr/GxoZ/xoZGP8ZGBf/Hx4d/x4dHP8dHBv/HBsa/xsaGf8aGRj/GRgX/x8eHf8eHRz/EBAQ/w8PD/8ODg7/DQ0N/wwMDP8SEhL/ERER/xAQEP8PDw//Dg4O/w0NDf8MDAz/EhIS/xEREf8QEBD/Dw8P/wAqabD/KWiv/yhnrv8nZq3/LWyz/yxrsv8rarH/Kmmw/ylor/8oZ67/J2at/y1ss/8sa7L/K2qx/yppsP8paK//KC9m/ycuZf8tNGv/LDNq/ysyaf8qMWj/KTBn/ygvZv8nLmX/LTRr/ywzav8rMmn/KjFo/ykwZ/8oL2b/Jy5l/x8eHf8eHRz/HRwb/xwbGv8bGhn/GhkY/xkYF/8fHh3/Hh0c/x0cG/8cGxr/GxoZ/xoZGP8ZGBf/Hx4d/x4dHP8QEBD/Dw8P/w4ODv8NDQ3/DAwM/xISEv8RERH/EBAQ/w8PD/8ODg7/DQ0N/wwMDP8SEhL/ERER/xAQEP8PDw//ACppsP8paK//KGeu/ydmrf8tbLP/LGuy/ytqsf8qabD/KWiv/yhnrv8nZq3/LWyz/yxrsv8rarH/Kmmw/ylor/8oL2b/Jy5l/y00a/8sM2r/KzJp/yoxaP8pMGf/KC9m/ycuZf8tNGv/LDNq/ysyaf8qMWj/KTBn/ygvZv8nLmX/Hx4d/x4dHP8dHBv/HBsa/xsaGf8aGRj/GRgX/x8eHf8eHRz/HRwb/xwbGv8bGhn/GhkY/xkYF/8fHh3/Hh0c/xAQEP8PDw//Dg4O/w0NDf8MDAz/EhIS/xEREf8QEBD/Dw8P/w4ODv8NDQ3/DAwM/xISEv8RERH/EBAQ/w8PD/8AKmmw/ylor/8oZ67/J2at/y1ss/8sa7L/K2qx/yppsP8paK//KGeu/ydmrf8tbLP/LGuy/ytqsf8qabD/KWiv/ygvZv8nLmX/LTRr/ywzav8rMmn/KjFo/ykwZ/8oL2b/Jy5l/y00a/8sM2r/KzJp/yoxaP8pMGf/KC9m/ycuZf8fHh3/Hh0c/x0cG/8cGxr/GxoZ/xoZGP8ZGBf/Hx4d/x4dHP8dHBv/HBsa/xsaGf8aGRj/GRgX/x8eHf8eHRz/EBAQ/w8PD/8ODg7/DQ0N/wwMDP8SEhL/ERER/xAQEP8PDw//Dg4O/w0NDf8MDAz/EhIS/xEREf8QEBD/Dw8P/wAqabD/KWiv/yhnrv8nZq3/LWyz/yxrsv8rarH/Kmmw/ylor/8oZ67/J2at/y1ss/8sa7L/K2qx/yppsP8paK//KC9m/ycuZf8tNGv/LDNq/ysyaf8qMWj/KTBn/ygvZv8nLmX/LTRr/ywzav8rMmn/KjFo/ykwZ/8oL2b/Jy5l/x8eHf8eHRz/HRwb/xwbGv8bGhn/GhkY/xkYF/8fHh3/Hh0c/x0cG/8cGxr/GxoZ/xoZGP8ZGBf/Hx4d/x4dHP8QEBD/Dw8P/w4ODv8NDQ3/DAwM/xISEv8RERH/EBAQ/w8PD/8ODg7/DQ0N/wwMDP8SEhL/ERER/xAQEP8PDw//ACppsP8paK//KGeu/ydmrf8tbLP/LGuy/ytqsf8qabD/KWiv/yhnrv8nZq3/LWyz/yxrsv8rarH/Kmmw/ylor/8oL2b/Jy5l/y00a/8sM2r/KzJp/yoxaP8pMGf/KC9m/ycuZf8tNGv/LDNq/ysyaf8qMWj/KTBn/ygvZv8nLmX/Hx4d/x4dHP8dHBv/HBsa/xsaGf8aGRj/GRgX/x8eHf8eHRz/HRwb/xwbGv8bGhn/GhkY/xkYF/8fHh3/Hh0c/xAQEP8PDw//Dg4O/w0NDf8MDAz/EhIS/xEREf8QEBD/Dw8P/w4ODv8NDQ3/DAwM/xISEv8RERH/EBAQ/w8PD/8AKmmw/ylor/8oZ67/J2at/y1ss/8sa7L/K2qx/yppsP8paK//KGeu/ydmrf8tbLP/LGuy/ytqsf8qabD/KWiv/ygvZv8nLmX/LTRr/ywzav8rMmn/KjFo/ykwZ/8oL2b/Jy5l/y00a/8sM2r/KzJp/yoxaP8pMGf/KC9m/ycuZf8fHh3/Hh0c/x0cG/8cGxr/GxoZ/xoZGP8ZGBf/Hx4d/x4dHP8dHBv/HBsa/xsaGf8aGRj/GRgX/x8eHf8eHRz/EBAQ/w8PD/8ODg7/DQ0N/wwMDP8SEhL/ERER/xAQEP8PDw//Dg4O/w0NDf8MDAz/EhIS/xEREf8QEBD/Dw8P/wAqabD/KWiv/yhnrv8nZq3/LWyz/yxrsv8rarH/Kmmw/ylor/8oZ67/J2at/y1ss/8sa7L/K2qx/yppsP8paK//KC9m/ycuZf8tNGv/LDNq/ysyaf8qMWj/KTBn/ygvZv8nLmX/LTRr/ywzav8rMmn/KjFo/ykwZ/8oL2b/Jy5l/x8eHf8eHRz/HRwb/xwbGv8bGhn/GhkY/xkYF/8fHh3/Hh0c/x0cG/8cGxr/GxoZ/xoZGP8ZGBf/Hx4d/x4dHP8QEBD/Dw8P/w4ODv8NDQ3/DAwM/xISEv8RERH/EBAQ/w8PD/8ODg7/DQ0N/wwMDP8SEhL/ERER/xAQEP8PDw//ACppsP8paK//KGeu/ydmrf8tbLP/LGuy/ytqsf8qabD/KWiv/yhnrv8nZq3/LWyz/yxrsv8rarH/Kmmw/ylor/8oL2b/Jy5l/y00a/8sM2r/KzJp/yoxaP8pMGf/KC9m/ycuZf8tNGv/LDNq/ysyaf8qMWj/KTBn/ygvZv8nLmX/Hx4d/x4dHP8dHBv/HBsa/xsaGf8aGRj/GRgX/x8eHf8eHRz/HRwb/xwbGv8bGhn/GhkY/xkYF/8fHh3/Hh0c/xAQEP8PDw//Dg4O/w0NDf8MDAz/EhIS/xEREf8QEBD/Dw8P/w4ODv8NDQ3/DAwM/xISEv8RERH/EBAQ/w8PD//HkDk9MLct1wAAAABJRU5ErkJggg==",
       "relative_path": "mimic.png",
       "width": 64,
-      "height": 16,
+      "height": 64,
       "uv_width": 64,
-      "uv_height": 16
+      "uv_height": 64
     }
   ],
   "animations": [],
