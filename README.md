@@ -97,3 +97,12 @@ The server controller starts the idle pose when an apparition spawns, changes to
 ## BetterModel animation installation and testing
 
 Copy the complete `bettermodel/models/` directory to `plugins/BetterModel/models/`, run `/bettermodel reload`, then distribute the regenerated resource pack. Use BetterModel's `/bm test <model> <animation>` command to preview clips individually; start with `observer idle`, `crawler crawl`, `mimic walk`, and `mimic_revealed reveal`. The plugin's encounter controller triggers clips automatically once the models are loaded. Repository structural validation and CI do not replace an in-game visual test on the target Paper/BetterModel versions.
+
+
+## BetterModel rig and animation validation
+
+The apparition pack contains 27 archetype models plus the Mimic's separate revealed form. Each asset uses a Blockbench Generic-model bone hierarchy with every geometry element assigned to exactly one animated bone. Animation tracks target the matching bone UUIDs; orphaned geometry references and missing animator bones are invalid.
+
+Every model ships with 18 authored clips: looping `idle`, `walk`, `run`, `stalk`, and `crawl`; one-shot `attack`, `lunge`, `twitch`, `reveal`, `disappear`, `emerge`, `hurt`, `death`, `roar`, `inspect`, `listen`, `recoil`, and `turn`. The encounter controller uses emerge on spawn, stalk/crawl while stalking, run while hunting or retreating, and occasional listen/inspect/twitch cues while the apparition observes or searches. One-shot clips return to the appropriate loop after their authored duration.
+
+Run `python scripts/validate_bettermodel_models.py` before packaging the model pack. This checks JSON parsing, bone/element references, UUID uniqueness, animation coverage, keyframe ordering, and embedded textures. After validation, copy `bettermodel/models/` into the server's `plugins/BetterModel/models/`, run `/bettermodel reload`, and distribute the generated resource pack. Structural validation does not replace in-game rendering and animation testing on Paper 26.1.2 with BetterModel 3.5.1.
