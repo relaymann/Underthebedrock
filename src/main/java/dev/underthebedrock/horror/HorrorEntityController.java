@@ -38,6 +38,7 @@ public final class HorrorEntityController implements Listener {
         private EntityTracker modelTracker;
         private boolean mimicRevealed;
         private boolean mimicRevealWarningLogged;
+        private long mimicLastAttackAt;
         private Location lastKnown;
         private Location lastPlayerPosition;
         private State state = State.OBSERVING;
@@ -284,9 +285,23 @@ public final class HorrorEntityController implements Listener {
             return;
         }
         if (encounter.state == State.HUNTING) {
+            if (encounter.type == EntityArchetype.MIMIC && distanceSquared <= 4.0
+                    && System.currentTimeMillis() - encounter.mimicLastAttackAt >= 3000) {
+                encounter.mimicLastAttackAt = System.currentTimeMillis();
+                player.damage(4.0, shell);
+                Vector knockback = player.getLocation().toVector().subtract(shell.getLocation().toVector());
+                if (knockback.lengthSquared() > .01) {
+                    knockback.normalize().multiply(.62).setY(.24);
+                    player.setVelocity(knockback);
+                }
+                player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_HURT, .9f, .72f);
+                player.playSound(shell.getLocation(), Sound.ENTITY_ZOMBIE_ATTACK_WOODEN_DOOR, .65f, .62f);
+                return;
+            }
             double speed = encounter.type == EntityArchetype.HEAVY ? .35
                     : encounter.type == EntityArchetype.CRAWLING_ONE ? 1.8
-                    : encounter.type == EntityArchetype.CRAWLER ? 1.15 : 1.0;
+                    : encounter.type == EntityArchetype.CRAWLER ? 1.15
+                    : encounter.type == EntityArchetype.MIMIC ? 1.45 : 1.0;
             moveToward(shell, encounter.lastKnown, speed);
             return;
         }
