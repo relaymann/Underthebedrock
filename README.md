@@ -14,6 +14,9 @@ Standalone Paper 26.1.2 psychological / analog ARG horror plugin with a persiste
 - /enter — manually return to the horror-world entrance if needed. There is no player-facing command to return to the old world.
 - /evidence — inspect your personal evidence journal.
 - /underthebedrock status — inspect world and integration status.
+- /underthebedrock entity list — list the 27 apparition IDs.
+- /underthebedrock entity spawn <id> [player] — manually spawn an apparition for yourself or another online player.
+- /underthebedrock entity despawn [player] — remove the current apparition for yourself or another player.
 
 ## Custom equipment
 All 27 custom equipment items have persistent item identities, custom names/lore, cooldowns, and right-click abilities. They are distributed through procedural structure chests and supply drops.
@@ -110,3 +113,12 @@ The apparition pack contains 27 archetype models plus the Mimic's separate revea
 Every model ships with 18 authored clips: looping `idle`, `walk`, `run`, `stalk`, and `crawl`; one-shot `attack`, `lunge`, `twitch`, `reveal`, `disappear`, `emerge`, `hurt`, `death`, `roar`, `inspect`, `listen`, `recoil`, and `turn`. The encounter controller uses emerge on spawn, stalk/crawl while stalking, run while hunting or retreating, and occasional listen/inspect/twitch cues while the apparition observes or searches. All five looping clips are authored with matching start/end poses and matching seam tangents to avoid visible snapping when they wrap. One-shot clips return to the appropriate loop after their authored duration.
 
 Run `python scripts/validate_bettermodel_models.py` before packaging the model pack. This checks JSON parsing, bone/element references, UUID uniqueness, animation coverage, keyframe ordering, and embedded textures. After validation, copy `bettermodel/models/` into the server's `plugins/BetterModel/models/`, run `/bettermodel reload`, and distribute the generated resource pack. Structural validation does not replace in-game rendering and animation testing on Paper 26.1.2 with BetterModel 3.5.1.
+
+
+## Manual entity spawning, AI, and sounds
+
+Administrators can now test each apparition directly with `/underthebedrock entity spawn <id> [player]`. The controller uses each archetype's observation, stalking, retreat, searching, hunting, and disappearance rules; pursuer-class entities also have type-specific damage, reach, and attack cooldowns. The controller no longer substitutes the Watcher model silently when a configured entity model is missing: it logs the exact missing BetterModel ID and refuses to spawn a broken visual.
+
+The Java controller emits custom namespaced sound events for each archetype and cue. Merge `resource-pack/assets/underthebedrock/sounds.json` into the BetterModel-generated ZIP using `scripts/merge_resource_pack.py`, then host and distribute the merged pack. The current sound definitions use distinct Minecraft source samples behind Under The Bedrock-specific sound event IDs; bespoke OGG recordings can replace those source mappings later without changing the plugin code.
+
+**Important BetterModel visibility setting:** Under The Bedrock uses invisible Armor Stand carriers. Set `follow-mob-invisibility: false` in `plugins/BetterModel/config.yml`; otherwise BetterModel's default setting hides the attached models. Then reload BetterModel and restart the server. The merged BetterModel resource pack must be accepted by every client or the custom textures/geometry will appear as missing-texture errors.
