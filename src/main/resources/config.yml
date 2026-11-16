@@ -12,6 +12,14 @@ world:
 horror:
   null:
     minimum-distance-blocks: 1000
+  enclosure:
+    enabled: true
+    radius-blocks: 1500
+    wall-thickness-blocks: 16
+    wall-height-blocks: 18
+    apostle-model: unperson
+    apostle-sprint-speed: 0.25
+    apostle-hunt-speed: 0.17
   director:
     enabled: true
     check-interval-seconds: 12

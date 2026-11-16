@@ -24,6 +24,7 @@ public final class StructureManager implements Listener {
     private static final long HOUR=3_600_000L;
     private final UnderTheBedrockPlugin plugin;
     private final VoidWorldManager worlds;
+    private final NullEnclosureManager enclosure;
     private final File file;
     private final YamlConfiguration data;
     private final Set<String> protectedBlocks=new HashSet<>();
@@ -31,7 +32,10 @@ public final class StructureManager implements Listener {
     private BukkitTask task;
 
     public StructureManager(UnderTheBedrockPlugin plugin,VoidWorldManager worlds){
-        this.plugin=plugin;this.worlds=worlds;file=new File(plugin.getDataFolder(),"structures.yml");
+        this(plugin, worlds, null);
+    }
+    public StructureManager(UnderTheBedrockPlugin plugin,VoidWorldManager worlds,NullEnclosureManager enclosure){
+        this.plugin=plugin;this.worlds=worlds;this.enclosure=enclosure;file=new File(plugin.getDataFolder(),"structures.yml");
         data=YamlConfiguration.loadConfiguration(file);protectedBlocks.addAll(data.getStringList("protected-blocks"));
         marker=new NamespacedKey(plugin,"generated-structure");
     }
@@ -47,6 +51,7 @@ public final class StructureManager implements Listener {
         if(!worlds.isActive())return; World world=worlds.getWorld(); if(world==null)return;
         int cell=Math.max(256,plugin.getConfig().getInt("horror.structures.site-cell-size-blocks",1024));
         for(Player player:world.getPlayers()){
+            if(enclosure!=null&&!enclosure.hasEscaped(player.getUniqueId()))continue;
             int cx=Math.floorDiv(player.getLocation().getBlockX()-world.getSpawnLocation().getBlockX(),cell);
             int cz=Math.floorDiv(player.getLocation().getBlockZ()-world.getSpawnLocation().getBlockZ(),cell);
             for(int dx=-1;dx<=1;dx++)for(int dz=-1;dz<=1;dz++)ensureSite(world,cx+dx,cz+dz,cell);
