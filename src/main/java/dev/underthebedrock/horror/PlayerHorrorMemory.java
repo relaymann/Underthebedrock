@@ -43,6 +43,15 @@ public final class PlayerHorrorMemory {
     public boolean hearRecording(String id) { return id != null && !id.isBlank() && heardRecordings.add(id); }
     public boolean recordRegion(String id) { return id != null && !id.isBlank() && visitedRegions.add(id); }
 
+    /** Backward-compatible restore path for existing saved-data tests and integrations. */
+    public void restore(double t, double p, long occurrence, long severe, long chat, long entityAt,
+                        long count, long distance, String last, Map<EntityArchetype, Integer> entities,
+                        Set<String> clues, String lastClue, long clueAt, Set<String> lore,
+                        Set<String> recordings) {
+        restore(t, p, occurrence, severe, chat, entityAt, count, distance, last, entities,
+                clues, lastClue, clueAt, lore, recordings, Set.of(), Set.of(), "none", 0L, 0L);
+    }
+
     public void restore(double t, double p, long occurrence, long severe, long chat, long entityAt,
                         long count, long distance, String last, Map<EntityArchetype, Integer> entities,
                         Set<String> clues, String lastClue, long clueAt, Set<String> lore,
