@@ -105,7 +105,7 @@ public final class UnderTheBedrockCommand implements CommandExecutor, TabComplet
                 sender.sendMessage("§aSpawned §f" + type.displayName() + " §afor §f" + target.getName() + "§a.");
                 if (!(sender instanceof Player senderPlayer)
                         || !senderPlayer.getUniqueId().equals(target.getUniqueId())) {
-                    target.sendMessage("§8Something has appeared somewhere behind you.");
+                    target.sendMessage("§8Something has appeared in front of you.");
                 }
             } else {
                 sender.sendMessage("§cCould not spawn it. Check that its BetterModel model is loaded and a safe loaded-chunk spawn point is available.");

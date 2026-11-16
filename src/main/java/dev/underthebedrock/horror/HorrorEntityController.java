@@ -179,8 +179,10 @@ public final class HorrorEntityController implements Listener {
             plugin.getLogger().warning("Could not attach BetterModel '" + model + "' for " + type + ".");
             return false;
         }
-        for (Player viewer : player.getWorld().getPlayers()) {
-            if (!viewer.getUniqueId().equals(player.getUniqueId())) viewer.hideEntity(plugin, shell);
+        if (playerSpecificVisibility()) {
+            for (Player viewer : player.getWorld().getPlayers()) {
+                if (!viewer.getUniqueId().equals(player.getUniqueId())) viewer.hideEntity(plugin, shell);
+            }
         }
         Encounter encounter = new Encounter(player.getUniqueId(), type, shell, player.getLocation(), tracker.get());
         active.put(player.getUniqueId(), encounter);
@@ -239,18 +241,17 @@ public final class HorrorEntityController implements Listener {
         Location playerNow = player.getLocation();
         double playerMovementSquared = encounter.lastPlayerPosition == null ? 0 : encounter.lastPlayerPosition.distanceSquared(playerNow);
         encounter.lastPlayerPosition = playerNow.clone();
-        boolean visible = distanceSquared < 10000 && player.hasLineOfSight(shell);
+        double observationRange = Math.max(1.0, plugin.getConfig().getDouble("horror.entities.behavior.observation-range-blocks", 100));
+        boolean visible = distanceSquared < observationRange * observationRange && player.hasLineOfSight(shell);
         if (visible) {
             encounter.observedChecks++;
             encounter.unseenChecks = 0;
             encounter.state = State.OBSERVING;
         } else {
             encounter.unseenChecks++;
-            encounter.lastKnown = player.getLocation().clone();
-        }
-
-        if (distanceSquared > 16384 || System.currentTimeMillis() - encounter.startedAt > 180000) {
-            encounter.state = State.DISAPPEARING;
+            if (plugin.getConfig().getBoolean("horror.entities.behavior.remember-last-known-position", true)) {
+                encounter.lastKnown = player.getLocation().clone();
+            }
         }
 
         switch (encounter.type) {
@@ -259,7 +260,8 @@ public final class HorrorEntityController implements Listener {
                 if (visible && encounter.observedChecks >= 2) encounter.state = State.DISAPPEARING;
             }
             case WITNESS, OBSERVER, FORGOTTEN_RESIDENT, SURVEYOR, UNPERSON, ORIGINAL -> {
-                if (visible && distanceSquared < 3600) encounter.state = State.DISAPPEARING;
+                double vanishRange = Math.max(1.0, plugin.getConfig().getDouble("horror.entities.behavior.passive-vanish-range-blocks", 60));
+                if (visible && distanceSquared < vanishRange * vanishRange) encounter.state = State.DISAPPEARING;
             }
             case PEEKER, DOORFRAME, LURKER -> {
                 if (visible) encounter.state = State.RETREATING;
@@ -322,6 +324,13 @@ public final class HorrorEntityController implements Listener {
                 if (!visible && random.nextDouble() < .16) encounter.state = State.STALKING;
             }
             case STALKER -> encounter.state = visible ? State.OBSERVING : State.STALKING;
+        }
+
+        // Lifetime and range limits are authoritative: archetype AI must never override a despawn.
+        double despawnRange = Math.max(1.0, plugin.getConfig().getDouble("horror.entities.behavior.despawn-range-blocks", 128));
+        long maxDurationMillis = Math.max(1L, plugin.getConfig().getLong("horror.entities.max-encounter-duration-seconds", 180)) * 1000L;
+        if (distanceSquared > despawnRange * despawnRange || System.currentTimeMillis() - encounter.startedAt > maxDurationMillis) {
+            encounter.state = State.DISAPPEARING;
         }
 
         if (encounter.state == State.HUNTING && previousState != State.HUNTING) {
@@ -622,7 +631,12 @@ public final class HorrorEntityController implements Listener {
         hideForeignEncounters(event.getPlayer());
     }
 
+    private boolean playerSpecificVisibility() {
+        return plugin.getConfig().getBoolean("horror.entities.behavior.player-specific-visibility", true);
+    }
+
     private void hideForeignEncounters(Player viewer) {
+        if (!playerSpecificVisibility()) return;
         for (Encounter encounter : active.values()) {
             if (encounter.shell.isValid()
                     && encounter.shell.getWorld().equals(viewer.getWorld())
