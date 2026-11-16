@@ -1,24 +1,16 @@
 package dev.underthebedrock.horror;
 
-/**
- * A player's private progression through the world's awareness.
- * Stages unlock richer phenomena; they do not directly increase attack damage or spawn spam.
- */
+/** A player's private progression through the world's awareness. */
 public enum WorldRecognitionStage {
-    UNNOTICED,
-    OBSERVED,
-    ACKNOWLEDGED,
-    FOLLOWED,
-    HUNTED,
-    RECOGNIZED;
+    UNNOTICED, OBSERVED, ACKNOWLEDGED, FOLLOWED, HUNTED, RECOGNIZED;
 
     public static WorldRecognitionStage calculate(int regions, int clues, int lore,
                                                    long encounters, long distance, double tension) {
         int score = Math.min(12, Math.max(0, regions))
                 + Math.min(8, Math.max(0, clues)) * 2
                 + Math.min(10, Math.max(0, lore))
-                + (int) (Math.min(20, Math.max(0, encounters)) / 2)
-                + (int) (Math.max(0, distance) / 4096)
+                + (int) (Math.min(20L, Math.max(0L, encounters)) / 2)
+                + (int) Math.min(20L, Math.max(0L, distance) / 4096L)
                 + (int) (Math.max(0, Math.min(100, tension)) / 25);
         if (score >= 30) return RECOGNIZED;
         if (score >= 21) return HUNTED;

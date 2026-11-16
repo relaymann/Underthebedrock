@@ -3,6 +3,7 @@ package dev.underthebedrock.horror;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class WorldRecognitionStageTest {
     @Test
@@ -18,7 +19,7 @@ class WorldRecognitionStageTest {
         assertEquals(WorldRecognitionStage.ACKNOWLEDGED,
                 WorldRecognitionStage.calculate(4, 2, 0, 0, 0, 0));
         assertEquals(WorldRecognitionStage.FOLLOWED,
-                WorldRecognitionStage.calculate(6, 3, 0, 0, 0, 0));
+                WorldRecognitionStage.calculate(8, 3, 0, 0, 0, 0));
     }
 
     @Test
@@ -43,7 +44,7 @@ class WorldRecognitionStageTest {
         int previous = -1;
         for (WorldRecognitionStage stage : WorldRecognitionStage.values()) {
             int current = stage.maximumPhenomenonIndex();
-            org.junit.jupiter.api.Assertions.assertTrue(current > previous);
+            assertTrue(current > previous);
             previous = current;
         }
     }

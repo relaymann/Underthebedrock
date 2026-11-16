@@ -61,7 +61,7 @@ public final class HorrorEventDirector {
 
             long firstDue = now + Math.max(30, plugin.getConfig().getInt(
                     "horror.events.minimum-cooldown-seconds", 150)) * 1000L;
-            long due = nextEvent.computeIfAbsent(id, ignored -> firstDue);
+            long due = nextEvent.computeIfAbsent(id, ignored -> (long) firstDue);
             if (now < due || random.nextDouble() > .22) continue;
 
             fire(player, memory);
