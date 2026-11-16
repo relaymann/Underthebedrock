@@ -58,8 +58,8 @@ horror:
   entities:
     enabled: true
     safe-radius-blocks: 512
-    full-threat-distance-blocks: 8192
-    maximum-chance-per-check: 0.025
+    full-threat-distance-blocks: 4096
+    maximum-chance-per-check: 0.10
     successful-encounter-cooldown-minutes: 5
     active-encounters-per-player: 1
     max-encounter-duration-seconds: 180

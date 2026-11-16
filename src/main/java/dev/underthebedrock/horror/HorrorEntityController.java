@@ -126,7 +126,7 @@ public final class HorrorEntityController implements Listener {
                 || !target.getWorld().equals(worlds.getWorld()) || active.containsKey(target.getUniqueId())) {
             return false;
         }
-        Location spawn = findSpawn(target);
+        Location spawn = findManualSpawn(target);
         return spawn != null && createEncounter(target, type, spawn);
     }
 
@@ -160,7 +160,12 @@ public final class HorrorEntityController implements Listener {
 
         ArmorStand shell = player.getWorld().spawn(spawn, ArmorStand.class, stand -> {
             stand.setInvisible(true);
-            stand.setMarker(true);
+            // A marker stand has a zero-sized body. Keep a normal carrier so BetterModel
+            // can track its entity position and viewer range reliably; the carrier stays hidden.
+            stand.setMarker(false);
+            stand.setSmall(false);
+            stand.setBasePlate(false);
+            stand.setArms(false);
             stand.setGravity(false);
             stand.setInvulnerable(true);
             stand.setSilent(true);
@@ -179,28 +184,44 @@ public final class HorrorEntityController implements Listener {
         }
         Encounter encounter = new Encounter(player.getUniqueId(), type, shell, player.getLocation(), tracker.get());
         active.put(player.getUniqueId(), encounter);
+        plugin.getLogger().info("Created " + type.name().toLowerCase(java.util.Locale.ROOT)
+                + " apparition model '" + model + "' for " + player.getName()
+                + " at " + spawn.getBlockX() + "," + spawn.getBlockY() + "," + spawn.getBlockZ()
+                + " (carrier " + shell.getUniqueId() + ").");
         setAnimation(encounter, "emerge");
         director.recordEntityEncounter(player, type);
         sounds.play(player, spawn, type, HorrorSoundManager.Cue.AMBIENT, .72f, .92f);
         return true;
     }
 
+    /** Natural encounters appear far enough away to be discovered, but remain within loaded view distance. */
     private Location findSpawn(Player player) {
+        return findSpawn(player, 22, 34, 95, 155);
+    }
+
+    /** Manual test spawns appear nearby and in front of the target for immediate verification. */
+    private Location findManualSpawn(Player player) {
+        return findSpawn(player, 7, 11, -32, 32);
+    }
+
+    private Location findSpawn(Player player, double minimumDistance, double maximumDistance,
+                               double minimumAngle, double maximumAngle) {
         Location origin = player.getLocation();
         Vector forward = origin.getDirection().setY(0).normalize();
         if (forward.lengthSquared() < .01) forward = new Vector(0, 0, 1);
         int floor = plugin.getConfig().getInt("world.floor-y", 64);
-        for (int i = 0; i < 16; i++) {
-            double angle = Math.toRadians(105 + random.nextDouble() * 150);
-            Vector offset = forward.clone().rotateAroundY(angle).multiply(26 + random.nextDouble() * 38);
+        for (int i = 0; i < 32; i++) {
+            double angle = Math.toRadians(minimumAngle + random.nextDouble() * (maximumAngle - minimumAngle));
+            double distance = minimumDistance + random.nextDouble() * (maximumDistance - minimumDistance);
+            Vector offset = forward.clone().rotateAroundY(angle).multiply(distance);
             int x = origin.getBlockX() + offset.getBlockX();
             int z = origin.getBlockZ() + offset.getBlockZ();
             if (!player.getWorld().isChunkLoaded(Math.floorDiv(x, 16), Math.floorDiv(z, 16))) continue;
-            int y = floor + 1;
-            if (random.nextDouble() < .18) y += 2;
-            Location location = new Location(player.getWorld(), x + .5, y, z + .5);
-            if (location.distanceSquared(origin) >= 400 && location.getBlock().isPassable()
-                    && location.clone().add(0, 1, 0).getBlock().isPassable()) return location;
+            Location location = new Location(player.getWorld(), x + .5, floor + 1, z + .5);
+            if (!location.getBlock().isPassable()
+                    || !location.clone().add(0, 1, 0).getBlock().isPassable()
+                    || !location.clone().subtract(0, 1, 0).getBlock().getType().isSolid()) continue;
+            return location;
         }
         return null;
     }
