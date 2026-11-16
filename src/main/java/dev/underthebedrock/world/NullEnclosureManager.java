@@ -551,10 +551,13 @@ public final class NullEnclosureManager implements Listener {
                 || event.getTo().getWorld() != worlds.getWorld() || hasEscaped(event.getPlayer().getUniqueId())) return;
         Location spawn = worlds.getWorld().getSpawnLocation();
         double radius = Math.hypot(event.getTo().getX() - spawn.getX(), event.getTo().getZ() - spawn.getZ());
-        boolean mazeDestination = Math.abs(event.getTo().getX() - spawn.getX()) <= 38
+        boolean fromMaze = Math.abs(event.getFrom().getX() - spawn.getX()) <= 38
+                && event.getFrom().getZ() < spawn.getZ() - 1428
+                && event.getFrom().getZ() >= spawn.getZ() - 1610;
+        boolean toMaze = Math.abs(event.getTo().getX() - spawn.getX()) <= 38
                 && event.getTo().getZ() < spawn.getZ() - 1428
                 && event.getTo().getZ() >= spawn.getZ() - 1610;
-        if (mazeDestination || radius > plugin.getConfig().getInt("horror.enclosure.radius-blocks", RADIUS) + 10) {
+        if (fromMaze || toMaze || radius > plugin.getConfig().getInt("horror.enclosure.radius-blocks", RADIUS) + 10) {
             event.setCancelled(true);
             event.getPlayer().sendMessage("§8The wall does not permit that passage.");
         }
