@@ -17,11 +17,11 @@ public final class EntityEncounterPolicy {
         this.maximumChance = Math.max(0, Math.min(1, maximumChance));
     }
 
-    /** Zero inside the protected start zone; quadratic growth beyond it. */
+    /** Zero inside the protected start zone; predictable linear growth as exploration deepens. */
     public double chanceAt(double distance) {
         if (!Double.isFinite(distance) || distance <= safeRadius) return 0;
         double progress = Math.min(1, (distance - safeRadius) / (fullThreatDistance - safeRadius));
-        return maximumChance * progress * progress;
+        return maximumChance * progress;
     }
 
     public List<EntityArchetype> eligibleAt(double distance) {
@@ -34,9 +34,8 @@ public final class EntityEncounterPolicy {
     }
 
     public Optional<EntityArchetype> roll(double distance, Random random) {
-        if (random.nextDouble() >= chanceAt(distance)) return Optional.empty();
         List<EntityArchetype> eligible = eligibleAt(distance);
-        if (eligible.isEmpty()) return Optional.empty();
+        if (eligible.isEmpty() || random.nextDouble() >= chanceAt(distance)) return Optional.empty();
         double total = eligible.stream().mapToDouble(type -> type.selectionWeight() * type.rarity().selectionMultiplier()).sum();
         double value = random.nextDouble() * total;
         for (EntityArchetype type : eligible) {
@@ -48,9 +47,8 @@ public final class EntityEncounterPolicy {
 
     /** Repeated sightings gently bias the director toward unfamiliar encounters. */
     public Optional<EntityArchetype> roll(double distance, Random random, PlayerHorrorMemory memory) {
-        if (random.nextDouble() >= chanceAt(distance)) return Optional.empty();
         List<EntityArchetype> eligible = eligibleAt(distance);
-        if (eligible.isEmpty()) return Optional.empty();
+        if (eligible.isEmpty() || random.nextDouble() >= chanceAt(distance)) return Optional.empty();
         double total = 0;
         for (EntityArchetype type : eligible) total += adaptiveWeight(type, memory);
         double value = random.nextDouble() * total;

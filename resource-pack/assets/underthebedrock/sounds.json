@@ -1,0 +1,974 @@
+{
+  "entity.stalker.ambient": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/phantom/ambient",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.stalker.alert": {
+    "sounds": [
+      {
+        "name": "minecraft:block/sculk/shrieker/shriek",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.stalker.attack": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/warden/attack_impact",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.stalker.vanish": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/enderman/teleport",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.aggressor.ambient": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/warden/heartbeat",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.aggressor.alert": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/warden/roar",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.aggressor.attack": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/warden/attack_impact",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.aggressor.vanish": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/enderman/teleport",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.observer.ambient": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/phantom/ambient",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.observer.alert": {
+    "sounds": [
+      {
+        "name": "minecraft:block/sculk/shrieker/shriek",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.observer.attack": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/warden/attack_impact",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.observer.vanish": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/enderman/teleport",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.mimic.ambient": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/enderman/ambient",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.mimic.alert": {
+    "sounds": [
+      {
+        "name": "minecraft:block/sculk/shrieker/shriek",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.mimic.attack": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/warden/sonic_boom",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.mimic.vanish": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/enderman/teleport",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.wanderer.ambient": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/phantom/ambient",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.wanderer.alert": {
+    "sounds": [
+      {
+        "name": "minecraft:block/sculk/shrieker/shriek",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.wanderer.attack": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/warden/attack_impact",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.wanderer.vanish": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/enderman/teleport",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.deep_entity.ambient": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/warden/heartbeat",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.deep_entity.alert": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/warden/roar",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.deep_entity.attack": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/warden/attack_impact",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.deep_entity.vanish": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/enderman/teleport",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.witness.ambient": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/phantom/ambient",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.witness.alert": {
+    "sounds": [
+      {
+        "name": "minecraft:block/sculk/shrieker/shriek",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.witness.attack": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/warden/attack_impact",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.witness.vanish": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/enderman/teleport",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.peeker.ambient": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/phantom/ambient",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.peeker.alert": {
+    "sounds": [
+      {
+        "name": "minecraft:block/sculk/shrieker/shriek",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.peeker.attack": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/warden/attack_impact",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.peeker.vanish": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/enderman/teleport",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.forgotten_resident.ambient": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/phantom/ambient",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.forgotten_resident.alert": {
+    "sounds": [
+      {
+        "name": "minecraft:block/sculk/shrieker/shriek",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.forgotten_resident.attack": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/warden/attack_impact",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.forgotten_resident.vanish": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/enderman/teleport",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.surveyor.ambient": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/phantom/ambient",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.surveyor.alert": {
+    "sounds": [
+      {
+        "name": "minecraft:block/sculk/shrieker/shriek",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.surveyor.attack": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/warden/attack_impact",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.surveyor.vanish": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/enderman/teleport",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.lurker.ambient": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/phantom/ambient",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.lurker.alert": {
+    "sounds": [
+      {
+        "name": "minecraft:block/sculk/shrieker/shriek",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.lurker.attack": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/warden/attack_impact",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.lurker.vanish": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/enderman/teleport",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.doorframe.ambient": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/phantom/ambient",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.doorframe.alert": {
+    "sounds": [
+      {
+        "name": "minecraft:block/sculk/shrieker/shriek",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.doorframe.attack": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/warden/attack_impact",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.doorframe.vanish": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/enderman/teleport",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.ceiling_crawler.ambient": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/phantom/ambient",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.ceiling_crawler.alert": {
+    "sounds": [
+      {
+        "name": "minecraft:block/sculk/shrieker/shriek",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.ceiling_crawler.attack": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/warden/attack_impact",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.ceiling_crawler.vanish": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/enderman/teleport",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.echo.ambient": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/enderman/ambient",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.echo.alert": {
+    "sounds": [
+      {
+        "name": "minecraft:block/sculk/shrieker/shriek",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.echo.attack": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/warden/sonic_boom",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.echo.vanish": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/enderman/teleport",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.pursuer.ambient": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/warden/heartbeat",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.pursuer.alert": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/warden/roar",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.pursuer.attack": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/warden/attack_impact",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.pursuer.vanish": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/enderman/teleport",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.crawling_one.ambient": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/warden/heartbeat",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.crawling_one.alert": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/warden/roar",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.crawling_one.attack": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/warden/attack_impact",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.crawling_one.vanish": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/enderman/teleport",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.heavy.ambient": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/warden/heartbeat",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.heavy.alert": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/warden/roar",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.heavy.attack": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/warden/attack_impact",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.heavy.vanish": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/enderman/teleport",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.imitator.ambient": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/enderman/ambient",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.imitator.alert": {
+    "sounds": [
+      {
+        "name": "minecraft:block/sculk/shrieker/shriek",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.imitator.attack": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/warden/sonic_boom",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.imitator.vanish": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/enderman/teleport",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.misprint.ambient": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/enderman/ambient",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.misprint.alert": {
+    "sounds": [
+      {
+        "name": "minecraft:block/sculk/shrieker/shriek",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.misprint.attack": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/warden/sonic_boom",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.misprint.vanish": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/enderman/teleport",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.double.ambient": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/enderman/ambient",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.double.alert": {
+    "sounds": [
+      {
+        "name": "minecraft:block/sculk/shrieker/shriek",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.double.attack": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/warden/sonic_boom",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.double.vanish": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/enderman/teleport",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.absence.ambient": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/phantom/ambient",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.absence.alert": {
+    "sounds": [
+      {
+        "name": "minecraft:block/sculk/shrieker/shriek",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.absence.attack": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/warden/attack_impact",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.absence.vanish": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/enderman/teleport",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.excavator.ambient": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/warden/heartbeat",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.excavator.alert": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/warden/roar",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.excavator.attack": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/warden/attack_impact",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.excavator.vanish": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/enderman/teleport",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.unperson.ambient": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/phantom/ambient",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.unperson.alert": {
+    "sounds": [
+      {
+        "name": "minecraft:block/sculk/shrieker/shriek",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.unperson.attack": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/warden/attack_impact",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.unperson.vanish": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/enderman/teleport",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.original.ambient": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/phantom/ambient",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.original.alert": {
+    "sounds": [
+      {
+        "name": "minecraft:block/sculk/shrieker/shriek",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.original.attack": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/warden/attack_impact",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.original.vanish": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/enderman/teleport",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.watcher.ambient": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/phantom/ambient",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.watcher.alert": {
+    "sounds": [
+      {
+        "name": "minecraft:block/sculk/shrieker/shriek",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.watcher.attack": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/warden/attack_impact",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.watcher.vanish": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/enderman/teleport",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.drifter.ambient": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/phantom/ambient",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.drifter.alert": {
+    "sounds": [
+      {
+        "name": "minecraft:block/sculk/shrieker/shriek",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.drifter.attack": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/warden/attack_impact",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.drifter.vanish": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/enderman/teleport",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.crawler.ambient": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/warden/heartbeat",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.crawler.alert": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/warden/roar",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.crawler.attack": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/warden/attack_impact",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  },
+  "entity.crawler.vanish": {
+    "sounds": [
+      {
+        "name": "minecraft:entity/enderman/teleport",
+        "volume": 1,
+        "weight": 1
+      }
+    ]
+  }
+}

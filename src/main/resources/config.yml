@@ -12,6 +12,14 @@ world:
 horror:
   null:
     minimum-distance-blocks: 1000
+  enclosure:
+    enabled: true
+    radius-blocks: 1500
+    wall-thickness-blocks: 16
+    wall-height-blocks: 18
+    apostle-model: utb_unperson
+    apostle-sprint-speed: 0.25
+    apostle-hunt-speed: 0.17
   director:
     enabled: true
     check-interval-seconds: 12
@@ -22,6 +30,8 @@ horror:
     enabled: true
     minimum-cooldown-seconds: 150
     maximum-cooldown-seconds: 360
+    region-cell-size-blocks: 128
+    first-event-delay-seconds: 150
   clues:
     enabled: true
     scan-interval-ticks: 100
@@ -58,8 +68,8 @@ horror:
   entities:
     enabled: true
     safe-radius-blocks: 512
-    full-threat-distance-blocks: 8192
-    maximum-chance-per-check: 0.025
+    full-threat-distance-blocks: 4096
+    maximum-chance-per-check: 0.10
     successful-encounter-cooldown-minutes: 5
     active-encounters-per-player: 1
     max-encounter-duration-seconds: 180
@@ -67,39 +77,40 @@ horror:
       observation-range-blocks: 100
       despawn-range-blocks: 128
       passive-vanish-range-blocks: 60
-      movement-step-blocks: 0.55
+      movement-speed-blocks-per-tick: 0.085
       remember-last-known-position: true
       player-specific-visibility: true
       adaptive-selection: true
       crawler-maximum-light-level: 7
     models:
-      observer: watcher
-      stalker: watcher
-      wanderer: watcher
-      mimic: watcher
-      aggressor: watcher
-      deep_entity: watcher
-      witness: watcher
-      peeker: watcher
-      forgotten_resident: watcher
-      surveyor: watcher
-      lurker: watcher
-      doorframe: watcher
-      ceiling_crawler: watcher
-      echo: watcher
-      pursuer: watcher
-      crawling_one: watcher
-      heavy: watcher
-      imitator: watcher
-      misprint: watcher
-      double: watcher
-      absence: watcher
-      excavator: watcher
-      unperson: watcher
-      original: watcher
-      watcher: watcher
-      drifter: watcher
-      crawler: watcher
+      observer: utb_observer
+      stalker: utb_stalker
+      wanderer: utb_wanderer
+      mimic: utb_mimic
+      mimic-revealed: utb_mimic_revealed
+      aggressor: utb_aggressor
+      deep_entity: utb_deep_entity
+      witness: utb_witness
+      peeker: utb_peeker
+      forgotten_resident: utb_forgotten_resident
+      surveyor: utb_surveyor
+      lurker: utb_lurker
+      doorframe: utb_doorframe
+      ceiling_crawler: utb_ceiling_crawler
+      echo: utb_echo
+      pursuer: utb_pursuer
+      crawling_one: utb_crawling_one
+      heavy: utb_heavy
+      imitator: utb_imitator
+      misprint: utb_misprint
+      double: utb_double
+      absence: utb_absence
+      excavator: utb_excavator
+      unperson: utb_unperson
+      original: utb_original
+      watcher: utb_watcher
+      drifter: utb_drifter
+      crawler: utb_crawler
   memory:
     file: player-horror-memory.yml
   civilization:
@@ -109,10 +120,7 @@ horror:
     ambient-effects-enabled: true
     resident-echoes-enabled: true
 integrations:
-  nova:
-    enabled: true
-    required: true
   bettermodel:
     enabled: true
     required: true
-    default-watcher-model: watcher
+    default-watcher-model: utb_watcher

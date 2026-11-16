@@ -1,7 +1,9 @@
 name: Build
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+      - feature/first-half-bettermodel-models
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -39,6 +41,15 @@ jobs:
           fi
           cp "$jar_file" build/UnderTheBedrock.jar
           test -s build/UnderTheBedrock.jar
+
+      - name: Upload installable JAR artifact
+        if: github.event_name != 'pull_request' && success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: under-the-bedrock-plugin
+          path: build/UnderTheBedrock.jar
+          if-no-files-found: error
+          retention-days: 30
 
       - name: Publish installable JAR download
         if: github.event_name != 'pull_request'

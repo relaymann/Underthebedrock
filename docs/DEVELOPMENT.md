@@ -1,7 +1,8 @@
 # Development rules
 
 - Target Paper 26.1.2 and Java 25 unless the owner explicitly changes the target.
-- Keep Nova and BetterModel as first-class integrations through their public APIs. Never depend on private internals.
+- Keep BetterModel as the first-class visual integration through its public API. Never depend on private internals.
+- Keep core world, survival, evidence, and horror-event systems implemented with Paper APIs; do not require Nova or another custom-content framework.
 - Never pre-generate a massive radius synchronously. Let chunk requests drive void-floor generation.
 - Do not create an artificial world border. Minecraft's native coordinate limits are the only practical boundary.
 - Keep chunk generation deterministic and cheap; do no disk, database, or network I/O in generation callbacks.
