@@ -305,6 +305,7 @@ public final class NullEnclosureManager implements Listener {
 
     @EventHandler(ignoreCancelled = true)
     public void onMove(PlayerMoveEvent event) {
+        if (event instanceof PlayerTeleportEvent) return;
         if (event.getTo() == null || event.getFrom().getWorld() != worlds.getWorld()) return;
         Player player = event.getPlayer();
         Trial t = trial(player);
