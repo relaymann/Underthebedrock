@@ -121,7 +121,7 @@ public final class NullEnclosureManager implements Listener {
     private Trial trial(Player player) {
         return trials.computeIfAbsent(player.getUniqueId(), ignored -> new Trial(0, false, false));
     }
-    public boolean hasEscaped(UUID player) { Trial t = trials.get(player); return t != null && t.unlocked; }
+    public boolean hasEscaped(UUID player) { if (!plugin.getConfig().getBoolean("horror.enclosure.enabled", true)) return true; Trial t = trials.get(player); return t != null && t.unlocked; }
 
     private Location centre(World world, int z) { return new Location(world, world.getSpawnLocation().getX(), FLOOR + 1, z); }
     private void tick() {
