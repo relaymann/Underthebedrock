@@ -1,11 +1,11 @@
 # Under The Bedrock
 
-Standalone Paper 26.1.2 psychological / analog ARG horror plugin with a persistent void world, individualized horror pacing, evidence discovery, BetterModel apparitions, and custom exploration equipment.
+Paper 26.1.2 psychological / analog ARG horror plugin with a persistent void world, individualized horror pacing, evidence discovery, bundled animated apparitions, and custom exploration equipment. Under The Bedrock automatically installs its bundled `.bbmodel` assets into BetterModel, applies the required compatibility setting, and reloads BetterModel; administrators do not need to copy model files or edit BetterModel's config.
 
 ## Target platform
 - Minecraft Java / Paper 26.1.2
 - Java 25 / Gradle 9.7.1
-- BetterModel 3.5.1
+- BetterModel 3.5.1 or newer compatible release (the rendering engine dependency; the model assets and BetterModel configuration are provisioned automatically by Under The Bedrock)
 
 ## Commands
 - /underthebedrock start — create/activate the horror world.
@@ -41,7 +41,7 @@ The civilization layer adds six deterministic district types: residential blocks
 The station includes a traversable rail layout, minecart supplies, and occasional unmanned service-cart arrivals. A restrained environmental director escalates distant footsteps, doors that briefly open behind the player, redstone lights that flicker at later stages, signs that temporarily rewrite themselves, ash, smoke, and portal anomalies according to the player's discoveries rather than using constant jumpscares. Null reacts differently to resident evidence and the player's increasingly clear identity. All civilization sites persist in `civilization-sites.yml`; generation only touches already-loaded chunks near players. Discovering the Architect's Seal also stabilizes each Reconstructor for one additional activation; after Null recognizes the returning subject, activating one produces a warning that the anchor has been noticed.
 
 ## Build
-Use JDK 25 and Gradle 9.7.1: `gradle clean test build`. JAR output: `build/libs/`. Install BetterModel 3.5.1.
+Use JDK 25 and Gradle 9.7.1: `gradle clean test build`. JAR output: `build/libs/`. Install the BetterModel plugin once. Under The Bedrock bundles all 28 required model files, copies them into BetterModel's models folder under its own `utb_` namespace, migrates the default model IDs in its config, sets `follow-mob-invisibility: false`, and invokes BetterModel's API reload automatically. No manual `.bbmodel` copying, BetterModel config editing, or `/bettermodel reload` is required. BetterModel still generates the client resource pack; the server must distribute that pack through its configured resource-pack delivery method so players can see the custom models.
 
 
 ## Entity ecosystem overhaul

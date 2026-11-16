@@ -17,7 +17,7 @@ horror:
     radius-blocks: 1500
     wall-thickness-blocks: 16
     wall-height-blocks: 18
-    apostle-model: unperson
+    apostle-model: utb_unperson
     apostle-sprint-speed: 0.25
     apostle-hunt-speed: 0.17
   director:
@@ -83,34 +83,34 @@ horror:
       adaptive-selection: true
       crawler-maximum-light-level: 7
     models:
-      observer: observer
-      stalker: stalker
-      wanderer: wanderer
-      mimic: mimic
-      mimic-revealed: mimic_revealed
-      aggressor: aggressor
-      deep_entity: deep_entity
-      witness: witness
-      peeker: peeker
-      forgotten_resident: forgotten_resident
-      surveyor: surveyor
-      lurker: lurker
-      doorframe: doorframe
-      ceiling_crawler: ceiling_crawler
-      echo: echo
-      pursuer: pursuer
-      crawling_one: crawling_one
-      heavy: heavy
-      imitator: imitator
-      misprint: misprint
-      double: double
-      absence: absence
-      excavator: excavator
-      unperson: unperson
-      original: original
-      watcher: watcher
-      drifter: drifter
-      crawler: crawler
+      observer: utb_observer
+      stalker: utb_stalker
+      wanderer: utb_wanderer
+      mimic: utb_mimic
+      mimic-revealed: utb_mimic_revealed
+      aggressor: utb_aggressor
+      deep_entity: utb_deep_entity
+      witness: utb_witness
+      peeker: utb_peeker
+      forgotten_resident: utb_forgotten_resident
+      surveyor: utb_surveyor
+      lurker: utb_lurker
+      doorframe: utb_doorframe
+      ceiling_crawler: utb_ceiling_crawler
+      echo: utb_echo
+      pursuer: utb_pursuer
+      crawling_one: utb_crawling_one
+      heavy: utb_heavy
+      imitator: utb_imitator
+      misprint: utb_misprint
+      double: utb_double
+      absence: utb_absence
+      excavator: utb_excavator
+      unperson: utb_unperson
+      original: utb_original
+      watcher: utb_watcher
+      drifter: utb_drifter
+      crawler: utb_crawler
   memory:
     file: player-horror-memory.yml
   civilization:
@@ -123,4 +123,4 @@ integrations:
   bettermodel:
     enabled: true
     required: true
-    default-watcher-model: watcher
+    default-watcher-model: utb_watcher

@@ -26,5 +26,13 @@ tasks.withType<JavaCompile>().configureEach {
     options.encoding = "UTF-8"
     options.release.set(25)
 }
+
+tasks.processResources {
+    from("bettermodel/models") {
+        include("*.bbmodel")
+        into("under-the-bedrock/models")
+    }
+}
+
 tasks.test { useJUnitPlatform() }
 tasks.jar { archiveBaseName.set("UnderTheBedrock") }

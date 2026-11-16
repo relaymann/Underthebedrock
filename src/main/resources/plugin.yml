@@ -2,7 +2,7 @@ name: UnderTheBedrock
 version: '0.1.0-SNAPSHOT'
 main: dev.underthebedrock.UnderTheBedrockPlugin
 api-version: '26.1'
-description: Subtle psychological and analog ARG horror in a persistent void world.
+description: Psychological ARG horror with automatically provisioned animated BetterModel assets.
 authors: [relaymann]
 depend: [BetterModel]
 commands:
