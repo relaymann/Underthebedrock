@@ -42,7 +42,6 @@ public final class HorrorEntityController implements Listener {
         private String activeAnimation = "";
         private long animationUntil;
         private boolean disappearanceStarted;
-        private long mimicLastAttackAt;
         private long lastAttackAt;
         private Location lastKnown;
         private Location lastPlayerPosition;
@@ -200,7 +199,8 @@ public final class HorrorEntityController implements Listener {
             int y = floor + 1;
             if (random.nextDouble() < .18) y += 2;
             Location location = new Location(player.getWorld(), x + .5, y, z + .5);
-            if (location.distanceSquared(origin) >= 400 && location.getBlock().isPassable()) return location;
+            if (location.distanceSquared(origin) >= 400 && location.getBlock().isPassable()
+                    && location.clone().add(0, 1, 0).getBlock().isPassable()) return location;
         }
         return null;
     }
@@ -240,20 +240,27 @@ public final class HorrorEntityController implements Listener {
             case WITNESS, OBSERVER, FORGOTTEN_RESIDENT, SURVEYOR, UNPERSON, ORIGINAL -> {
                 if (visible && distanceSquared < 3600) encounter.state = State.DISAPPEARING;
             }
-            case PEEKER, DOORFRAME, LURKER, CEILING_CRAWLER -> {
+            case PEEKER, DOORFRAME, LURKER -> {
                 if (visible) encounter.state = State.RETREATING;
+                else if (encounter.unseenChecks >= 2) encounter.state = State.STALKING;
+            }
+            case CEILING_CRAWLER -> {
+                int lightLimit = plugin.getConfig().getInt("horror.entities.behavior.crawler-maximum-light-level", 7);
+                boolean dark = shell.getLocation().getBlock().getLightLevel() <= lightLimit;
+                if (dark && distanceSquared < 400 && !visible) encounter.state = State.HUNTING;
+                else if (visible) encounter.state = State.RETREATING;
                 else if (encounter.unseenChecks >= 2) encounter.state = State.STALKING;
             }
             case CRAWLER -> {
                 int lightLimit = plugin.getConfig().getInt("horror.entities.behavior.crawler-maximum-light-level", 7);
                 boolean dark = shell.getLocation().getBlock().getLightLevel() <= lightLimit;
-                if (dark && distanceSquared < 3600) encounter.state = visible ? State.SEARCHING : State.HUNTING;
+                if (dark && distanceSquared < 3600) encounter.state = State.HUNTING;
                 else if (visible) encounter.state = State.RETREATING;
                 else if (encounter.unseenChecks >= 2) encounter.state = State.STALKING;
             }
             case PURSUER, AGGRESSOR, CRAWLING_ONE, HEAVY, EXCAVATOR -> {
                 double provocation = director.memory(player.getUniqueId()).provocation();
-                if (provocation >= 12 || distanceSquared < 1600) encounter.state = visible ? State.SEARCHING : State.HUNTING;
+                if (provocation >= 12 || distanceSquared < 1600) encounter.state = State.HUNTING;
                 else if (visible) encounter.state = State.OBSERVING;
             }
             case MIMIC -> {
@@ -422,7 +429,8 @@ public final class HorrorEntityController implements Listener {
     }
 
     private boolean canAttack(EntityArchetype type) {
-        return type.isPursuer() || type == EntityArchetype.DEEP_ENTITY || type == EntityArchetype.MIMIC;
+        return type.isPursuer() || type == EntityArchetype.DEEP_ENTITY
+                || type == EntityArchetype.MIMIC || type == EntityArchetype.CEILING_CRAWLER;
     }
 
     private double attackRange(EntityArchetype type) {
