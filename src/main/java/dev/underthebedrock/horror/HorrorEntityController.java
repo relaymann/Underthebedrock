@@ -6,7 +6,6 @@ import dev.underthebedrock.world.VoidWorldManager;
 import kr.toxicity.model.api.tracker.EntityTracker;
 import org.bukkit.Location;
 import org.bukkit.Particle;
-import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.ArmorStand;
@@ -43,6 +42,7 @@ public final class HorrorEntityController implements Listener {
         private long animationUntil;
         private boolean disappearanceStarted;
         private long mimicLastAttackAt;
+        private long lastAttackAt;
         private Location lastKnown;
         private Location lastPlayerPosition;
         private State state = State.OBSERVING;
@@ -64,6 +64,7 @@ public final class HorrorEntityController implements Listener {
     private final VoidWorldManager worlds;
     private final OccurrenceDirector director;
     private final BetterModelIntegration models;
+    private final HorrorSoundManager sounds;
     private final Map<UUID, Encounter> active = new HashMap<>();
     private final Random random = new Random();
     private BukkitTask task;
@@ -76,6 +77,7 @@ public final class HorrorEntityController implements Listener {
         this.worlds = worlds;
         this.director = director;
         this.models = models;
+        this.sounds = new HorrorSoundManager();
     }
 
     public void start() {
@@ -112,28 +114,44 @@ public final class HorrorEntityController implements Listener {
     }
 
     private void attempt(Player player) {
-        if (models.availableModels().isEmpty()) {
+        Location spawn = findSpawn(player);
+        if (spawn == null) return;
+        var selected = director.trySelectEntityEncounter(player);
+        selected.ifPresent(type -> createEncounter(player, type, spawn));
+    }
+
+    /** Manually creates a named apparition for an administrator command. */
+    public boolean spawnFor(Player target, EntityArchetype type) {
+        if (!worlds.isActive() || worlds.getWorld() == null
+                || !target.getWorld().equals(worlds.getWorld()) || active.containsKey(target.getUniqueId())) {
+            return false;
+        }
+        Location spawn = findSpawn(target);
+        return spawn != null && createEncounter(target, type, spawn);
+    }
+
+    public boolean despawnFor(Player target) {
+        Encounter encounter = active.remove(target.getUniqueId());
+        if (encounter == null) return false;
+        remove(encounter);
+        return true;
+    }
+
+    private boolean createEncounter(Player player, EntityArchetype type, Location spawn) {
+        Set<String> registered = models.availableModels();
+        if (registered.isEmpty()) {
             if (!warned) {
                 warned = true;
                 plugin.getLogger().warning("No BetterModel models registered; entity encounters paused.");
             }
-            return;
+            return false;
         }
-        Location spawn = findSpawn(player);
-        if (spawn == null) return;
-        var selected = director.trySelectEntityEncounter(player);
-        if (selected.isEmpty()) return;
-        EntityArchetype type = selected.get();
         String key = type.name().toLowerCase(java.util.Locale.ROOT);
         String model = plugin.getConfig().getString("horror.entities.models." + key,
                 plugin.getConfig().getString("integrations.bettermodel.default-watcher-model", "watcher"));
-        if (!models.availableModels().contains(model)) {
-            String fallback = plugin.getConfig().getString("integrations.bettermodel.default-watcher-model", "watcher");
-            if (!models.availableModels().contains(fallback)) {
-                plugin.getLogger().warning("No registered BetterModel model for " + type + " or fallback '" + fallback + "'.");
-                return;
-            }
-            model = fallback;
+        if (!registered.contains(model)) {
+            plugin.getLogger().warning("BetterModel model '" + model + "' is not registered for " + type + ".");
+            return false;
         }
 
         ArmorStand shell = player.getWorld().spawn(spawn, ArmorStand.class, stand -> {
@@ -150,7 +168,7 @@ public final class HorrorEntityController implements Listener {
         if (tracker.isEmpty()) {
             shell.remove();
             plugin.getLogger().warning("Could not attach BetterModel '" + model + "' for " + type + ".");
-            return;
+            return false;
         }
         for (Player viewer : player.getWorld().getPlayers()) {
             if (!viewer.getUniqueId().equals(player.getUniqueId())) viewer.hideEntity(plugin, shell);
@@ -159,7 +177,8 @@ public final class HorrorEntityController implements Listener {
         active.put(player.getUniqueId(), encounter);
         setAnimation(encounter, "emerge");
         director.recordEntityEncounter(player, type);
-        player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_STARE, .12f, .55f);
+        sounds.play(player, spawn, type, HorrorSoundManager.Cue.AMBIENT, .72f, .92f);
+        return true;
     }
 
     private Location findSpawn(Player player) {
@@ -245,9 +264,9 @@ public final class HorrorEntityController implements Listener {
                     encounter.state = State.SEARCHING;
                     // It imitates the player's footfalls while the disguise is still intact.
                     if (playerMovementSquared >= 0.36 && random.nextDouble() < 0.45) {
-                        player.playSound(shell.getLocation(), Sound.BLOCK_STONE_STEP, 0.24f, 0.62f + random.nextFloat() * 0.22f);
+                        sounds.play(player, shell.getLocation(), encounter.type, HorrorSoundManager.Cue.AMBIENT, .22f, .72f + random.nextFloat() * .2f);
                     } else if (random.nextDouble() < 0.10) {
-                        player.playSound(shell.getLocation(), Sound.BLOCK_WOODEN_DOOR_OPEN, 0.16f, 0.72f);
+                        sounds.play(player, shell.getLocation(), encounter.type, HorrorSoundManager.Cue.ALERT, .18f, .78f);
                     }
                 }
             }
@@ -256,7 +275,7 @@ public final class HorrorEntityController implements Listener {
                 else if (encounter.unseenChecks >= 2) encounter.state = State.SEARCHING;
             }
             case ECHO -> {
-                if (!visible && encounter.unseenChecks % 2 == 0) player.playSound(player.getLocation(), Sound.BLOCK_STONE_STEP, .16f, .65f);
+                if (!visible && encounter.unseenChecks % 2 == 0) sounds.play(player, player.getLocation(), encounter.type, HorrorSoundManager.Cue.AMBIENT, .18f, .68f);
                 if (visible && distanceSquared < 2500) encounter.state = State.DISAPPEARING;
             }
             case MISPRINT, ABSENCE -> {
@@ -280,12 +299,14 @@ public final class HorrorEntityController implements Listener {
                     || encounter.type == EntityArchetype.PURSUER) {
                 setAnimation(encounter, "lunge");
             }
+            sounds.play(player, shell.getLocation(), encounter.type, HorrorSoundManager.Cue.ALERT, .85f, .82f);
         }
 
         if (encounter.state == State.DISAPPEARING) {
             if (!encounter.disappearanceStarted) {
                 encounter.disappearanceStarted = true;
                 setAnimation(encounter, "disappear");
+                sounds.play(player, shell.getLocation(), encounter.type, HorrorSoundManager.Cue.VANISH, .8f, .9f);
                 shell.getWorld().spawnParticle(Particle.SMOKE, shell.getLocation().add(0, 1, 0), 18, .25, .5, .25, .025);
                 plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
                     remove(encounter);
@@ -347,19 +368,18 @@ public final class HorrorEntityController implements Listener {
             if (encounter.state == State.HUNTING) {
                 encounter.lastKnown = player.getLocation().clone();
                 double distanceSquared = shell.getLocation().distanceSquared(player.getLocation());
-                if (encounter.type == EntityArchetype.MIMIC && distanceSquared <= 4.0
+                if (canAttack(encounter.type) && distanceSquared <= attackRange(encounter.type) * attackRange(encounter.type)
                         && encounter.animationUntil <= System.currentTimeMillis()
-                        && System.currentTimeMillis() - encounter.mimicLastAttackAt >= 3000L) {
-                    encounter.mimicLastAttackAt = System.currentTimeMillis();
+                        && System.currentTimeMillis() - encounter.lastAttackAt >= attackCooldown(encounter.type)) {
+                    encounter.lastAttackAt = System.currentTimeMillis();
                     setAnimation(encounter, "attack");
-                    player.damage(4.0, shell);
+                    player.damage(attackDamage(encounter.type), shell);
                     Vector knockback = player.getLocation().toVector().subtract(shell.getLocation().toVector());
                     if (knockback.lengthSquared() > .01) {
-                        knockback.normalize().multiply(.62).setY(.24);
+                        knockback.normalize().multiply(encounter.type == EntityArchetype.HEAVY ? .9 : .62).setY(.24);
                         player.setVelocity(knockback);
                     }
-                    player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_HURT, .9f, .72f);
-                    player.playSound(shell.getLocation(), Sound.ENTITY_ZOMBIE_ATTACK_WOODEN_DOOR, .65f, .62f);
+                    sounds.play(player, shell.getLocation(), encounter.type, HorrorSoundManager.Cue.ATTACK, .95f, .88f);
                     continue;
                 }
                 moveToward(shell, player.getLocation(), speed);
@@ -394,6 +414,37 @@ public final class HorrorEntityController implements Listener {
                 }
             }
         }
+    }
+
+    private boolean canAttack(EntityArchetype type) {
+        return type.isPursuer() || type == EntityArchetype.DEEP_ENTITY || type == EntityArchetype.MIMIC;
+    }
+
+    private double attackRange(EntityArchetype type) {
+        return switch (type) {
+            case HEAVY, DEEP_ENTITY, EXCAVATOR -> 2.8;
+            case CRAWLING_ONE, CRAWLER, CEILING_CRAWLER -> 2.2;
+            default -> 2.0;
+        };
+    }
+
+    private double attackDamage(EntityArchetype type) {
+        return switch (type) {
+            case HEAVY, DEEP_ENTITY -> 7.0;
+            case EXCAVATOR, AGGRESSOR -> 5.0;
+            case MIMIC -> 4.0;
+            case PURSUER -> 3.5;
+            default -> 2.5;
+        };
+    }
+
+    private long attackCooldown(EntityArchetype type) {
+        return switch (type) {
+            case CRAWLING_ONE, CRAWLER -> 1800L;
+            case HEAVY, DEEP_ENTITY, EXCAVATOR -> 4200L;
+            case MIMIC -> 3000L;
+            default -> 2600L;
+        };
     }
 
     private double movementSpeed(Encounter encounter) {
@@ -434,8 +485,7 @@ public final class HorrorEntityController implements Listener {
             Location at = encounter.shell.getLocation();
             encounter.shell.getWorld().spawnParticle(Particle.SMOKE, at.clone().add(0, 1, 0), 42, .38, .72, .38, .035);
             encounter.shell.getWorld().spawnParticle(Particle.CRIT, at.clone().add(0, 1, 0), 24, .28, .55, .28, .12);
-            player.playSound(at, Sound.ENTITY_ENDERMAN_SCREAM, 1.25f, .58f);
-            player.playSound(at, Sound.ENTITY_WARDEN_ROAR, .85f, .72f);
+            sounds.play(player, at, encounter.type, HorrorSoundManager.Cue.ALERT, 1.2f, .62f);
         });
     }
 
