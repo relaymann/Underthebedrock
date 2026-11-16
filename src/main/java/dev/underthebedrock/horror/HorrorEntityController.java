@@ -138,6 +138,10 @@ public final class HorrorEntityController implements Listener {
         return true;
     }
 
+    public boolean hasEncounter(Player target) {
+        return active.containsKey(target.getUniqueId());
+    }
+
     private boolean createEncounter(Player player, EntityArchetype type, Location spawn) {
         Set<String> registered = models.availableModels();
         if (registered.isEmpty()) {
