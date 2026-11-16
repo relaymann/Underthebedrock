@@ -22,6 +22,8 @@ horror:
     enabled: true
     minimum-cooldown-seconds: 150
     maximum-cooldown-seconds: 360
+    region-cell-size-blocks: 128
+    first-event-delay-seconds: 150
   clues:
     enabled: true
     scan-interval-ticks: 100
